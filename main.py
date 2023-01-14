@@ -18,6 +18,7 @@ CAMERA_SPEED = 0.9
 
 PLAYER_MOVEMENT_SPEED = 3
 RUN_SPEED_MODIFIER = 2
+SLASH_SPEED_MODIFIER = 0.35
 BOMB_COUNT = 70
 PLAYING_FIELD_WIDTH = SCREEN_WIDTH - 50
 PLAYING_FIELD_HEIGHT = SCREEN_HEIGHT - 50
@@ -99,7 +100,7 @@ class MyGame(arcade.Window):
         self.player_sprite.change_x = 0
         self.player_sprite.change_y = 0
 
-        # Slashing
+        # Handle slashing, hold the c key for 0.75s to activate
         if arcade.key.C in self.key_press_buffer:
             if self.player_sprite.c_key_timer == 0:
                 self.player_sprite.c_key_timer = time.time()
@@ -131,84 +132,124 @@ class MyGame(arcade.Window):
                         self.player_sprite.current_frame > self.player_sprite.southeast_slash_frames.__len__():
                     self.player_sprite.current_frame = 0
 
-        # Running
+        # Handle running, hold the shift key
         if arcade.key.LEFT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer \
                 and arcade.key.LSHIFT in self.key_press_buffer:
             self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED * 0.7 * RUN_SPEED_MODIFIER
             self.player_sprite.change_y = PLAYER_MOVEMENT_SPEED * 0.7 * RUN_SPEED_MODIFIER
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_x *= SLASH_SPEED_MODIFIER
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER
             self.player_sprite.current_direction = "northwest"
             self.player_sprite.is_running = True
         elif arcade.key.LEFT in self.key_press_buffer and arcade.key.DOWN in self.key_press_buffer \
                 and arcade.key.LSHIFT in self.key_press_buffer:
             self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED * 0.7 * RUN_SPEED_MODIFIER
             self.player_sprite.change_y = -PLAYER_MOVEMENT_SPEED * 0.7 * RUN_SPEED_MODIFIER
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_x *= SLASH_SPEED_MODIFIER
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER
             self.player_sprite.current_direction = "southwest"
             self.player_sprite.is_running = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer \
                 and arcade.key.LSHIFT in self.key_press_buffer:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED * 0.7 * RUN_SPEED_MODIFIER
             self.player_sprite.change_y = PLAYER_MOVEMENT_SPEED * 0.7 * RUN_SPEED_MODIFIER
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_x *= SLASH_SPEED_MODIFIER
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER
             self.player_sprite.current_direction = "northeast"
             self.player_sprite.is_running = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.DOWN in self.key_press_buffer \
                 and arcade.key.LSHIFT in self.key_press_buffer:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED * 0.7 * RUN_SPEED_MODIFIER
             self.player_sprite.change_y = -PLAYER_MOVEMENT_SPEED * 0.7 * RUN_SPEED_MODIFIER
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_x *= SLASH_SPEED_MODIFIER
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER
             self.player_sprite.current_direction = "southeast"
             self.player_sprite.is_running = True
         elif arcade.key.UP in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
             self.player_sprite.change_y = PLAYER_MOVEMENT_SPEED * RUN_SPEED_MODIFIER
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER
             self.player_sprite.current_direction = "north"
             self.player_sprite.is_running = True
         elif arcade.key.DOWN in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
             self.player_sprite.change_y = -PLAYER_MOVEMENT_SPEED * RUN_SPEED_MODIFIER
             self.player_sprite.current_direction = "south"
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER
             self.player_sprite.is_running = True
         elif arcade.key.LEFT in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
             self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED * RUN_SPEED_MODIFIER
             self.player_sprite.current_direction = "west"
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_x *= SLASH_SPEED_MODIFIER
             self.player_sprite.is_running = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED * RUN_SPEED_MODIFIER
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER
             self.player_sprite.current_direction = "east"
             self.player_sprite.is_running = True
 
-        # Basic movement
+        # Handle basic movement use the arrow keys
         elif arcade.key.LEFT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer:
             self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED * 0.7
             self.player_sprite.change_y = PLAYER_MOVEMENT_SPEED * 0.7
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_x *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
             self.player_sprite.current_direction = "northwest"
             self.player_sprite.is_walking = True
         elif arcade.key.LEFT in self.key_press_buffer and arcade.key.DOWN in self.key_press_buffer:
             self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED * 0.7
             self.player_sprite.change_y = -PLAYER_MOVEMENT_SPEED * 0.7
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_x *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
             self.player_sprite.current_direction = "southwest"
             self.player_sprite.is_walking = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED * 0.7
             self.player_sprite.change_y = PLAYER_MOVEMENT_SPEED * 0.7
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_x *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
             self.player_sprite.current_direction = "northeast"
             self.player_sprite.is_walking = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.DOWN in self.key_press_buffer:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED * 0.7
             self.player_sprite.change_y = -PLAYER_MOVEMENT_SPEED * 0.7
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_x *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
             self.player_sprite.current_direction = "southeast"
             self.player_sprite.is_walking = True
         elif arcade.key.UP in self.key_press_buffer:
             self.player_sprite.change_y = PLAYER_MOVEMENT_SPEED
             self.player_sprite.current_direction = "north"
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
             self.player_sprite.is_walking = True
         elif arcade.key.DOWN in self.key_press_buffer:
             self.player_sprite.change_y = -PLAYER_MOVEMENT_SPEED
             self.player_sprite.current_direction = "south"
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_y *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
             self.player_sprite.is_walking = True
         elif arcade.key.LEFT in self.key_press_buffer:
             self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
             self.player_sprite.current_direction = "west"
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_x *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
             self.player_sprite.is_walking = True
         elif arcade.key.RIGHT in self.key_press_buffer:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
             self.player_sprite.current_direction = "east"
+            if self.player_sprite.is_slashing:
+                self.player_sprite.change_x *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
             self.player_sprite.is_walking = True
 
     def on_key_release(self, key, modifiers):
