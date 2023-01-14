@@ -345,7 +345,36 @@ class Player(arcade.Sprite):
             self.just_stopped_running = False
             self.is_running = False
 
-        if self.is_slashing:
+        if self.is_slashing and self.is_running:
+            if self.current_direction == self.directions[0] and \
+                    self.current_frame < self.north_dash_slash_frames.__len__():
+                self.texture = self.north_dash_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[1] and \
+                    self.current_frame < self.west_slash_frames.__len__():
+                self.texture = self.west_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[2] and \
+                    self.current_frame < self.south_dash_slash_frames.__len__():
+                self.texture = self.south_dash_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[3] and \
+                    self.current_frame < self.east_slash_frames.__len__():
+                self.texture = self.east_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[4] and \
+                    self.current_frame < self.northwest_dash_slash_frames.__len__():
+                self.texture = self.northwest_dash_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[5] and \
+                    self.current_frame < self.northeast_dash_slash_frames.__len__():
+                self.texture = self.northeast_dash_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[6] and \
+                    self.current_frame < self.southwest_dash_slash_frames.__len__():
+                self.texture = self.southwest_dash_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[7] and \
+                    self.current_frame < self.southeast_dash_slash_frames.__len__():
+                self.texture = self.southeast_dash_slash_frames[self.current_frame]
+            else:
+                self.is_slashing = False
+                self.current_frame = 0
+
+        elif self.is_slashing:
             if self.current_direction == self.directions[0] and \
                     self.current_frame < self.north_slash_frames.__len__():
                 self.texture = self.north_slash_frames[self.current_frame]

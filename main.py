@@ -108,31 +108,6 @@ class MyGame(arcade.Window):
                 self.player_sprite.is_slashing = True
                 self.player_sprite.c_key_timer = 0
 
-                # Reset current_frame if it would go out of bounds
-                if self.player_sprite.current_direction == self.player_sprite.directions[0] and \
-                        self.player_sprite.current_frame > self.player_sprite.north_slash_frames.__len__():
-                    self.player_sprite.current_frame = 0
-                elif self.player_sprite.current_direction == self.player_sprite.directions[1] and \
-                        self.player_sprite.current_frame > self.player_sprite.west_slash_frames.__len__():
-                    self.player_sprite.current_frame = 0
-                elif self.player_sprite.current_direction == self.player_sprite.directions[2] and \
-                        self.player_sprite.current_frame > self.player_sprite.south_slash_frames.__len__():
-                    self.player_sprite.current_frame = 0
-                elif self.player_sprite.current_direction == self.player_sprite.directions[3] and \
-                        self.player_sprite.current_frame > self.player_sprite.east_slash_frames.__len__():
-                    self.player_sprite.current_frame = 0
-                elif self.player_sprite.current_direction == self.player_sprite.directions[4] and \
-                        self.player_sprite.current_frame > self.player_sprite.northwest_slash_frames.__len__():
-                    self.player_sprite.current_frame = 0
-                elif self.player_sprite.current_direction == self.player_sprite.directions[5] and \
-                        self.player_sprite.current_frame > self.player_sprite.northeast_slash_frames.__len__():
-                    self.player_sprite.current_frame = 0
-                elif self.player_sprite.current_direction == self.player_sprite.directions[6] and \
-                        self.player_sprite.current_frame > self.player_sprite.southwest_slash_frames.__len__():
-                    self.player_sprite.current_frame = 0
-                elif self.player_sprite.current_direction == self.player_sprite.directions[7] and \
-                        self.player_sprite.current_frame > self.player_sprite.southeast_slash_frames.__len__():
-                    self.player_sprite.current_frame = 0
 
         # Handle running, hold the shift key
         if arcade.key.LEFT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer \
@@ -262,6 +237,8 @@ class MyGame(arcade.Window):
             if self.player_sprite.is_running:
                 self.player_sprite.is_running = False
                 self.player_sprite.just_stopped_running = True
+        elif not arcade.key.C in self.key_press_buffer:
+            self.player_sprite.c_key_timer = 0
 
     def scroll_to_player(self, speed=CAMERA_SPEED):
         position = Vec2(self.player_sprite.center_x - self.width / 2,
@@ -305,6 +282,10 @@ class MyGame(arcade.Window):
         self.process_key_presses()
         self.player_sprite.update_animation(delta_time)
         self.scroll_to_player()
+
+        if self.player_sprite.c_key_timer > 0:
+            self.player_sprite.change_x *= 0.9
+            self.player_sprite.change_y *= 0.9
 
 
 if __name__ == "__main__":
