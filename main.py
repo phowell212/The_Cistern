@@ -107,6 +107,8 @@ class MyGame(arcade.Window):
             elif time.time() - self.player_sprite.c_key_timer >= 0.75:
                 self.player_sprite.is_slashing = True
                 self.player_sprite.c_key_timer = 0
+
+                # Reset current_frame if it would go out of bounds
                 if self.player_sprite.current_direction == self.player_sprite.directions[0] and \
                         self.player_sprite.current_frame > self.player_sprite.north_slash_frames.__len__():
                     self.player_sprite.current_frame = 0

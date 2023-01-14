@@ -99,7 +99,7 @@ class Player(arcade.Sprite):
         self.scale = scale
         self.texture = arcade.load_texture("assets/player/south-0.png")
 
-        # Load the frame arrays
+        # Init the frame arrays
         self.north_idle_frames = []
         self.north_walking_frames = []
         self.north_running_frames = []
@@ -171,10 +171,7 @@ class Player(arcade.Sprite):
         self.southwest_dash_slash_frames = []
         self.southwest_slash_frames = []
 
-        # Load the frames
         self.load_frames()
-
-        # Other stuff
         self.c_key_timer = 0.0
 
     def load_frames(self):
