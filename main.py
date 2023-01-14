@@ -6,23 +6,28 @@ import arcade
 from arcade.experimental import Shadertoy
 import time
 
+# Screen Settings
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 1000
 SCREEN_TITLE = "The Cistercian Cistern"
+PLAYING_FIELD_WIDTH = SCREEN_WIDTH - 50
+PLAYING_FIELD_HEIGHT = SCREEN_HEIGHT - 50
 
+# Scaling Settings
 SPRITE_SCALING = 0.25
 PLAYER_SCALING = 0.4
 
 # How fast the camera pans to the player. 1.0 is instant.
 CAMERA_SPEED = 0.9
 
+# Movement settings
 PLAYER_MOVEMENT_SPEED = 3
 RUN_SPEED_MODIFIER = 2
 SLASH_SPEED_MODIFIER = 0.2
 SLASH_CHARGE_SPEED_MODIFIER = 0.8
-SLASH_CHARGE_TIME = 0.5
-PLAYING_FIELD_WIDTH = SCREEN_WIDTH - 50
-PLAYING_FIELD_HEIGHT = SCREEN_HEIGHT - 50
+
+# Time settings
+SLASH_CHARGE_TIME = 0.35
 
 
 class MyGame(arcade.Window):
@@ -228,6 +233,11 @@ class MyGame(arcade.Window):
             if self.player_sprite.is_slashing:
                 self.player_sprite.change_x *= SLASH_SPEED_MODIFIER + (SLASH_SPEED_MODIFIER / 3)
             self.player_sprite.is_walking = True
+
+        # Modify the movement speed again to make a charge effect when c is pressed
+        if arcade.key.C in self.key_press_buffer:
+            self.player_sprite.change_x *= SLASH_CHARGE_SPEED_MODIFIER
+            self.player_sprite.change_y *= SLASH_CHARGE_SPEED_MODIFIER
 
     def on_key_release(self, key, modifiers):
         self.key_press_buffer.discard(key)

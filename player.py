@@ -339,6 +339,12 @@ class Player(arcade.Sprite):
             self.elapsed_time = 0
             self.current_frame += 1
 
+        # Increase the frame rate for slashing
+        if self.is_slashing:
+            self.update_interval = 1 / 40
+        else:
+            self.update_interval = 1 / 10
+
         # Update the sprite texture
         if self.just_stopped_running is True and self.run_stop_animation_frame >= 21:
             self.run_stop_animation_frame = 18
