@@ -18,7 +18,9 @@ CAMERA_SPEED = 0.9
 
 PLAYER_MOVEMENT_SPEED = 3
 RUN_SPEED_MODIFIER = 2
-SLASH_SPEED_MODIFIER = 0.35
+SLASH_SPEED_MODIFIER = 0.2
+SLASH_CHARGE_SPEED_MODIFIER = 0.8
+SLASH_CHARGE_TIME = 0.5
 BOMB_COUNT = 70
 PLAYING_FIELD_WIDTH = SCREEN_WIDTH - 50
 PLAYING_FIELD_HEIGHT = SCREEN_HEIGHT - 50
@@ -100,14 +102,13 @@ class MyGame(arcade.Window):
         self.player_sprite.change_x = 0
         self.player_sprite.change_y = 0
 
-        # Handle slashing, hold the c key for 0.75s to activate
+        # Handle slashing, hold the c key for SLASH_CHARGE_TIME to activate
         if arcade.key.C in self.key_press_buffer:
             if self.player_sprite.c_key_timer == 0:
                 self.player_sprite.c_key_timer = time.time()
-            elif time.time() - self.player_sprite.c_key_timer >= 0.75:
+            elif time.time() - self.player_sprite.c_key_timer >= SLASH_CHARGE_TIME:
                 self.player_sprite.is_slashing = True
                 self.player_sprite.c_key_timer = 0
-
 
         # Handle running, hold the shift key
         if arcade.key.LEFT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer \
@@ -284,8 +285,8 @@ class MyGame(arcade.Window):
         self.scroll_to_player()
 
         if self.player_sprite.c_key_timer > 0:
-            self.player_sprite.change_x *= 0.9
-            self.player_sprite.change_y *= 0.9
+            self.player_sprite.change_x *= SLASH_CHARGE_SPEED_MODIFIER
+            self.player_sprite.change_y *= SLASH_CHARGE_SPEED_MODIFIER
 
 
 if __name__ == "__main__":
