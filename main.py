@@ -4,6 +4,7 @@ import player
 from pathlib import Path
 import arcade
 from arcade.experimental import Shadertoy
+import time
 
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 1000
@@ -97,6 +98,38 @@ class MyGame(arcade.Window):
     def process_key_presses(self):
         self.player_sprite.change_x = 0
         self.player_sprite.change_y = 0
+
+        # Slashing
+        if arcade.key.C in self.key_press_buffer:
+            if self.player_sprite.c_key_timer == 0:
+                self.player_sprite.c_key_timer = time.time()
+            elif time.time() - self.player_sprite.c_key_timer >= 0.75:
+                self.player_sprite.is_slashing = True
+                self.player_sprite.c_key_timer = 0
+                if self.player_sprite.current_direction == self.player_sprite.directions[0] and \
+                        self.player_sprite.current_frame > self.player_sprite.north_slash_frames.__len__():
+                    self.player_sprite.current_frame = 0
+                elif self.player_sprite.current_direction == self.player_sprite.directions[1] and \
+                        self.player_sprite.current_frame > self.player_sprite.west_slash_frames.__len__():
+                    self.player_sprite.current_frame = 0
+                elif self.player_sprite.current_direction == self.player_sprite.directions[2] and \
+                        self.player_sprite.current_frame > self.player_sprite.south_slash_frames.__len__():
+                    self.player_sprite.current_frame = 0
+                elif self.player_sprite.current_direction == self.player_sprite.directions[3] and \
+                        self.player_sprite.current_frame > self.player_sprite.east_slash_frames.__len__():
+                    self.player_sprite.current_frame = 0
+                elif self.player_sprite.current_direction == self.player_sprite.directions[4] and \
+                        self.player_sprite.current_frame > self.player_sprite.northwest_slash_frames.__len__():
+                    self.player_sprite.current_frame = 0
+                elif self.player_sprite.current_direction == self.player_sprite.directions[5] and \
+                        self.player_sprite.current_frame > self.player_sprite.northeast_slash_frames.__len__():
+                    self.player_sprite.current_frame = 0
+                elif self.player_sprite.current_direction == self.player_sprite.directions[6] and \
+                        self.player_sprite.current_frame > self.player_sprite.southwest_slash_frames.__len__():
+                    self.player_sprite.current_frame = 0
+                elif self.player_sprite.current_direction == self.player_sprite.directions[7] and \
+                        self.player_sprite.current_frame > self.player_sprite.southeast_slash_frames.__len__():
+                    self.player_sprite.current_frame = 0
 
         # Running
         if arcade.key.LEFT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer \

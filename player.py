@@ -86,6 +86,7 @@ class Player(arcade.Sprite):
         # Init the sprite
         self.is_walking = False
         self.is_running = False
+        self.is_slashing = False
         self.just_stopped_running = False
         self.run_stop_animation_frame = 22
         self.current_frame = 0
@@ -172,6 +173,9 @@ class Player(arcade.Sprite):
 
         # Load the frames
         self.load_frames()
+
+        # Other stuff
+        self.c_key_timer = 0.0
 
     def load_frames(self):
 
@@ -337,8 +341,6 @@ class Player(arcade.Sprite):
         if self.elapsed_time > self.update_interval:
             self.elapsed_time = 0
             self.current_frame += 1
-            if self.current_frame > 4:
-                self.current_frame = 0
 
         # Update the sprite texture
         if self.just_stopped_running is True and self.run_stop_animation_frame >= 21:
@@ -346,7 +348,38 @@ class Player(arcade.Sprite):
             self.just_stopped_running = False
             self.is_running = False
 
-        if self.run_stop_animation_frame < 21:
+        if self.is_slashing:
+            if self.current_direction == self.directions[0] and \
+                    self.current_frame < self.north_slash_frames.__len__():
+                self.texture = self.north_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[1] and \
+                    self.current_frame < self.west_slash_frames.__len__():
+                self.texture = self.west_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[2] and \
+                    self.current_frame < self.south_slash_frames.__len__():
+                self.texture = self.south_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[3] and \
+                    self.current_frame < self.east_slash_frames.__len__():
+                self.texture = self.east_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[4] and \
+                    self.current_frame < self.northwest_slash_frames.__len__():
+                self.texture = self.northwest_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[5] and \
+                    self.current_frame < self.northeast_slash_frames.__len__():
+                self.texture = self.northeast_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[6] and \
+                    self.current_frame < self.southwest_slash_frames.__len__():
+                self.texture = self.southwest_slash_frames[self.current_frame]
+            elif self.current_direction == self.directions[7] and \
+                    self.current_frame < self.southeast_slash_frames.__len__():
+                self.texture = self.southeast_slash_frames[self.current_frame]
+            else:
+                self.is_slashing = False
+                self.current_frame = 0
+                self.c_key_timer = 0
+
+        # Run stop has to have a different animation frame counter because it is triggered
+        elif self.run_stop_animation_frame < 21:
             if self.current_direction == self.directions[0]:
                 self.texture = self.north_run_stop_frames[self.run_stop_animation_frame - 18]
                 self.run_stop_animation_frame += 1
@@ -371,54 +404,88 @@ class Player(arcade.Sprite):
             elif self.current_direction == self.directions[7]:
                 self.texture = self.southeast_run_stop_frames[self.run_stop_animation_frame - 18]
                 self.run_stop_animation_frame += 1
+
         elif self.is_running:
-            if self.current_direction == self.directions[0]:
+            if self.current_direction == self.directions[0] and \
+                    self.current_frame < self.north_running_frames.__len__():
                 self.texture = self.north_running_frames[self.current_frame]
-            elif self.current_direction == self.directions[1]:
+            elif self.current_direction == self.directions[1] and \
+                    self.current_frame < self.west_running_frames.__len__():
                 self.texture = self.west_running_frames[self.current_frame]
-            elif self.current_direction == self.directions[2]:
+            elif self.current_direction == self.directions[2] and \
+                    self.current_frame < self.south_running_frames.__len__():
                 self.texture = self.south_running_frames[self.current_frame]
-            elif self.current_direction == self.directions[3]:
+            elif self.current_direction == self.directions[3] and \
+                    self.current_frame < self.east_running_frames.__len__():
                 self.texture = self.east_running_frames[self.current_frame]
-            elif self.current_direction == self.directions[4]:
+            elif self.current_direction == self.directions[4] and \
+                    self.current_frame < self.northwest_running_frames.__len__():
                 self.texture = self.northwest_running_frames[self.current_frame]
-            elif self.current_direction == self.directions[5]:
+            elif self.current_direction == self.directions[5] and \
+                    self.current_frame < self.northeast_running_frames.__len__():
                 self.texture = self.northeast_running_frames[self.current_frame]
-            elif self.current_direction == self.directions[6]:
+            elif self.current_direction == self.directions[6] and \
+                    self.current_frame < self.southwest_running_frames.__len__():
                 self.texture = self.southwest_running_frames[self.current_frame]
-            elif self.current_direction == self.directions[7]:
+            elif self.current_direction == self.directions[7] and \
+                    self.current_frame < self.southeast_running_frames.__len__():
                 self.texture = self.southeast_running_frames[self.current_frame]
+            else:
+                self.current_frame = 0
+
         elif self.is_walking:
-            if self.current_direction == self.directions[0]:
+            if self.current_direction == self.directions[0] and \
+                    self.current_frame < self.north_walking_frames.__len__():
                 self.texture = self.north_walking_frames[self.current_frame]
-            elif self.current_direction == self.directions[1]:
+            elif self.current_direction == self.directions[1] and \
+                    self.current_frame < self.west_walking_frames.__len__():
                 self.texture = self.west_walking_frames[self.current_frame]
-            elif self.current_direction == self.directions[2]:
+            elif self.current_direction == self.directions[2] and \
+                    self.current_frame < self.south_walking_frames.__len__():
                 self.texture = self.south_walking_frames[self.current_frame]
-            elif self.current_direction == self.directions[3]:
+            elif self.current_direction == self.directions[3] and \
+                    self.current_frame < self.east_walking_frames.__len__():
                 self.texture = self.east_walking_frames[self.current_frame]
-            elif self.current_direction == self.directions[4]:
+            elif self.current_direction == self.directions[4] and \
+                    self.current_frame < self.northwest_walking_frames.__len__():
                 self.texture = self.northwest_walking_frames[self.current_frame]
-            elif self.current_direction == self.directions[5]:
+            elif self.current_direction == self.directions[5] and \
+                    self.current_frame < self.northeast_walking_frames.__len__():
                 self.texture = self.northeast_walking_frames[self.current_frame]
-            elif self.current_direction == self.directions[6]:
+            elif self.current_direction == self.directions[6] and \
+                    self.current_frame < self.southwest_walking_frames.__len__():
                 self.texture = self.southwest_walking_frames[self.current_frame]
-            elif self.current_direction == self.directions[7]:
+            elif self.current_direction == self.directions[7] and \
+                    self.current_frame < self.southeast_walking_frames.__len__():
                 self.texture = self.southeast_walking_frames[self.current_frame]
+            else:
+                self.current_frame = 0
+
+        # If the player is idle
         else:
-            if self.current_direction == self.directions[0]:
+            if self.current_direction == self.directions[0] and \
+                    self.current_frame < self.north_idle_frames.__len__():
                 self.texture = self.north_idle_frames[self.current_frame]
-            elif self.current_direction == self.directions[1]:
+            elif self.current_direction == self.directions[1] and \
+                    self.current_frame < self.west_idle_frames.__len__():
                 self.texture = self.west_idle_frames[self.current_frame]
-            elif self.current_direction == self.directions[2]:
+            elif self.current_direction == self.directions[2] and \
+                    self.current_frame < self.south_idle_frames.__len__():
                 self.texture = self.south_idle_frames[self.current_frame]
-            elif self.current_direction == self.directions[3]:
+            elif self.current_direction == self.directions[3] and \
+                    self.current_frame < self.east_idle_frames.__len__():
                 self.texture = self.east_idle_frames[self.current_frame]
-            elif self.current_direction == self.directions[4]:
+            elif self.current_direction == self.directions[4] and \
+                    self.current_frame < self.northwest_idle_frames.__len__():
                 self.texture = self.northwest_idle_frames[self.current_frame]
-            elif self.current_direction == self.directions[5]:
+            elif self.current_direction == self.directions[5] and \
+                    self.current_frame < self.northeast_idle_frames.__len__():
                 self.texture = self.northeast_idle_frames[self.current_frame]
-            elif self.current_direction == self.directions[6]:
+            elif self.current_direction == self.directions[6] and \
+                    self.current_frame < self.southwest_idle_frames.__len__():
                 self.texture = self.southwest_idle_frames[self.current_frame]
-            elif self.current_direction == self.directions[7]:
+            elif self.current_direction == self.directions[7] and \
+                    self.current_frame < self.southeast_idle_frames.__len__():
                 self.texture = self.southeast_idle_frames[self.current_frame]
+            else:
+                self.current_frame = 0
