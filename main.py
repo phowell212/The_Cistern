@@ -8,7 +8,7 @@ import time
 
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 1000
-SCREEN_TITLE = "Ray-casting Demo"
+SCREEN_TITLE = "The Cistercian Cistern"
 
 SPRITE_SCALING = 0.25
 PLAYER_SCALING = 0.4
@@ -21,7 +21,6 @@ RUN_SPEED_MODIFIER = 2
 SLASH_SPEED_MODIFIER = 0.2
 SLASH_CHARGE_SPEED_MODIFIER = 0.8
 SLASH_CHARGE_TIME = 0.5
-BOMB_COUNT = 70
 PLAYING_FIELD_WIDTH = SCREEN_WIDTH - 50
 PLAYING_FIELD_HEIGHT = SCREEN_HEIGHT - 50
 
@@ -32,7 +31,7 @@ class MyGame(arcade.Window):
         super().__init__(width, height, title, resizable=True)
 
         # Init the shaders
-        self.box_shadershadertoy = None
+        self.box_shadertoy = None
         self.channel0 = None
         self.channel1 = None
         self.load_shader()
@@ -64,19 +63,19 @@ class MyGame(arcade.Window):
         window_size = self.get_size()
 
         # Create the shader toy
-        self.box_shadershadertoy = Shadertoy.create_from_file(window_size, shader_file_path)
+        self.box_shadertoy = Shadertoy.create_from_file(window_size, shader_file_path)
 
         # Create the channels 0 and 1 frame buffers.
         # Make the buffer the size of the window, with 4 channels (RGBA)
-        self.channel0 = self.box_shadershadertoy.ctx.framebuffer(
-            color_attachments=[self.box_shadershadertoy.ctx.texture(window_size, components=4)]
+        self.channel0 = self.box_shadertoy.ctx.framebuffer(
+            color_attachments=[self.box_shadertoy.ctx.texture(window_size, components=4)]
         )
-        self.channel1 = self.box_shadershadertoy.ctx.framebuffer(
-            color_attachments=[self.box_shadershadertoy.ctx.texture(window_size, components=4)])
+        self.channel1 = self.box_shadertoy.ctx.framebuffer(
+            color_attachments=[self.box_shadertoy.ctx.texture(window_size, components=4)])
 
         # Assign the frame buffers to the channels
-        self.box_shadershadertoy.channel_0 = self.channel0.color_attachments[0]
-        self.box_shadershadertoy.channel_1 = self.channel1.color_attachments[0]
+        self.box_shadertoy.channel_0 = self.channel0.color_attachments[0]
+        self.box_shadertoy.channel_1 = self.channel1.color_attachments[0]
 
     def generate_walls(self):
 
@@ -271,9 +270,9 @@ class MyGame(arcade.Window):
              self.player_sprite.position[1] - self.camera.position[1])
 
         # Run the shader and render to the window
-        self.box_shadershadertoy.program['lightPosition'] = p
-        self.box_shadershadertoy.program['lightSize'] = 200
-        self.box_shadershadertoy.render()
+        self.box_shadertoy.program['lightPosition'] = p
+        self.box_shadertoy.program['lightSize'] = 200
+        self.box_shadertoy.render()
 
         # Draw the player
         self.player_list.draw()
