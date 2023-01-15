@@ -1,6 +1,7 @@
 import random
 from pyglet.math import Vec2
 import player
+import green_monster
 from pathlib import Path
 import arcade
 from arcade.experimental import Shadertoy
@@ -16,18 +17,19 @@ PLAYING_FIELD_HEIGHT = SCREEN_HEIGHT - 50
 # Scaling Settings
 SPRITE_SCALING = 0.25
 PLAYER_SCALING = 0.4
+MONSTER_SCALING = 1
 
 # How fast the camera pans to the player. 1.0 is instant.
 CAMERA_SPEED = 0.9
 
 # Movement settings
-PLAYER_MOVEMENT_SPEED = 3
+PLAYER_MOVEMENT_SPEED = 2
 RUN_SPEED_MODIFIER = 2
 SLASH_SPEED_MODIFIER = 0.2
 SLASH_CHARGE_SPEED_MODIFIER = 0.8
 
 # Time settings
-SLASH_CHARGE_TIME = 0.35
+SLASH_CHARGE_TIME = 0.075
 
 
 class MyGame(arcade.Window):
@@ -43,8 +45,10 @@ class MyGame(arcade.Window):
 
         # Make the sprites
         self.player_sprite = None
+        self.monster_sprite = None
         self.wall_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
+        self.monster_list = arcade.SpriteList()
 
         # Other stuff
         arcade.set_background_color((108, 121, 147))
@@ -56,10 +60,14 @@ class MyGame(arcade.Window):
         # Create the sprites
         self.player_sprite = player.Player(256, 512, PLAYER_SCALING)
         self.player_list.append(self.player_sprite)
-        self.generate_walls()
+        self.generate_walls(self.player_sprite.center_x, self.player_sprite.center_y, 1500)
+        self.monster_sprite = green_monster.GreenMonster(596, 512, MONSTER_SCALING)
+        self.monster_list.append(self.monster_sprite)
 
         # Physics engine, so we don't run into walls
-        self.physics_engine = arcade.PhysicsEngineSimple(self.player_sprite, self.wall_list)
+        self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.player_sprite, self.wall_list)
+        self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.player_sprite, self.monster_list)
+        self.monster_and_wall_collider = arcade.PhysicsEngineSimple(self.monster_sprite, self.wall_list)
 
     def load_shader(self):
         shader_file_path = Path("shaders/box_shadows.glsl")
@@ -82,7 +90,7 @@ class MyGame(arcade.Window):
         self.box_shadertoy.channel_0 = self.channel0.color_attachments[0]
         self.box_shadertoy.channel_1 = self.channel1.color_attachments[0]
 
-    def generate_walls(self):
+    def generate_walls(self, player_x, player_y, distance):
 
         # Set up several columns of walls
         for x in range(0, PLAYING_FIELD_WIDTH, 128):
@@ -101,6 +109,9 @@ class MyGame(arcade.Window):
 
     def on_key_press(self, key, modifiers):
         self.key_press_buffer.add(key)
+
+    def spawn_monster(self, x, y):
+        self.monster_sprite = green_monster.GreenMonster(x, y, MONSTER_SCALING)
 
     def process_key_presses(self):
         self.player_sprite.change_x = 0
@@ -275,6 +286,9 @@ class MyGame(arcade.Window):
         # Clear to background color
         self.clear()
 
+        # Draw the enemies
+        self.monster_list.draw()
+
         # Calculate the light position
         p = (self.player_sprite.position[0] - self.camera.position[0],
              self.player_sprite.position[1] - self.camera.position[1])
@@ -288,14 +302,20 @@ class MyGame(arcade.Window):
         self.player_list.draw()
 
     def on_update(self, delta_time):
-        self.physics_engine.update()
-        self.process_key_presses()
-        self.player_sprite.update_animation(delta_time)
-        self.scroll_to_player()
 
+        # Update the physics
+        self.player_and_wall_collider.update()
+        self.player_and_monster_collider.update()
+        self.monster_and_wall_collider.update()
+        self.process_key_presses()
+
+        self.player_sprite.update_animation(delta_time)
         if self.player_sprite.c_key_timer > 0:
             self.player_sprite.change_x *= SLASH_CHARGE_SPEED_MODIFIER
             self.player_sprite.change_y *= SLASH_CHARGE_SPEED_MODIFIER
+
+        self.monster_sprite.update()
+        self.scroll_to_player()
 
 
 if __name__ == "__main__":
