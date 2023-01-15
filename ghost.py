@@ -63,6 +63,7 @@ class GhostMonster(arcade.Sprite):
             self.time += 1 / 60
             self.center_y += math.sin(self.time * self.bob_frequency) * self.bob_amplitude
 
+            # Make the ghost move
             if random.randint(0, 100) == 0:
                 self.change_x = random.randint(-1, 1)
                 self.change_y = random.randint(-1, 1)
@@ -70,11 +71,9 @@ class GhostMonster(arcade.Sprite):
         else:
             self.update_animation(1 / 2)
 
-        # if the monster is moving up, set the current direction to north
+        # Update the ghost's direction
         if self.change_y > 0:
             self.current_direction = self.directions[0]
-        # if the monster is moving down, set the current direction to south
-        elif self.change_y < 0:
+        else:
             self.current_direction = self.directions[1]
-        elif self.change_x != 0:
-            self.current_direction = self.directions[0]
+

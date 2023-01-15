@@ -13,7 +13,7 @@ float terrain(vec2 samplePoint)
     float returnValue = 1.0 - sampleStepped;
 
     // Soften the edges of the shadows
-    returnValue = mix(0.98, 1.0, returnValue);
+    returnValue = mix(0.96, 1.0, returnValue);
 
     return returnValue;
 }
@@ -43,7 +43,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     }
 
     // Find out how much light we have based on the distance to our light
-    lightAmount *= 1.0 - smoothstep(0.0, lightSize, distanceToLight);
+    lightAmount *= 1.0 - smoothstep(0.1, lightSize, distanceToLight);
 
     // We'll alternate our display between black and whatever is in channel 1
     vec4 blackColor = vec4(30.0/256.0, 33.0/256.0, 40.0/256.0, 1.0);

@@ -70,7 +70,6 @@ class MyGame(arcade.Window):
         self.wall_list.extend(scene_wall_sprite_list)
 
         # Create the other sprites
-        # Create the sprites
         self.player_sprite = player.Player(self.map_center_x, self.map_center_y, PLAYER_SCALING)
         self.player_list.append(self.player_sprite)
         self.generate_walls(self.level_map.width, self.level_map.height)
