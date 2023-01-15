@@ -1,7 +1,7 @@
 import random
 from pyglet.math import Vec2
 import player
-import green_monster
+import ghost
 from pathlib import Path
 import arcade
 from arcade.experimental import Shadertoy
@@ -13,11 +13,12 @@ SCREEN_HEIGHT = 1000
 SCREEN_TITLE = "The Cistercian Cistern"
 PLAYING_FIELD_WIDTH = SCREEN_WIDTH - 50
 PLAYING_FIELD_HEIGHT = SCREEN_HEIGHT - 50
+SPOTLIGHT_SIZE = 350
 
 # Scaling Settings
 SPRITE_SCALING = 0.25
 PLAYER_SCALING = 0.4
-MONSTER_SCALING = 1
+MONSTER_SCALING = 0.5
 
 # How fast the camera pans to the player. 1.0 is instant.
 CAMERA_SPEED = 0.9
@@ -25,11 +26,11 @@ CAMERA_SPEED = 0.9
 # Movement settings
 PLAYER_MOVEMENT_SPEED = 2
 RUN_SPEED_MODIFIER = 2
-SLASH_SPEED_MODIFIER = 0.2
+SLASH_SPEED_MODIFIER = 0.15
 SLASH_CHARGE_SPEED_MODIFIER = 0.8
 
 # Time settings
-SLASH_CHARGE_TIME = 0.075
+SLASH_CHARGE_TIME = 0.04
 
 
 class MyGame(arcade.Window):
@@ -61,8 +62,8 @@ class MyGame(arcade.Window):
         map_location = "assets/level/level_map.json"
         layer_options = {"Tile Layer 1": {"use_spatial_hash": True, "spatial_hash_cell_size": 128}}
         self.level_map = arcade.tilemap.load_tilemap(map_location, SPRITE_SCALING, layer_options=layer_options)
-        map_center_x = self.level_map.width * self.level_map.tile_width * SPRITE_SCALING / 2
-        map_center_y = self.level_map.height * self.level_map.tile_height * SPRITE_SCALING / 2
+        self.map_center_x = self.level_map.width * self.level_map.tile_width * SPRITE_SCALING / 2
+        self.map_center_y = self.level_map.height * self.level_map.tile_height * SPRITE_SCALING / 2
         self.wall_tile_map = arcade.load_tilemap(map_location, SPRITE_SCALING, layer_options)
         self.wall_tile_map = arcade.Scene.from_tilemap(self.wall_tile_map)
         scene_wall_sprite_list = self.wall_tile_map.get_sprite_list("Tile Layer 1")
@@ -70,10 +71,11 @@ class MyGame(arcade.Window):
 
         # Create the other sprites
         # Create the sprites
-        self.player_sprite = player.Player(map_center_x, map_center_y, PLAYER_SCALING)
+        self.player_sprite = player.Player(self.map_center_x, self.map_center_y, PLAYER_SCALING)
         self.player_list.append(self.player_sprite)
         self.generate_walls(self.level_map.width, self.level_map.height)
-        self.monster_sprite = green_monster.GreenMonster(596, 512, MONSTER_SCALING)
+        self.monster_sprite = ghost.GhostMonster(self.map_center_x, self.map_center_y + 60, MONSTER_SCALING)
+        self.monster_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
         self.monster_list.append(self.monster_sprite)
 
         # Physics engine, so we don't run into walls
@@ -129,9 +131,6 @@ class MyGame(arcade.Window):
 
     def on_key_press(self, key, modifiers):
         self.key_press_buffer.add(key)
-
-    def spawn_monster(self, x, y):
-        self.monster_sprite = green_monster.GreenMonster(x, y, MONSTER_SCALING)
 
     def process_key_presses(self):
         self.player_sprite.change_x = 0
@@ -290,24 +289,17 @@ class MyGame(arcade.Window):
         # Use the camera
         self.camera.use()
 
-        # Select the channel 0 frame buffer to draw on
-        self.channel0.use()
-        self.channel0.clear()
-
-        # Draw the walls in shadow
-        self.wall_list.draw()
-
-        # Select the channel 1 frame buffer to draw on
+        # Draw the monsters on top of the shadow
         self.channel1.use()
         self.channel1.clear()
-
-        # Select this window to draw on
-        self.use()
-        # Clear to background color
-        self.clear()
-
-        # Draw the enemies
         self.monster_list.draw()
+
+        # Draw the walls
+        self.channel0.use()
+        self.channel0.clear()
+        self.wall_list.draw()
+        self.use()
+        self.clear()
 
         # Calculate the light position
         p = (self.player_sprite.position[0] - self.camera.position[0],
@@ -315,7 +307,7 @@ class MyGame(arcade.Window):
 
         # Run the shader and render to the window
         self.box_shadertoy.program['lightPosition'] = p
-        self.box_shadertoy.program['lightSize'] = 200
+        self.box_shadertoy.program['lightSize'] = SPOTLIGHT_SIZE
         self.box_shadertoy.render()
 
         # Draw the player
@@ -336,6 +328,12 @@ class MyGame(arcade.Window):
 
         self.monster_sprite.update()
         self.scroll_to_player()
+
+        # Handle the player's slash
+        player_collisions = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
+        for _ in player_collisions:
+            if self.player_sprite.is_slashing:
+                self.monster_sprite.is_being_hurt = True
 
 
 if __name__ == "__main__":

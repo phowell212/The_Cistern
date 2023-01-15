@@ -2,6 +2,7 @@
 
 // x, y position of the light
 uniform vec2 lightPosition;
+
 // Size of light in pixels
 uniform float lightSize;
 
@@ -49,5 +50,5 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
     // Our fragment color will be somewhere between black and channel 1
     // dependent on the value of b.
-    fragColor = mix(blackColor, texture(iChannel1, normalizedFragCoord), lightAmount);
+    fragColor = mix(blackColor, texture(iChannel1, normalizedFragCoord), lightAmount), iChannel0;
 }
