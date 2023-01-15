@@ -57,10 +57,22 @@ class MyGame(arcade.Window):
         # Make the camera
         self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
 
+        # Load the level map
+        map_location = "assets/level/level_map.json"
+        layer_options = {"Tile Layer 1": {"use_spatial_hash": True, "spatial_hash_cell_size": 128}}
+        self.level_map = arcade.tilemap.load_tilemap(map_location, SPRITE_SCALING, layer_options=layer_options)
+        map_center_x = self.level_map.width * self.level_map.tile_width * SPRITE_SCALING / 2
+        map_center_y = self.level_map.height * self.level_map.tile_height * SPRITE_SCALING / 2
+        self.wall_tile_map = arcade.load_tilemap(map_location, SPRITE_SCALING, layer_options)
+        self.wall_tile_map = arcade.Scene.from_tilemap(self.wall_tile_map)
+        scene_wall_sprite_list = self.wall_tile_map.get_sprite_list("Tile Layer 1")
+        self.wall_list.extend(scene_wall_sprite_list)
+
+        # Create the other sprites
         # Create the sprites
-        self.player_sprite = player.Player(256, 512, PLAYER_SCALING)
+        self.player_sprite = player.Player(map_center_x, map_center_y, PLAYER_SCALING)
         self.player_list.append(self.player_sprite)
-        self.generate_walls(self.player_sprite.center_x, self.player_sprite.center_y, 1500)
+        self.generate_walls(self.level_map.width, self.level_map.height)
         self.monster_sprite = green_monster.GreenMonster(596, 512, MONSTER_SCALING)
         self.monster_list.append(self.monster_sprite)
 
@@ -90,22 +102,30 @@ class MyGame(arcade.Window):
         self.box_shadertoy.channel_0 = self.channel0.color_attachments[0]
         self.box_shadertoy.channel_1 = self.channel1.color_attachments[0]
 
-    def generate_walls(self, player_x, player_y, distance):
+    def generate_walls(self, map_width, map_height):
+        map_width = map_width * self.level_map.tile_width * SPRITE_SCALING
+        map_height = map_height * self.level_map.tile_height * SPRITE_SCALING
+        for _ in range(150):
+            # Generate random x, y coordinates for the wall
+            x = random.randrange(100, map_width - 100)
+            y = random.randrange(100, map_height - 100)
 
-        # Set up several columns of walls
-        for x in range(0, PLAYING_FIELD_WIDTH, 128):
-            player_height = self.player_sprite.height
-
-            # Add some extra space between the walls and player sprite
-            extra_space = 20
-            for y in range(0, PLAYING_FIELD_HEIGHT, int((player_height + extra_space) / 2)):
-
-                # Randomly skip a box so the player can find a way through
-                if random.randrange(3) > 0:
-                    wall = arcade.Sprite(":resources:images/tiles/dirt.png", SPRITE_SCALING)
-                    wall.center_x = x
-                    wall.center_y = y
-                    self.wall_list.append(wall)
+            wall = arcade.Sprite("assets/level/wall.png", SPRITE_SCALING)
+            wall.center_x = x
+            wall.center_y = y
+            overlap = False
+            for wall_check in self.wall_list:
+                if wall.collides_with_sprite(wall_check):
+                    overlap = True
+                    break
+            if not overlap:
+                self.wall_list.append(wall)
+            else:
+                # Generate new coordinates for the wall
+                x = random.randrange(100, map_width - 100)
+                y = random.randrange(100, map_height - 100)
+                wall.center_x = x
+                wall.center_y = y
 
     def on_key_press(self, key, modifiers):
         self.key_press_buffer.add(key)

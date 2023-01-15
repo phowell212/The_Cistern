@@ -62,8 +62,8 @@ class GreenMonster(arcade.Sprite):
             self.center_y += self.change_y
 
             if random.randint(0, 100) == 0:
-                self.change_x = random.randint(-2, 2)
-                self.change_y = random.randint(-2, 2)
+                self.change_x = random.randint(-1, 1)
+                self.change_y = random.randint(-1, 1)
 
         else:
             self.update_animation(1 / 40)
