@@ -15,7 +15,7 @@ class GhostMonster(arcade.Sprite):
         self.hurt_frame = 0
         self.death_frame = 0
         self.update_interval = 1 / 10
-        self.health = 10
+        self.health = 7
         self.scale = scale
         self.center_x, self.center_y = center_x, center_y
         self.directions = ["north", "south"]
