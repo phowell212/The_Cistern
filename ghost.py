@@ -9,12 +9,13 @@ class GhostMonster(arcade.Sprite):
         self.north_idle_frames = []
         self.south_idle_frames = []
         self.hurt_frames = []
+        self.death_frames = []
         self.is_being_hurt = False
         self.current_frame = 0
         self.hurt_frame = 0
         self.death_frame = 0
         self.update_interval = 1 / 10
-        self.health = 5
+        self.health = 10
         self.scale = scale
         self.center_x, self.center_y = center_x, center_y
         self.directions = ["north", "south"]
@@ -31,12 +32,22 @@ class GhostMonster(arcade.Sprite):
             self.south_idle_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_south-{i}.png"))
         for i in range(0, 7):
             self.hurt_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_scream-{i}.png"))
+        for i in range(0, 10):
+            self.death_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_death-{i}.png"))
 
     def update_animation(self, delta_time):
         self.current_frame += self.update_interval * delta_time
 
+        # If the sprite has no health, play that animation then kill it
+        if self.health <= 0 and self.death_frame < len(self.death_frames):
+            self.texture = self.death_frames[self.death_frame]
+            self.death_frame += 1
+        elif self.health <= 0:
+            self.death_frame = 0
+            self.kill()
+
         # If the monster is being hurt, play the hurt animation
-        if self.is_being_hurt and self.hurt_frame < len(self.hurt_frames) - 1:
+        elif self.is_being_hurt and self.hurt_frame < len(self.hurt_frames) - 1:
             self.hurt_frame += 1
             self.texture = self.hurt_frames[self.hurt_frame]
         elif self.is_being_hurt:
