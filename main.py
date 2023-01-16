@@ -44,7 +44,7 @@ class MyGame(arcade.Window):
         self.channel1 = None
         self.load_shader()
 
-        # Make the sprites
+        # Init the sprites
         self.player_sprite = None
         self.monster_sprite = None
         self.wall_list = arcade.SpriteList()
@@ -54,6 +54,9 @@ class MyGame(arcade.Window):
         # Other stuff
         arcade.set_background_color((108, 121, 147))
         self.key_press_buffer = set()
+        self.ghosts_to_spawn = 2.0
+        self.ghosts_to_spawn_multiplier = 1.25
+        self.no_ghost_timer = 0.0
 
         # Make the camera
         self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -69,7 +72,7 @@ class MyGame(arcade.Window):
         scene_wall_sprite_list = self.wall_tile_map.get_sprite_list("Tile Layer 1")
         self.wall_list.extend(scene_wall_sprite_list)
 
-        # Create the other sprites
+        # Create the sprites
         self.player_sprite = player.Player(self.map_center_x, self.map_center_y, PLAYER_SCALING)
         self.player_list.append(self.player_sprite)
         self.generate_walls(self.level_map.width, self.level_map.height)
@@ -325,14 +328,32 @@ class MyGame(arcade.Window):
             self.player_sprite.change_x *= SLASH_CHARGE_SPEED_MODIFIER
             self.player_sprite.change_y *= SLASH_CHARGE_SPEED_MODIFIER
 
-        self.monster_sprite.update()
+        self.monster_list.update()
         self.scroll_to_player()
 
         # Handle the player's slash
         player_collisions = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
-        for _ in player_collisions:
+        for monster in player_collisions:
             if self.player_sprite.is_slashing:
-                self.monster_sprite.is_being_hurt = True
+                monster.is_being_hurt = True
+
+        # Handle spawning in more monsters if there aren't any on the screen
+        if not self.monster_list:
+            if self.no_ghost_timer != 0:
+                self.no_ghost_timer = time.time()
+            elif time.time() - self.no_ghost_timer > 5:
+                for i in range(int(self.ghosts_to_spawn)):
+                    random_x = random.uniform(self.player_sprite.center_x - 150, self.player_sprite.center_x + 150)
+                    random_y = random.uniform(self.player_sprite.center_y - 150, self.player_sprite.center_y + 150)
+                    if random_x < 0 or random_x > self.width or random_y < 0 or random_y > self.height:
+                        random_x = random.uniform(0, self.width)
+                        random_y = random.uniform(0, self.height)
+                    monster = ghost.GhostMonster(random_x, random_y, MONSTER_SCALING)
+                    monster.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+                    self.monster_list.append(monster)
+
+            self.ghosts_to_spawn *= self.ghosts_to_spawn_multiplier
+            self.no_ghost_timer = 0.0
 
 
 if __name__ == "__main__":
