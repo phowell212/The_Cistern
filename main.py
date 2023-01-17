@@ -1,12 +1,13 @@
 import random
-from pyglet.math import Vec2
 import player
 import ghost
-from pathlib import Path
 import arcade
-from arcade.experimental import Shadertoy
 import time
 import settings as s
+import swordslash as ss
+from arcade.experimental import Shadertoy
+from pathlib import Path
+from pyglet.math import Vec2
 
 
 class MyGame(arcade.Window):
@@ -26,6 +27,7 @@ class MyGame(arcade.Window):
         self.wall_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.monster_list = arcade.SpriteList()
+        self.swordslash_list = arcade.SpriteList()
 
         # Other stuff
         arcade.set_background_color((108, 121, 147))
@@ -62,6 +64,96 @@ class MyGame(arcade.Window):
         self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.player_sprite, self.monster_list)
         self.monster_and_wall_collider = arcade.PhysicsEngineSimple(self.monster_sprite, self.wall_list)
 
+    def on_draw(self):
+        # Use the camera
+        self.camera.use()
+
+        # Draw the monsters on top of the shadow
+        self.channel1.use()
+        self.channel1.clear()
+        self.monster_list.draw()
+
+        # Draw the walls
+        self.channel0.use()
+        self.channel0.clear()
+        self.wall_list.draw()
+        self.use()
+        self.clear()
+
+        # Calculate the light position
+        p = (self.player_sprite.position[0] - self.camera.position[0],
+             self.player_sprite.position[1] - self.camera.position[1])
+
+        # Run the shader and render to the window
+        self.box_shadertoy.program['lightPosition'] = p
+        self.box_shadertoy.program['lightSize'] = s.SPOTLIGHT_SIZE
+        self.box_shadertoy.render()
+
+        # Draw the player
+        self.player_list.draw()
+        self.swordslash_list.draw()
+
+    def on_update(self, delta_time: float = 1 / 240):
+
+        # Update the physics
+        self.player_and_wall_collider.update()
+        self.player_and_monster_collider.update()
+        self.monster_and_wall_collider.update()
+        self.monster_list.update()
+        self.scroll_to_player()
+        self.process_key_presses()
+        for projectile in self.swordslash_list:
+            projectile.update_animation(delta_time)
+            projectile.update()
+            if arcade.check_for_collision_with_list(projectile, self.wall_list):
+                projectile.is_hitting_wall = True
+
+        # Make a projectile if the player is slashing and there currently isn't another one
+        if self.player_sprite.is_slashing and self.player_sprite.c_key_timer == 0 and not self.swordslash_list:
+            slash_projectile = ss.SwordSlash(self.player_sprite)
+            self.swordslash_list.append(slash_projectile)
+
+        # Update the player
+        self.player_sprite.update_animation(delta_time)
+        if self.player_sprite.c_key_timer > 0:
+            self.player_sprite.change_x *= s.SLASH_CHARGE_SPEED_MODIFIER
+            self.player_sprite.change_y *= s.SLASH_CHARGE_SPEED_MODIFIER
+
+        # Handle the player's slash
+        player_collisions = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
+        for projectile in self.swordslash_list:
+            projectile_collisions = arcade.check_for_collision_with_list(projectile, self.monster_list)
+            for monster in projectile_collisions:
+                monster.is_being_hurt = True
+        for monster in player_collisions:
+            if self.player_sprite.is_slashing:
+                monster.is_being_hurt = True
+
+        # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
+        if not self.monster_list:
+            if self.no_ghost_timer != 0:
+                self.no_ghost_timer = time.time()
+            elif time.time() - self.no_ghost_timer > 5:
+                for i in range(int(self.ghosts_to_spawn)):
+                    random_x = random.uniform(self.player_sprite.center_x - 50, self.player_sprite.center_x + 50)
+                    random_y = random.uniform(self.player_sprite.center_y - 50, self.player_sprite.center_y + 50)
+                    if random_x < 0 or random_x > self.width or random_y < 0 or random_y > self.height:
+                        random_x = random.uniform(0, self.width)
+                        random_y = random.uniform(0, self.height)
+                    monster = ghost.GhostMonster(random_x, random_y, s.MONSTER_SCALING)
+                    monster.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+                    self.monster_list.append(monster)
+                self.ghosts_to_spawn += 0.5
+
+            self.ghosts_to_spawn *= self.ghosts_to_spawn_multiplier
+            self.no_ghost_timer = 0.0
+
+        # Make sure the new monsters cant walk through walls, this causes monsters to bounce off the walls
+        for monster in self.monster_list:
+            if arcade.check_for_collision_with_list(monster, self.wall_list):
+                monster.change_x *= -1
+                monster.change_y *= -1
+
     def load_shader(self):
         shader_file_path = Path("shaders/box_shadows.glsl")
 
@@ -87,10 +179,8 @@ class MyGame(arcade.Window):
         map_width = map_width * self.level_map.tile_width * s.SPRITE_SCALING
         map_height = map_height * self.level_map.tile_height * s.SPRITE_SCALING
         for _ in range(150):
-            # Generate random x, y coordinates for the wall
             x = random.randrange(100, map_width - 100)
             y = random.randrange(100, map_height - 100)
-
             wall = arcade.Sprite("assets/level/wall.png", s.SPRITE_SCALING)
             wall.center_x = x
             wall.center_y = y
@@ -102,7 +192,6 @@ class MyGame(arcade.Window):
             if not overlap:
                 self.wall_list.append(wall)
             else:
-                # Generate new coordinates for the wall
                 x = random.randrange(100, map_width - 100)
                 y = random.randrange(100, map_height - 100)
                 wall.center_x = x
@@ -256,97 +345,13 @@ class MyGame(arcade.Window):
             if self.player_sprite.is_running:
                 self.player_sprite.is_running = False
                 self.player_sprite.just_stopped_running = True
-        elif not arcade.key.C in self.key_press_buffer:
+        elif arcade.key.C not in self.key_press_buffer:
             self.player_sprite.c_key_timer = 0
 
     def scroll_to_player(self, speed=s.CAMERA_SPEED):
         position = Vec2(self.player_sprite.center_x - self.width / 2,
                         self.player_sprite.center_y - self.height / 2)
         self.camera.move_to(position, speed)
-
-    def on_draw(self):
-        # Use the camera
-        self.camera.use()
-
-        # Draw the monsters on top of the shadow
-        self.channel1.use()
-        self.channel1.clear()
-        self.monster_list.draw()
-
-        # Draw the walls
-        self.channel0.use()
-        self.channel0.clear()
-        self.wall_list.draw()
-        self.use()
-        self.clear()
-
-        # Calculate the light position
-        p = (self.player_sprite.position[0] - self.camera.position[0],
-             self.player_sprite.position[1] - self.camera.position[1])
-
-        # Run the shader and render to the window
-        self.box_shadertoy.program['lightPosition'] = p
-        self.box_shadertoy.program['lightSize'] = s.SPOTLIGHT_SIZE
-        self.box_shadertoy.render()
-
-        # Draw the player
-        self.player_list.draw()
-
-    def on_update(self, delta_time):
-
-        # Update the physics
-        self.player_and_wall_collider.update()
-        self.player_and_monster_collider.update()
-        self.monster_and_wall_collider.update()
-        self.process_key_presses()
-
-        # Update the hitboxes and handle the initialization counter
-        if self.initialized < 1:
-            self.player_sprite.set_hit_box(self.player_sprite.texture.hit_box_points)
-            for monster in self.monster_list:
-                monster.set_hit_box(monster.texture.hit_box_points)
-            else:
-                self.initialized -= 1
-
-        # Update the player
-        self.player_sprite.update_animation(delta_time)
-        if self.player_sprite.c_key_timer > 0:
-            self.player_sprite.change_x *= s.SLASH_CHARGE_SPEED_MODIFIER
-            self.player_sprite.change_y *= s.SLASH_CHARGE_SPEED_MODIFIER
-
-        self.monster_list.update()
-        self.scroll_to_player()
-
-        # Handle the player's slash
-        player_collisions = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
-        for monster in player_collisions:
-            if self.player_sprite.is_slashing:
-                monster.is_being_hurt = True
-
-        # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
-        if not self.monster_list:
-            if self.no_ghost_timer != 0:
-                self.no_ghost_timer = time.time()
-            elif time.time() - self.no_ghost_timer > 5:
-                for i in range(int(self.ghosts_to_spawn)):
-                    random_x = random.uniform(self.player_sprite.center_x - 50, self.player_sprite.center_x + 50)
-                    random_y = random.uniform(self.player_sprite.center_y - 50, self.player_sprite.center_y + 50)
-                    if random_x < 0 or random_x > self.width or random_y < 0 or random_y > self.height:
-                        random_x = random.uniform(0, self.width)
-                        random_y = random.uniform(0, self.height)
-                    monster = ghost.GhostMonster(random_x, random_y, s.MONSTER_SCALING)
-                    monster.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
-                    self.monster_list.append(monster)
-                self.ghosts_to_spawn += 0.5
-
-            self.ghosts_to_spawn *= self.ghosts_to_spawn_multiplier
-            self.no_ghost_timer = 0.0
-
-        # Make sure the new monsters cant walk through walls, this causes monsters to bounce off the walls
-        for monster in self.monster_list:
-            if arcade.check_for_collision_with_list(monster, self.wall_list):
-                monster.change_x *= -1
-                monster.change_y *= -1
 
 
 if __name__ == "__main__":

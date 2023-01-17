@@ -87,4 +87,3 @@ class GhostMonster(arcade.Sprite):
             self.current_direction = self.directions[0]
         else:
             self.current_direction = self.directions[1]
-
