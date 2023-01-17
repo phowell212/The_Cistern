@@ -144,9 +144,9 @@ class SwordSlash(arcade.Sprite):
             elif self.direction == "east":
                 self.center_x += s.SLASH_PROJECTILE_SPEED
                 if self.player_copy.is_walking and self.player_copy.current_direction == "east":
-                    self.center_x += s.SLASH_PROJECTILE_SPEED
+                    self.center_x -= s.SLASH_PROJECTILE_SPEED
                 elif self.player_copy.is_running and self.player_copy.current_direction == "east":
-                    self.center_x += s.SLASH_PROJECTILE_SPEED * 2
+                    self.center_x -= s.SLASH_PROJECTILE_SPEED * 2
             elif self.direction == "west":
                 self.center_x -= s.SLASH_PROJECTILE_SPEED
                 if self.player_copy.is_walking and self.player_copy.current_direction == "west":
