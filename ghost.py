@@ -25,16 +25,6 @@ class GhostMonster(arcade.Sprite):
         self.bob_amplitude = 0.3
         self.load_frames()
 
-    def load_frames(self):
-        for i in range(0, 1):
-            self.north_idle_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_north-{i}.png"))
-        for i in range(0, 1):
-            self.south_idle_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_south-{i}.png"))
-        for i in range(0, 7):
-            self.hurt_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_scream-{i}.png"))
-        for i in range(0, 10):
-            self.death_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_death-{i}.png"))
-
     def update_animation(self, delta_time: float = 1 / 30):
         self.current_frame += self.update_interval * delta_time
 
@@ -87,3 +77,13 @@ class GhostMonster(arcade.Sprite):
             self.current_direction = self.directions[0]
         else:
             self.current_direction = self.directions[1]
+
+    def load_frames(self):
+        for i in range(0, 1):
+            self.north_idle_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_north-{i}.png"))
+        for i in range(0, 1):
+            self.south_idle_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_south-{i}.png"))
+        for i in range(0, 7):
+            self.hurt_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_scream-{i}.png"))
+        for i in range(0, 10):
+            self.death_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_death-{i}.png"))

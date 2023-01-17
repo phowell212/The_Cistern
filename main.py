@@ -65,6 +65,7 @@ class MyGame(arcade.Window):
         self.monster_and_wall_collider = arcade.PhysicsEngineSimple(self.monster_sprite, self.wall_list)
 
     def on_draw(self):
+
         # Use the camera
         self.camera.use()
 
@@ -144,7 +145,6 @@ class MyGame(arcade.Window):
                     monster.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
                     self.monster_list.append(monster)
                 self.ghosts_to_spawn += 0.5
-
             self.ghosts_to_spawn *= self.ghosts_to_spawn_multiplier
             self.no_ghost_timer = 0.0
 
@@ -156,11 +156,7 @@ class MyGame(arcade.Window):
 
     def load_shader(self):
         shader_file_path = Path("shaders/box_shadows.glsl")
-
-        # Size of the window
         window_size = self.get_size()
-
-        # Create the shader toy
         self.box_shadertoy = Shadertoy.create_from_file(window_size, shader_file_path)
 
         # Create the channels 0 and 1 frame buffers.
