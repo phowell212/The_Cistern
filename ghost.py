@@ -10,10 +10,13 @@ class GhostMonster(arcade.Sprite):
         self.south_idle_frames = []
         self.hurt_frames = []
         self.death_frames = []
+        self.spawn_frames = []
         self.is_being_hurt = False
         self.current_frame = 0
         self.hurt_frame = 0
         self.death_frame = 0
+        self.spawn_frame = 0
+        self.is_spawned = False
         self.update_interval = 1 / 10
         self.health = 7
         self.scale = scale
@@ -28,8 +31,15 @@ class GhostMonster(arcade.Sprite):
     def update_animation(self, delta_time: float = 1 / 30):
         self.current_frame += self.update_interval * delta_time
 
+        # If the ghost is spawning in, then play the spawn animation in full
+        if not self.is_spawned and self.spawn_frame < len(self.spawn_frames):
+            self.texture = self.spawn_frames[self.spawn_frame]
+            self.spawn_frame += 1
+            if self.spawn_frame == len(self.spawn_frames):
+                self.is_spawned = True
+
         # If the sprite has no health, play that animation then kill it
-        if self.health <= 0 and self.death_frame < len(self.death_frames):
+        elif self.health <= 0 and self.death_frame < len(self.death_frames):
             self.texture = self.death_frames[self.death_frame]
             self.death_frame += 1
         elif self.health <= 0:
@@ -89,3 +99,5 @@ class GhostMonster(arcade.Sprite):
             self.hurt_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_scream-{i}.png"))
         for i in range(0, 10):
             self.death_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_death-{i}.png"))
+        self.spawn_frames = self.death_frames[::-1]
+        self.spawn_frames = self.spawn_frames[1:]
