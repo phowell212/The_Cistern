@@ -35,7 +35,7 @@ class GhostMonster(arcade.Sprite):
         for i in range(0, 10):
             self.death_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_death-{i}.png"))
 
-    def update_animation(self, delta_time):
+    def update_animation(self, delta_time: float = 1 / 30):
         self.current_frame += self.update_interval * delta_time
 
         # If the sprite has no health, play that animation then kill it
