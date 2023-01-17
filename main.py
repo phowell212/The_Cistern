@@ -270,7 +270,7 @@ class MyGame(arcade.Window):
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
             self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED * s.RUN_SPEED_MODIFIER
             if self.player_sprite.is_slashing:
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
+                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
             self.player_sprite.current_direction = "east"
             self.player_sprite.is_running = True
 
