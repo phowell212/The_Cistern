@@ -1,8 +1,8 @@
 import random
-import player
 import ghost
 import arcade
 import time
+import player
 import settings as s
 import swordslash as ss
 from arcade.experimental import Shadertoy
@@ -52,7 +52,7 @@ class MyGame(arcade.Window):
         self.wall_list.extend(scene_wall_sprite_list)
 
         # Create the sprites
-        self.player_sprite = player.Player(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
+        self.player_sprite = player.Seraphima(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
         self.player_list.append(self.player_sprite)
         self.generate_walls(self.level_map.width, self.level_map.height)
         self.monster_sprite = ghost.GhostMonster(self.map_center_x, self.map_center_y + 60, s.MONSTER_SCALING)
