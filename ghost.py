@@ -55,6 +55,8 @@ class GhostMonster(arcade.Sprite):
             self.current_frame = 0
 
     def update(self):
+
+        # Update the ghost's position
         if not self.is_being_hurt or self.health > 0:
             self.update_animation(1)
             self.center_x += self.change_x

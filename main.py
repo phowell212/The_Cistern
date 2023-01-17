@@ -131,22 +131,7 @@ class MyGame(arcade.Window):
                 monster.is_being_hurt = True
 
         # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
-        if not self.monster_list:
-            if self.no_ghost_timer != 0:
-                self.no_ghost_timer = time.time()
-            elif time.time() - self.no_ghost_timer > 5:
-                for i in range(int(self.ghosts_to_spawn)):
-                    random_x = random.uniform(self.player_sprite.center_x - 50, self.player_sprite.center_x + 50)
-                    random_y = random.uniform(self.player_sprite.center_y - 50, self.player_sprite.center_y + 50)
-                    if random_x < 0 or random_x > self.width or random_y < 0 or random_y > self.height:
-                        random_x = random.uniform(0, self.width)
-                        random_y = random.uniform(0, self.height)
-                    monster = ghost.GhostMonster(random_x, random_y, s.MONSTER_SCALING)
-                    monster.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
-                    self.monster_list.append(monster)
-                self.ghosts_to_spawn += 0.5
-            self.ghosts_to_spawn *= self.ghosts_to_spawn_multiplier
-            self.no_ghost_timer = 0.0
+        self.spawn_monsters()
 
         # Make sure the new monsters cant walk through walls, this causes monsters to bounce off the walls
         for monster in self.monster_list:
@@ -192,6 +177,42 @@ class MyGame(arcade.Window):
                 y = random.randrange(100, map_height - 100)
                 wall.center_x = x
                 wall.center_y = y
+
+    def spawn_monsters(self):
+        # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
+        if not self.monster_list:
+            if self.no_ghost_timer != 0:
+                self.no_ghost_timer = time.time()
+            elif time.time() - self.no_ghost_timer > 5:
+                for i in range(int(self.ghosts_to_spawn)):
+                    random_x = random.uniform(self.player_sprite.center_x - 50, self.player_sprite.center_x + 50)
+                    random_y = random.uniform(self.player_sprite.center_y - 50, self.player_sprite.center_y + 50)
+                    if random_x < 0 or random_x > self.width or random_y < 0 or random_y > self.height:
+                        random_x = random.uniform(0, self.width)
+                        random_y = random.uniform(0, self.height)
+                    monster = ghost.GhostMonster(random_x, random_y, s.MONSTER_SCALING)
+                    monster.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+                    # check if the new monster collides with any existing monsters, wall sprites or player
+                    collision = False
+                    for wall in self.wall_list:
+                        if wall.collides_with_point((random_x, random_y)):
+                            collision = True
+                            break
+                    for mon in self.monster_list:
+                        if mon.collides_with_point((random_x, random_y)):
+                            collision = True
+                            break
+                    if self.player_sprite.collides_with_point((random_x, random_y)):
+                        collision = True
+                    # if there is no collision, add the monster to the list
+                    if not collision:
+                        self.monster_list.append(monster)
+                    else:
+                        # if there is a collision, try again
+                        self.spawn_monsters()
+                self.ghosts_to_spawn += 0.5
+            self.ghosts_to_spawn *= self.ghosts_to_spawn_multiplier
+            self.no_ghost_timer = 0.0
 
     def on_key_press(self, key, modifiers):
         self.key_press_buffer.add(key)
