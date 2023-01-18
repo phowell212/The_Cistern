@@ -37,10 +37,11 @@ class MyGame(arcade.Window):
         self.ghosts_to_spawn = 2.0
         self.ghosts_to_spawn_multiplier = 1.25
         self.no_ghost_timer = 0.0
-        self.initialized = 10
         self.score = 0
         self.health = s.PLAYER_STARTING_HEALTH
         self.is_dead = False
+        self.is_faded_out = False
+        self.has_spawned_player_death_ghost = True
 
         # Load the level map
         map_location = "assets/level/level_map.json"
@@ -119,6 +120,22 @@ class MyGame(arcade.Window):
                              color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
                              anchor_y="baseline", bold=True)
 
+            # If the player isn't already transparent make the player sprite slowly fade out
+            if self.player_sprite.alpha != 0:
+                self.player_sprite.alpha -= 0.01
+                self.player_sprite.alpha = max(0, self.player_sprite.alpha)
+            elif not self.is_faded_out:
+                self.is_faded_out = True
+                self.has_spawned_player_death_ghost = False
+
+            # If the player is fully transparent, spawn a ghost monster on their death location
+            elif not self.has_spawned_player_death_ghost:
+                self.monster_sprite = ghost.GhostMonster(self.player_sprite.center_x, self.player_sprite.center_y,
+                                                         s.MONSTER_SCALING)
+                self.monster_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+                self.monster_list.append(self.monster_sprite)
+                self.has_spawned_player_death_ghost = True
+
     def on_update(self, delta_time: float = 1 / 240):
 
         # Update the physics engine
@@ -152,6 +169,11 @@ class MyGame(arcade.Window):
                 heart.texture = self.heart_frames[int(self.heart_frame)]
             else:
                 self.heart_frame = 0
+
+        # Set the first heart's size to represent the player's health
+        for heart in self.heart_list:
+            heart.scale = (self.health / len(self.heart_list)) / 100
+            break
 
         # Handle the player's slash
         player_collisions = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
@@ -189,7 +211,7 @@ class MyGame(arcade.Window):
                 monster.change_y *= -1
 
     def load_shader(self):
-        shader_file_path = Path("shaders/box_shadows.glsl")
+        shader_file_path = Path("shaders/level_1_shader.glsl")
         window_size = self.get_size()
         self.box_shadertoy = Shadertoy.create_from_file(window_size, shader_file_path)
 
@@ -247,8 +269,8 @@ class MyGame(arcade.Window):
 
     def spawn_monsters(self):
         for i in range(int(self.ghosts_to_spawn)):
-            random_x = random.uniform(self.player_sprite.center_x - 150, self.player_sprite.center_x + 150)
-            random_y = random.uniform(self.player_sprite.center_y - 150, self.player_sprite.center_y + 150)
+            random_x = random.uniform(self.player_sprite.center_x - 100, self.player_sprite.center_x + 100)
+            random_y = random.uniform(self.player_sprite.center_y - 100, self.player_sprite.center_y + 100)
             if random_x < 0 or random_x > self.level_map.width or random_y < 0 or \
                     random_y > self.level_map.height:
                 random_x = random.uniform(0, self.width)
