@@ -122,7 +122,7 @@ class MyGame(arcade.Window):
 
             # If the player isn't already transparent make the player sprite slowly fade out
             if self.player_sprite.alpha != 0:
-                self.player_sprite.alpha -= 0.01
+                self.player_sprite.alpha -= 0.05
                 self.player_sprite.alpha = max(0, self.player_sprite.alpha)
             elif not self.is_faded_out:
                 self.is_faded_out = True
@@ -299,8 +299,8 @@ class MyGame(arcade.Window):
                 self.monster_list.append(monster)
             else:
 
-                # If there is a collision, try again
-                self.spawn_monsters()
+                # If there is a collision, Don't spawn the monster and try again
+                self.ghosts_to_spawn += 1
 
     def on_key_press(self, key, modifiers):
         if not self.is_dead:
