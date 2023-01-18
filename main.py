@@ -23,7 +23,7 @@ class MyGame(arcade.Window):
 
         # Init the sprites
         self.player_sprite = None
-        self.monster_sprite = None
+        self.ghost_sprite = None
         self.wall_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.monster_list = arcade.SpriteList()
@@ -58,9 +58,9 @@ class MyGame(arcade.Window):
         self.player_sprite = player.Seraphima(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
         self.player_list.append(self.player_sprite)
         self.generate_walls(self.level_map.width, self.level_map.height)
-        self.monster_sprite = ghost.GhostMonster(self.map_center_x, self.map_center_y + 60, s.MONSTER_SCALING)
-        self.monster_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
-        self.monster_list.append(self.monster_sprite)
+        self.ghost_sprite = ghost.GhostMonster(self.map_center_x, self.map_center_y + 60, s.MONSTER_SCALING)
+        self.ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+        self.monster_list.append(self.ghost_sprite)
         self.load_heart_frames()
         for i in range(int(self.health / 10)):
             heart = arcade.Sprite("assets/heart/heart-0.png", s.HEART_SCALING)
@@ -71,7 +71,7 @@ class MyGame(arcade.Window):
         # Make the physics engine
         self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.player_sprite, self.wall_list)
         self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.player_sprite, self.monster_list)
-        self.monster_and_wall_collider = arcade.PhysicsEngineSimple(self.monster_sprite, self.wall_list)
+        self.monster_and_wall_collider = arcade.PhysicsEngineSimple(self.ghost_sprite, self.wall_list)
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         arcade.set_background_color((108, 121, 147))
@@ -130,10 +130,10 @@ class MyGame(arcade.Window):
 
             # If the player is fully transparent, spawn a ghost monster on their death location
             elif not self.has_spawned_player_death_ghost:
-                self.monster_sprite = ghost.GhostMonster(self.player_sprite.center_x, self.player_sprite.center_y,
-                                                         s.MONSTER_SCALING)
-                self.monster_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
-                self.monster_list.append(self.monster_sprite)
+                self.ghost_sprite = ghost.GhostMonster(self.player_sprite.center_x, self.player_sprite.center_y,
+                                                       s.MONSTER_SCALING)
+                self.ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+                self.monster_list.append(self.ghost_sprite)
                 self.has_spawned_player_death_ghost = True
 
     def on_update(self, delta_time: float = 1 / 240):
@@ -202,7 +202,7 @@ class MyGame(arcade.Window):
                 self.score += 1
 
         # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
-        self.spawn_monsters_on_empty_list()
+        self.spawn_ghosts_on_empty_list()
 
         # Make sure the new monsters cant walk through walls, this causes monsters to bounce off the walls
         for monster in self.monster_list:
@@ -254,20 +254,20 @@ class MyGame(arcade.Window):
             if random.random() < 0.5:
                 wall.angle = 90
 
-    def spawn_monsters_on_empty_list(self):
+    def spawn_ghosts_on_empty_list(self):
 
         # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
         if not self.monster_list:
             if self.no_ghost_timer != 0:
                 self.no_ghost_timer = time.time()
             elif time.time() - self.no_ghost_timer > 5:
-                self.spawn_monsters()
+                self.spawn_ghosts()
                 # Reset the timer and increase the number of ghosts to spawn
                 self.ghosts_to_spawn += 0.5
             self.ghosts_to_spawn *= self.ghosts_to_spawn_multiplier
             self.no_ghost_timer = 0.0
 
-    def spawn_monsters(self):
+    def spawn_ghosts(self):
         for i in range(int(self.ghosts_to_spawn)):
             random_x = random.uniform(self.player_sprite.center_x - 100, self.player_sprite.center_x + 100)
             random_y = random.uniform(self.player_sprite.center_y - 100, self.player_sprite.center_y + 100)
@@ -282,8 +282,8 @@ class MyGame(arcade.Window):
             # The loops in the checks in a way increase the size of the monster's hitbox that is being spawned
             collision = False
             for wall in self.wall_list:
-                for i in range(-4, 4):
-                    for j in range(-4, 4):
+                for i in range(-6, 6):
+                    for j in range(-6, 6):
                         if wall.collides_with_point((random_x + i, random_y + j)):
                             collision = True
                             break
