@@ -110,7 +110,7 @@ class MyGame(arcade.Window):
         # Draw our score on the screen, scrolling it with the viewport
         # the score is increased 11 times per monster killed, so we divide it by 11 to get the actual score
         score_text = f"Score: {self.score / 11}"
-        arcade.draw_text(score_text, start_x=10, start_y=50, color=(255, 255, 242), font_size=18,
+        arcade.draw_text(score_text, start_x=40, start_y=30, color=(255, 255, 242), font_size=18,
                          font_name="Garamond")
 
         # Draw game over if dead
