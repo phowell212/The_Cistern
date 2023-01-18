@@ -28,6 +28,9 @@ class MyGame(arcade.Window):
         self.player_list = arcade.SpriteList()
         self.monster_list = arcade.SpriteList()
         self.swordslash_list = arcade.SpriteList()
+        self.heart_list = arcade.SpriteList()
+        self.heart_frames = []
+        self.heart_frame = 0
 
         # Init the other relevant variables
         self.key_press_buffer = set()
@@ -36,6 +39,8 @@ class MyGame(arcade.Window):
         self.no_ghost_timer = 0.0
         self.initialized = 10
         self.score = 0
+        self.health = s.PLAYER_STARTING_HEALTH
+        self.is_dead = False
 
         # Load the level map
         map_location = "assets/level/level_map.json"
@@ -55,6 +60,12 @@ class MyGame(arcade.Window):
         self.monster_sprite = ghost.GhostMonster(self.map_center_x, self.map_center_y + 60, s.MONSTER_SCALING)
         self.monster_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
         self.monster_list.append(self.monster_sprite)
+        self.load_heart_frames()
+        for i in range(int(self.health / 10)):
+            heart = arcade.Sprite("assets/heart/heart-0.png", s.HEART_SCALING)
+            heart.center_x = (self.width - 200) + i * 40
+            heart.center_y = 50
+            self.heart_list.append(heart)
 
         # Make the physics engine
         self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.player_sprite, self.wall_list)
@@ -81,7 +92,7 @@ class MyGame(arcade.Window):
 
         # Calculate the light position
         position = (self.player_sprite.position[0] - self.camera.position[0],
-             self.player_sprite.position[1] - self.camera.position[1])
+                    self.player_sprite.position[1] - self.camera.position[1])
 
         # Run the shader and render to the window
         self.box_shadertoy.program['lightPosition'] = position
@@ -94,12 +105,19 @@ class MyGame(arcade.Window):
 
         # Draw the GUI
         self.camera_gui.use()
+        self.heart_list.draw()
 
         # Draw our score on the screen, scrolling it with the viewport
         # the score is increased 11 times per monster killed, so we divide it by 11 to get the actual score
         score_text = f"Score: {self.score / 11}"
-        arcade.draw_text(score_text, start_x=10, start_y=10, color=(255, 255, 242), font_size=18,
+        arcade.draw_text(score_text, start_x=10, start_y=50, color=(255, 255, 242), font_size=18,
                          font_name="Garamond")
+
+        # Draw game over if dead
+        if self.is_dead:
+            arcade.draw_text("GAME OVER", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2,
+                             color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
+                             anchor_y="baseline", bold=True)
 
     def on_update(self, delta_time: float = 1 / 240):
 
@@ -127,6 +145,14 @@ class MyGame(arcade.Window):
             self.player_sprite.change_x *= s.SLASH_CHARGE_SPEED_MODIFIER
             self.player_sprite.change_y *= s.SLASH_CHARGE_SPEED_MODIFIER
 
+        # Update the heart frames, so they match the animation speed of the player
+        self.heart_frame += 9 * delta_time
+        for heart in self.heart_list:
+            if self.heart_frame < len(self.heart_frames):
+                heart.texture = self.heart_frames[int(self.heart_frame)]
+            else:
+                self.heart_frame = 0
+
         # Handle the player's slash
         player_collisions = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
         for projectile in self.swordslash_list:
@@ -136,6 +162,17 @@ class MyGame(arcade.Window):
         for monster in player_collisions:
             if self.player_sprite.is_slashing:
                 monster.is_being_hurt = True
+            else:
+
+                # Handle player damage
+                self.health -= 1
+                if self.health == 0 and self.heart_list:
+                    self.heart_list.pop()
+                    self.health = s.HEART_HEALTH
+                if self.health > 0:
+                    continue
+                else:
+                    self.is_dead = True
 
         # If a ghost dies increase the counter
         for monster in self.monster_list:
@@ -166,6 +203,10 @@ class MyGame(arcade.Window):
         # Assign the frame buffers to the channels
         self.box_shadertoy.channel_0 = self.channel0.color_attachments[0]
         self.box_shadertoy.channel_1 = self.channel1.color_attachments[0]
+
+    def load_heart_frames(self):
+        for i in range(0, 7):
+            self.heart_frames.append(arcade.load_texture(f"assets/heart/heart-{i}.png"))
 
     def generate_walls(self, map_width, map_height):
         map_width = int(map_width * self.level_map.tile_width * s.SPRITE_SCALING)
@@ -219,14 +260,14 @@ class MyGame(arcade.Window):
             # The loops in the checks in a way increase the size of the monster's hitbox that is being spawned
             collision = False
             for wall in self.wall_list:
-                for i in range(-3, 3):
-                    for j in range(-3, 3):
+                for i in range(-4, 4):
+                    for j in range(-4, 4):
                         if wall.collides_with_point((random_x + i, random_y + j)):
                             collision = True
                             break
             for mon in self.monster_list:
-                for i in range(-3, 3):
-                    for j in range(-3, 3):
+                for i in range(-4, 4):
+                    for j in range(-4, 4):
                         if mon.collides_with_point((random_x + i, random_y + j)):
                             collision = True
                             break
@@ -240,7 +281,8 @@ class MyGame(arcade.Window):
                 self.spawn_monsters()
 
     def on_key_press(self, key, modifiers):
-        self.key_press_buffer.add(key)
+        if not self.is_dead:
+            self.key_press_buffer.add(key)
 
     def process_key_presses(self):
         self.player_sprite.change_x = 0
@@ -399,5 +441,5 @@ class MyGame(arcade.Window):
 
 if __name__ == "__main__":
     window = MyGame(s.SCREEN_WIDTH, s.SCREEN_HEIGHT, s.SCREEN_TITLE)
-    # window.set_location(1025, 35)
+    window.set_location(1025, 35)
     arcade.run()

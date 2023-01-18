@@ -1,7 +1,6 @@
 # Screen Settings
 # SCREEN_WIDTH = 700
 # SCREEN_HEIGHT = 1000
-
 SCREEN_HEIGHT = 950
 SCREEN_WIDTH = 1500
 SCREEN_TITLE = "The Cistercian Cistern"
@@ -14,6 +13,7 @@ SPRITE_SCALING = 0.25
 PLAYER_SCALING = 0.4
 MONSTER_SCALING = 0.5
 SWORD_SLASH_SCALING = 0.35
+HEART_SCALING = 0.1
 
 # How fast the camera pans to the player. 1.0 is instant.
 CAMERA_SPEED = 0.9
@@ -30,3 +30,7 @@ SWORDSLASH_FPS = 1/70
 
 # Time settings
 SLASH_CHARGE_TIME = 0.05
+
+# Health settings, amount of life per heart
+HEART_HEALTH = 10
+PLAYER_STARTING_HEALTH = 40
