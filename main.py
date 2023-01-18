@@ -82,11 +82,11 @@ class MyGame(arcade.Window):
         self.clear()
 
         # Calculate the light position
-        p = (self.player_sprite.position[0] - self.camera.position[0],
+        position = (self.player_sprite.position[0] - self.camera.position[0],
              self.player_sprite.position[1] - self.camera.position[1])
 
         # Run the shader and render to the window
-        self.box_shadertoy.program['lightPosition'] = p
+        self.box_shadertoy.program['lightPosition'] = position
         self.box_shadertoy.program['lightSize'] = s.SPOTLIGHT_SIZE
         self.box_shadertoy.render()
 
@@ -187,38 +187,40 @@ class MyGame(arcade.Window):
             if self.no_ghost_timer != 0:
                 self.no_ghost_timer = time.time()
             elif time.time() - self.no_ghost_timer > 5:
-                for i in range(int(self.ghosts_to_spawn)):
-                    random_x = random.uniform(self.player_sprite.center_x - 50, self.player_sprite.center_x + 50)
-                    random_y = random.uniform(self.player_sprite.center_y - 50, self.player_sprite.center_y + 50)
-                    if random_x < 0 or random_x > self.level_map.width or random_y < 0 or\
-                            random_y > self.level_map.height:
-                        random_x = random.uniform(0, self.width)
-                        random_y = random.uniform(0, self.height)
-                    monster = ghost.GhostMonster(random_x, random_y, s.MONSTER_SCALING)
-                    monster.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
-
-                    # Check if the new monster collides with any existing monsters, wall sprites or player
-                    collision = False
-                    for wall in self.wall_list:
-                        if wall.collides_with_point((random_x, random_y)):
-                            collision = True
-                            break
-                    for mon in self.monster_list:
-                        if mon.collides_with_point((random_x, random_y)):
-                            collision = True
-                    if self.player_sprite.collides_with_point((random_x, random_y)):
-                        collision = True
-                    if not collision:
-                        self.monster_list.append(monster)
-                    else:
-
-                        # If there is a collision, try again
-                        self.spawn_monsters_on_empty_list()
-
+                self.spawn_monsters()
                 # Reset the timer and increase the number of ghosts to spawn
                 self.ghosts_to_spawn += 0.5
             self.ghosts_to_spawn *= self.ghosts_to_spawn_multiplier
             self.no_ghost_timer = 0.0
+
+    def spawn_monsters(self):
+        for i in range(int(self.ghosts_to_spawn)):
+            random_x = random.uniform(self.player_sprite.center_x - 50, self.player_sprite.center_x + 50)
+            random_y = random.uniform(self.player_sprite.center_y - 50, self.player_sprite.center_y + 50)
+            if random_x < 0 or random_x > self.level_map.width or random_y < 0 or \
+                    random_y > self.level_map.height:
+                random_x = random.uniform(0, self.width)
+                random_y = random.uniform(0, self.height)
+            monster = ghost.GhostMonster(random_x, random_y, s.MONSTER_SCALING)
+            monster.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+
+            # Check if the new monster collides with any existing monsters, wall sprites or player
+            collision = False
+            for wall in self.wall_list:
+                if wall.collides_with_point((random_x, random_y)):
+                    collision = True
+                    break
+            for mon in self.monster_list:
+                if mon.collides_with_point((random_x, random_y)):
+                    collision = True
+            if self.player_sprite.collides_with_point((random_x, random_y)):
+                collision = True
+            if not collision:
+                self.monster_list.append(monster)
+            else:
+
+                # If there is a collision, try again
+                self.spawn_monsters()
 
     def on_key_press(self, key, modifiers):
         self.key_press_buffer.add(key)
