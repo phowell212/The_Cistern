@@ -147,8 +147,7 @@ class MyGame(arcade.Window):
         # Create the channels 0 and 1 frame buffers.
         # Make the buffer the size of the window, with 4 channels (RGBA)
         self.channel0 = self.box_shadertoy.ctx.framebuffer(
-            color_attachments=[self.box_shadertoy.ctx.texture(window_size, components=4)]
-        )
+            color_attachments=[self.box_shadertoy.ctx.texture(window_size, components=4)])
         self.channel1 = self.box_shadertoy.ctx.framebuffer(
             color_attachments=[self.box_shadertoy.ctx.texture(window_size, components=4)])
 
@@ -195,8 +194,8 @@ class MyGame(arcade.Window):
 
     def spawn_monsters(self):
         for i in range(int(self.ghosts_to_spawn)):
-            random_x = random.uniform(self.player_sprite.center_x - 50, self.player_sprite.center_x + 50)
-            random_y = random.uniform(self.player_sprite.center_y - 50, self.player_sprite.center_y + 50)
+            random_x = random.uniform(self.player_sprite.center_x - 150, self.player_sprite.center_x + 150)
+            random_y = random.uniform(self.player_sprite.center_y - 150, self.player_sprite.center_y + 150)
             if random_x < 0 or random_x > self.level_map.width or random_y < 0 or \
                     random_y > self.level_map.height:
                 random_x = random.uniform(0, self.width)
@@ -205,14 +204,20 @@ class MyGame(arcade.Window):
             monster.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
 
             # Check if the new monster collides with any existing monsters, wall sprites or player
+            # The loops in the checks in a way increase the size of the monster's hitbox that is being spawned
             collision = False
             for wall in self.wall_list:
-                if wall.collides_with_point((random_x, random_y)):
-                    collision = True
-                    break
+                for i in range(-3, 3):
+                    for j in range(-3, 3):
+                        if wall.collides_with_point((random_x + i, random_y + j)):
+                            collision = True
+                            break
             for mon in self.monster_list:
-                if mon.collides_with_point((random_x, random_y)):
-                    collision = True
+                for i in range(-3, 3):
+                    for j in range(-3, 3):
+                        if mon.collides_with_point((random_x + i, random_y + j)):
+                            collision = True
+                            break
             if self.player_sprite.collides_with_point((random_x, random_y)):
                 collision = True
             if not collision:
