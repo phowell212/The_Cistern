@@ -1,7 +1,7 @@
 import random
-import ghost
 import arcade
 import time
+import ghost
 import player
 import settings as s
 import swordslash as ss
@@ -29,16 +29,13 @@ class MyGame(arcade.Window):
         self.monster_list = arcade.SpriteList()
         self.swordslash_list = arcade.SpriteList()
 
-        # Other stuff
-        arcade.set_background_color((108, 121, 147))
+        # Init the other relevant variables
         self.key_press_buffer = set()
         self.ghosts_to_spawn = 2.0
         self.ghosts_to_spawn_multiplier = 1.25
         self.no_ghost_timer = 0.0
         self.initialized = 10
-
-        # Make the camera
-        self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
+        self.score = 0
 
         # Load the level map
         map_location = "assets/level/level_map.json"
@@ -59,17 +56,18 @@ class MyGame(arcade.Window):
         self.monster_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
         self.monster_list.append(self.monster_sprite)
 
-        # Physics engine, so we don't run into walls
+        # Make the physics engine
         self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.player_sprite, self.wall_list)
         self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.player_sprite, self.monster_list)
         self.monster_and_wall_collider = arcade.PhysicsEngineSimple(self.monster_sprite, self.wall_list)
+        self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
+        self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
+        arcade.set_background_color((108, 121, 147))
 
     def on_draw(self):
-
-        # Use the camera
         self.camera.use()
 
-        # Draw the monsters on top of the shadow
+        # Draw the monsters beneath the wall shadows
         self.channel1.use()
         self.channel1.clear()
         self.monster_list.draw()
@@ -94,9 +92,18 @@ class MyGame(arcade.Window):
         self.player_list.draw()
         self.swordslash_list.draw()
 
+        # Draw the GUI
+        self.camera_gui.use()
+
+        # Draw our score on the screen, scrolling it with the viewport
+        # the score is increased 11 times per monster killed, so we divide it by 11 to get the actual score
+        score_text = f"Score: {self.score / 11}"
+        arcade.draw_text(score_text, start_x=10, start_y=10, color=(255, 255, 242), font_size=18,
+                         font_name="Garamond")
+
     def on_update(self, delta_time: float = 1 / 240):
 
-        # Update the physics
+        # Update the physics engine
         self.player_and_wall_collider.update()
         self.player_and_monster_collider.update()
         self.monster_and_wall_collider.update()
@@ -129,6 +136,11 @@ class MyGame(arcade.Window):
         for monster in player_collisions:
             if self.player_sprite.is_slashing:
                 monster.is_being_hurt = True
+
+        # If a ghost dies increase the counter
+        for monster in self.monster_list:
+            if monster.health == 0:
+                self.score += 1
 
         # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
         self.spawn_monsters_on_empty_list()
@@ -235,6 +247,7 @@ class MyGame(arcade.Window):
         self.player_sprite.change_y = 0
 
         # Handle slashing, hold the c key for SLASH_CHARGE_TIME to activate
+        # This discourages spamming the slash key
         if arcade.key.C in self.key_press_buffer:
             if self.player_sprite.c_key_timer == 0:
                 self.player_sprite.c_key_timer = time.time()
