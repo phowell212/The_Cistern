@@ -11,7 +11,6 @@ from pyglet.math import Vec2
 
 
 class MyGame(arcade.Window):
-
     def __init__(self, width, height, title):
         super().__init__(width, height, title, resizable=True)
 
@@ -210,6 +209,19 @@ class MyGame(arcade.Window):
                 monster.change_x *= -1
                 monster.change_y *= -1
 
+            # Handle the ghosts movement
+            elif not monster.is_being_hurt or self.health > 0:
+
+                # If the ghost is close to the player, Rush them down
+                distance = arcade.get_distance_between_sprites(monster, self.player_sprite)
+                if distance < s.GHOST_RUSH_DISTANCE:
+                    monster.change_x = (self.player_sprite.center_x - monster.center_x) * s.GHOST_RUSH_SPEED
+                    monster.change_y = (self.player_sprite.center_y - monster.center_y) * s.GHOST_RUSH_SPEED
+
+                # If the ghost is far away from the player have them wander around
+                else:
+                    monster.update()
+
     def load_shader(self):
         shader_file_path = Path("shaders/level_1_shader.glsl")
         window_size = self.get_size()
@@ -262,6 +274,7 @@ class MyGame(arcade.Window):
                 self.no_ghost_timer = time.time()
             elif time.time() - self.no_ghost_timer > 5:
                 self.spawn_ghosts()
+
                 # Reset the timer and increase the number of ghosts to spawn
                 self.ghosts_to_spawn += 0.5
             self.ghosts_to_spawn *= self.ghosts_to_spawn_multiplier
