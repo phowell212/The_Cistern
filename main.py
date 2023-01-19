@@ -64,7 +64,7 @@ class MyGame(arcade.Window):
         for i in range(int(self.health / 10)):
             heart = arcade.Sprite("assets/heart/heart-0.png", s.HEART_SCALING)
             heart.center_x = (self.width - 200) + i * 40
-            heart.center_y = 50
+            heart.center_y = 45
             self.heart_list.append(heart)
 
         # Make the physics engine
@@ -110,7 +110,7 @@ class MyGame(arcade.Window):
         # Draw our score on the screen, scrolling it with the viewport
         # the score is increased 11 times per monster killed, so we divide it by 11 to get the actual score
         score_text = f"Score: {self.score / 11}     Ghosts: {float(len(self.monster_list))}"
-        arcade.draw_text(score_text, start_x=40, start_y=30, color=(255, 255, 242), font_size=18,
+        arcade.draw_text(score_text, start_x=40, start_y=32, color=(255, 255, 242), font_size=19,
                          font_name="Garamond")
 
         # Draw game over if dead
