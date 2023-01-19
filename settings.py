@@ -36,3 +36,7 @@ SLASH_CHARGE_TIME = 0.05
 # Health settings, amount of life per heart
 HEART_HEALTH = 10
 PLAYER_STARTING_HEALTH = 40
+
+# Volume settings
+MUSIC_VOLUME = 0.3
+SWOOSH_VOLUME = 0.2

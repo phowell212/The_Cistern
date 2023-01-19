@@ -1,5 +1,4 @@
 import arcade
-
 '''
 ANIMATION INFO:
 

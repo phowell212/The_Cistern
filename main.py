@@ -9,7 +9,6 @@ from arcade.experimental import Shadertoy
 from pathlib import Path
 from pyglet.math import Vec2
 
-
 class MyGame(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title, resizable=True)
@@ -31,16 +30,22 @@ class MyGame(arcade.Window):
         self.heart_frames = []
         self.heart_frame = 0
 
-        # Init the other relevant variables
+        # Init counters, constants, arrays, flags, and sounds
         self.key_press_buffer = set()
         self.ghosts_to_spawn = 2.0
         self.ghosts_to_spawn_multiplier = 1.25
         self.no_ghost_timer = 0.0
         self.score = 0
+        self.music_timer = time.time()
+        self.general_timer = time.time()
         self.health = s.PLAYER_STARTING_HEALTH
         self.is_dead = False
         self.is_faded_out = False
         self.has_spawned_player_death_ghost = True
+        self.swoosh_sounds = []
+        for i in range(0, 3):
+            self.swoosh_sounds.append(arcade.load_sound(f"sounds/sword_swoosh-{i}.mp3"))
+        arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME, -1)
 
         # Load the level map
         map_location = "assets/level/level_map.json"
@@ -156,6 +161,7 @@ class MyGame(arcade.Window):
         if self.player_sprite.is_slashing and self.player_sprite.c_key_timer == 0 and not self.swordslash_list:
             slash_projectile = ss.SwordSlash(self.player_sprite)
             self.swordslash_list.append(slash_projectile)
+            arcade.play_sound(random.choice(self.swoosh_sounds), s.SWOOSH_VOLUME)
 
         # Update the player
         self.player_sprite.update_animation(delta_time)
