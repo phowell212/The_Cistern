@@ -78,8 +78,8 @@ class GhostMonster(arcade.Sprite):
 
             # Make the ghost move
             if random.randint(0, 100) == 0:
-                self.change_x = (random.randint(-1, 1) / 2)
-                self.change_y = (random.randint(-1, 1) / 2)
+                self.change_x = random.randint(-1, 1)
+                self.change_y = random.randint(-1, 1)
 
         else:
             self.update_animation(1 / 2)

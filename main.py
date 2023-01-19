@@ -121,7 +121,9 @@ class MyGame(arcade.Window):
 
             # If the player isn't already transparent make the player sprite slowly fade out
             if self.player_sprite.alpha != 0:
-                self.player_sprite.alpha -= 0.05
+                self.player_sprite.alpha -= 0.5
+                if self.player_sprite.alpha <= 0:
+                    self.player_sprite.kill()
                 self.player_sprite.alpha = max(0, self.player_sprite.alpha)
             elif not self.is_faded_out:
                 self.is_faded_out = True
@@ -217,10 +219,6 @@ class MyGame(arcade.Window):
                 if distance < s.GHOST_RUSH_DISTANCE:
                     monster.change_x = (self.player_sprite.center_x - monster.center_x) * s.GHOST_RUSH_SPEED
                     monster.change_y = (self.player_sprite.center_y - monster.center_y) * s.GHOST_RUSH_SPEED
-
-                # If the ghost is far away from the player have them wander around
-                else:
-                    monster.update()
 
     def load_shader(self):
         shader_file_path = Path("shaders/level_1_shader.glsl")
