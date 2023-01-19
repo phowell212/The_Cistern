@@ -122,11 +122,12 @@ class MyGame(arcade.Window):
             # If the player isn't already transparent make the player sprite slowly fade out
             if self.player_sprite.alpha != 0:
                 self.player_sprite.alpha -= 0.5
+                if self.player_sprite.alpha <= 0:
+                    self.player_sprite.kill()
                 self.player_sprite.alpha = max(0, self.player_sprite.alpha)
             elif not self.is_faded_out:
                 self.is_faded_out = True
                 self.has_spawned_player_death_ghost = False
-                self.player_sprite.remove_from_sprite_lists()
 
             # If the player is fully transparent, spawn a ghost monster on their death location
             elif not self.has_spawned_player_death_ghost:
@@ -279,8 +280,8 @@ class MyGame(arcade.Window):
 
     def spawn_ghosts(self):
         for i in range(int(self.ghosts_to_spawn)):
-            random_x = random.uniform(self.player_sprite.center_x - 100, self.player_sprite.center_x + 100)
-            random_y = random.uniform(self.player_sprite.center_y - 100, self.player_sprite.center_y + 100)
+            random_x = random.uniform(self.player_sprite.center_x - 50, self.player_sprite.center_x + 50)
+            random_y = random.uniform(self.player_sprite.center_y - 50, self.player_sprite.center_y + 50)
             if random_x < 0 or random_x > self.level_map.width or random_y < 0 or \
                     random_y > self.level_map.height:
                 random_x = random.uniform(0, self.width)
@@ -292,18 +293,10 @@ class MyGame(arcade.Window):
             # The loops in the checks in a way increase the size of the monster's hitbox that is being spawned
             collision = False
             for wall in self.wall_list:
-                for i in range(-6, 6):
-                    for j in range(-6, 6):
-                        if wall.collides_with_point((random_x + i, random_y + j)):
-                            collision = True
-                            break
-            for mon in self.monster_list:
-                for i in range(-4, 4):
-                    for j in range(-4, 4):
-                        if mon.collides_with_point((random_x + i, random_y + j)):
-                            collision = True
-                            break
-            if self.player_sprite.collides_with_point((random_x, random_y)):
+                if monster.collides_with_sprite(wall):
+                    collision = True
+                    break
+            if monster.collides_with_sprite(self.player_sprite):
                 collision = True
             if not collision:
                 self.monster_list.append(monster)
