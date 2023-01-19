@@ -122,12 +122,11 @@ class MyGame(arcade.Window):
             # If the player isn't already transparent make the player sprite slowly fade out
             if self.player_sprite.alpha != 0:
                 self.player_sprite.alpha -= 0.5
-                if self.player_sprite.alpha <= 0:
-                    self.player_sprite.kill()
                 self.player_sprite.alpha = max(0, self.player_sprite.alpha)
             elif not self.is_faded_out:
                 self.is_faded_out = True
                 self.has_spawned_player_death_ghost = False
+                self.player_sprite.remove_from_sprite_lists()
 
             # If the player is fully transparent, spawn a ghost monster on their death location
             elif not self.has_spawned_player_death_ghost:
