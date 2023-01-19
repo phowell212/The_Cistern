@@ -9,6 +9,7 @@ from arcade.experimental import Shadertoy
 from pathlib import Path
 from pyglet.math import Vec2
 
+
 class MyGame(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title, resizable=True)
@@ -45,7 +46,8 @@ class MyGame(arcade.Window):
         self.swoosh_sounds = []
         for i in range(0, 3):
             self.swoosh_sounds.append(arcade.load_sound(f"sounds/sword_swoosh-{i}.mp3"))
-        arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME, -1)
+        arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
+        self.music_timer = time.time() + (5 * 60) + 57
 
         # Load the level map
         map_location = "assets/level/level_map.json"
@@ -225,6 +227,11 @@ class MyGame(arcade.Window):
                 if distance < s.GHOST_RUSH_DISTANCE:
                     monster.change_x = (self.player_sprite.center_x - monster.center_x) * s.GHOST_RUSH_SPEED
                     monster.change_y = (self.player_sprite.center_y - monster.center_y) * s.GHOST_RUSH_SPEED
+
+        # Play the background music again if it's finished
+        if time.time() > self.music_timer:
+            arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
+            self.music_timer = time.time() + (5 * 60) + 57
 
     def load_shader(self):
         shader_file_path = Path("shaders/level_1_shader.glsl")
