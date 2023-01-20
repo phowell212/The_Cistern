@@ -30,6 +30,7 @@ class GhostMonster(arcade.Sprite):
         self.bob_frequency = 5
         self.bob_amplitude = 0.3
         self.current_path_position = 0
+        self.bounce_timer = 0
         self.scale = scale
 
         # Init directions and position
@@ -37,6 +38,7 @@ class GhostMonster(arcade.Sprite):
         self.directions = ["north", "south"]
         self.current_direction = self.directions[1]
         self.load_frames()
+        self.debug_path = None
 
     def load_frames(self):
         for i in range(0, 1):

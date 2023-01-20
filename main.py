@@ -94,7 +94,7 @@ class MyGame(arcade.Window):
         self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
         self.playing_field_bottom_boundary = 0
         self.grid_size = 128 * s.SPRITE_SCALING
-        self.barrier_list = arcade.AStarBarrierList(self.player_sprite, self.wall_list, self.grid_size * 2,
+        self.barrier_list = arcade.AStarBarrierList(self.player_sprite, self.wall_list, self.grid_size * 2.5,
                                                     self.playing_field_left_boundary,
                                                     self.playing_field_right_boundary,
                                                     self.playing_field_bottom_boundary,
@@ -106,10 +106,17 @@ class MyGame(arcade.Window):
         self.channel1.clear()
 
         # Draw the path if the debug mode is on
-        if arcade.key.T and arcade.key.D in self.key_press_buffer and len(self.path_list) > 0:
-            for path in self.path_list:
-                if path is not None:
-                    arcade.draw_line_strip(path, (30, 33, 40), 2)
+        if arcade.key.T and arcade.key.D in self.key_press_buffer:
+            for monster in self.monster_list:
+                try:
+                    monster.debug_path = arcade.astar_calculate_path(monster.position,
+                                                            self.player_sprite.position,
+                                                            self.barrier_list,
+                                                            diagonal_movement=False)
+                except ValueError:
+                    pass
+                if monster.debug_path is not None:
+                    arcade.draw_line_strip(monster.debug_path, (30, 33, 40), 2)
         self.path_list = []
         self.monster_list.draw()
 
@@ -224,6 +231,14 @@ class MyGame(arcade.Window):
         for heart in self.heart_list:
             heart.scale = (self.health / len(self.heart_list)) / 100
             break
+
+        # Make sure the ghosts cant push the player into a wall
+        for monster in self.monster_list:
+            if arcade.check_for_collision_with_list(monster, self.wall_list) and \
+                    arcade.check_for_collision_with_list(self.player_sprite, self.wall_list):
+                monster.change_x *= -1
+                monster.change_y *= -1
+                monster.bounce_timer = 0.05
 
         # Handle the player's slash
         player_collisions = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
