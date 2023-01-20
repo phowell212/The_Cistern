@@ -242,61 +242,7 @@ class MyGame(arcade.Window):
 
             # Handle the ghosts movement
             elif not monster.is_being_hurt or self.health > 0:
-                # Try to calculate the path
-                try:
-                    self.path = arcade.astar_calculate_path(monster.position,
-                                                            self.player_sprite.position,
-                                                            self.barrier_list,
-                                                            diagonal_movement=False)
-                    self.path_list.append(self.path)
-                except ValueError:
-                    pass
-
-                if self.path and not self.is_dead and \
-                        arcade.get_distance_between_sprites(monster, self.player_sprite) < s.MONSTER_VISION_RANGE:
-
-                    if not monster.is_hunting:
-                        monster.is_hunting = True
-
-                    # Figure out where we want to go
-                    try:
-                        next_x = self.path[monster.current_path_position][0]
-                        next_y = self.path[monster.current_path_position][1]
-                    except IndexError:
-                        # We are at the end of the path
-                        next_x = self.player_sprite.center_x
-                        next_y = self.player_sprite.center_y
-
-                    # What's the difference between the two
-                    diff_x = next_x - monster.center_x
-                    diff_y = next_y - monster.center_y
-
-                    # What's our angle
-                    angle = math.atan2(diff_y, diff_x)
-
-                    # Calculate the travel vector
-                    monster.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
-                    monster.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
-
-                    # Recalculate distance after the move
-                    distance = math.sqrt((monster.center_x - next_x) ** 2 + (monster.center_y - next_y) ** 2)
-
-                    # If we're close enough, move to the next point
-                    if distance < s.MONSTER_MOVEMENT_SPEED:
-                        monster.current_path_position += 1
-
-                        # If we're at the end of the path, start over
-                        if monster.current_path_position >= len(self.path):
-                            monster.current_path_position = 0
-
-                else:
-                    if monster.is_hunting:
-                        monster.is_hunting = False
-
-                    # If we can't find a path, just move randomly:
-                    if random.randint(0, 100) == 0:
-                        monster.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
-                        monster.change_y = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
+                self.move_monster(monster)
 
         # Play the background music again if it's finished
         if time.time() > self.music_timer:
@@ -347,19 +293,62 @@ class MyGame(arcade.Window):
             if random.random() < 0.5:
                 wall.angle = 90
 
-    def spawn_ghosts_on_empty_list(self):
+    def move_monster(self, monster):
+        # Try to calculate the path
+        try:
+            self.path = arcade.astar_calculate_path(monster.position,
+                                                    self.player_sprite.position,
+                                                    self.barrier_list,
+                                                    diagonal_movement=False)
+            self.path_list.append(self.path)
+        except ValueError:
+            pass
 
-        # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
-        if not self.monster_list:
-            if self.no_ghost_timer != 0:
-                self.no_ghost_timer = time.time()
-            elif time.time() - self.no_ghost_timer > 5:
-                self.spawn_ghosts()
+        if self.path and not self.is_dead and \
+                arcade.get_distance_between_sprites(monster, self.player_sprite) < s.MONSTER_VISION_RANGE:
 
-                # Reset the timer and increase the number of ghosts to spawn
-                self.ghosts_to_spawn += 0.5
-            self.ghosts_to_spawn *= self.ghosts_to_spawn_multiplier
-            self.no_ghost_timer = 0.0
+            if not monster.is_hunting:
+                monster.is_hunting = True
+
+            # Figure out where we want to go
+            try:
+                next_x = self.path[monster.current_path_position][0]
+                next_y = self.path[monster.current_path_position][1]
+            except IndexError:
+                # We are at the end of the path
+                next_x = self.player_sprite.center_x
+                next_y = self.player_sprite.center_y
+
+            # What's the difference between the two
+            diff_x = next_x - monster.center_x
+            diff_y = next_y - monster.center_y
+
+            # What's our angle
+            angle = math.atan2(diff_y, diff_x)
+
+            # Calculate the travel vector
+            monster.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
+            monster.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
+
+            # Recalculate distance after the move
+            distance = math.sqrt((monster.center_x - next_x) ** 2 + (monster.center_y - next_y) ** 2)
+
+            # If we're close enough, move to the next point
+            if distance < s.MONSTER_MOVEMENT_SPEED:
+                monster.current_path_position += 1
+
+                # If we're at the end of the path, start over
+                if monster.current_path_position >= len(self.path):
+                    monster.current_path_position = 0
+
+        else:
+            if monster.is_hunting:
+                monster.is_hunting = False
+
+            # If we can't find a path, just move randomly:
+            if random.randint(0, 100) == 0:
+                monster.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
+                monster.change_y = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
 
     def spawn_ghosts(self):
         for i in range(int(self.ghosts_to_spawn)):
@@ -387,6 +376,25 @@ class MyGame(arcade.Window):
                 # If there is a collision, Don't spawn the monster and try again
                 self.ghosts_to_spawn += 1
 
+    def spawn_ghosts_on_empty_list(self):
+
+        # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
+        if not self.monster_list:
+            if self.no_ghost_timer != 0:
+                self.no_ghost_timer = time.time()
+            elif time.time() - self.no_ghost_timer > 5:
+                self.spawn_ghosts()
+
+                # Reset the timer and increase the number of ghosts to spawn
+                self.ghosts_to_spawn += 0.5
+            self.ghosts_to_spawn *= self.ghosts_to_spawn_multiplier
+            self.no_ghost_timer = 0.0
+
+    def scroll_to_player(self, speed=s.CAMERA_SPEED):
+        position = Vec2(self.player_sprite.center_x - self.width / 2,
+                        self.player_sprite.center_y - self.height / 2)
+        self.camera.move_to(position, speed)
+
     def on_key_press(self, key, modifiers):
         if not self.is_dead:
             self.key_press_buffer.add(key)
@@ -407,8 +415,8 @@ class MyGame(arcade.Window):
         # Handle running, hold the shift key
         if arcade.key.LEFT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer \
                 and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.RUN_SPEED_MODIFIER
-            self.player_sprite.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.RUN_SPEED_MODIFIER
+            self.player_sprite.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
+            self.player_sprite.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
             if self.player_sprite.is_slashing:
                 self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
                 self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
@@ -416,8 +424,8 @@ class MyGame(arcade.Window):
             self.player_sprite.is_running = True
         elif arcade.key.LEFT in self.key_press_buffer and arcade.key.DOWN in self.key_press_buffer \
                 and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.RUN_SPEED_MODIFIER
-            self.player_sprite.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.RUN_SPEED_MODIFIER
+            self.player_sprite.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
+            self.player_sprite.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
             if self.player_sprite.is_slashing:
                 self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
                 self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
@@ -425,8 +433,8 @@ class MyGame(arcade.Window):
             self.player_sprite.is_running = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer \
                 and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.RUN_SPEED_MODIFIER
-            self.player_sprite.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.RUN_SPEED_MODIFIER
+            self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
+            self.player_sprite.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
             if self.player_sprite.is_slashing:
                 self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
                 self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
@@ -434,33 +442,33 @@ class MyGame(arcade.Window):
             self.player_sprite.is_running = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.DOWN in self.key_press_buffer \
                 and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.RUN_SPEED_MODIFIER
-            self.player_sprite.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.RUN_SPEED_MODIFIER
+            self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
+            self.player_sprite.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
             if self.player_sprite.is_slashing:
                 self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
                 self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
             self.player_sprite.current_direction = "southeast"
             self.player_sprite.is_running = True
         elif arcade.key.UP in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_y = s.PLAYER_MOVEMENT_SPEED * s.RUN_SPEED_MODIFIER
+            self.player_sprite.change_y = s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
             if self.player_sprite.is_slashing:
                 self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
             self.player_sprite.current_direction = "north"
             self.player_sprite.is_running = True
         elif arcade.key.DOWN in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_y = -s.PLAYER_MOVEMENT_SPEED * s.RUN_SPEED_MODIFIER
+            self.player_sprite.change_y = -s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
             self.player_sprite.current_direction = "south"
             if self.player_sprite.is_slashing:
                 self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
             self.player_sprite.is_running = True
         elif arcade.key.LEFT in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_x = -s.PLAYER_MOVEMENT_SPEED * s.RUN_SPEED_MODIFIER
+            self.player_sprite.change_x = -s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
             self.player_sprite.current_direction = "west"
             if self.player_sprite.is_slashing:
                 self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
             self.player_sprite.is_running = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED * s.RUN_SPEED_MODIFIER
+            self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
             if self.player_sprite.is_slashing:
                 self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
             self.player_sprite.current_direction = "east"
@@ -539,11 +547,6 @@ class MyGame(arcade.Window):
                 self.player_sprite.just_stopped_running = True
         elif arcade.key.C not in self.key_press_buffer:
             self.player_sprite.c_key_timer = 0
-
-    def scroll_to_player(self, speed=s.CAMERA_SPEED):
-        position = Vec2(self.player_sprite.center_x - self.width / 2,
-                        self.player_sprite.center_y - self.height / 2)
-        self.camera.move_to(position, speed)
 
 
 if __name__ == "__main__":

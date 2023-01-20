@@ -173,6 +173,164 @@ class Seraphima(arcade.Sprite):
         self.load_frames()
         self.c_key_timer = 0.0
 
+    def load_frames(self):
+
+        # Load the north facing frames
+        for i in range(0, 5):
+            self.north_idle_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
+        for i in range(6, 11):
+            self.north_walking_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
+        for i in range(12, 17):
+            self.north_running_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
+        for i in range(18, 21):
+            self.north_run_stop_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
+        for i in range(22, 43):
+            self.north_slash_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
+        for i in range(44, 53):
+            self.north_roll_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
+        for i in range(54, 57):
+            self.north_dash_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
+        for i in range(58, 67):
+            self.north_dash_stab_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
+        for i in range(68, 81):
+            self.north_dash_slash_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
+
+        # Load the west facing frames
+        for i in range(0, 5):
+            self.west_idle_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
+        for i in range(6, 11):
+            self.west_walking_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
+        for i in range(12, 17):
+            self.west_running_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
+        for i in range(18, 21):
+            self.west_run_stop_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
+        for i in range(22, 31):
+            self.west_roll_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
+        for i in range(32, 53):
+            self.west_slash_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
+        for i in range(54, 67):
+            self.west_x_slash_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
+        for i in range(68, 71):
+            self.west_dash_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
+        for i in range(72, 81):
+            self.west_dash_stab_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
+
+        # Load the south facing frames
+        for i in range(0, 5):
+            self.south_idle_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
+        for i in range(6, 11):
+            self.south_walking_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
+        for i in range(12, 17):
+            self.south_running_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
+        for i in range(18, 21):
+            self.south_run_stop_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
+        for i in range(22, 43):
+            self.south_slash_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
+        for i in range(44, 53):
+            self.south_roll_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
+        for i in range(54, 57):
+            self.south_dash_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
+        for i in range(58, 67):
+            self.south_dash_stab_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
+        for i in range(68, 81):
+            self.south_dash_slash_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
+
+        # Load the east facing frames
+        for i in range(0, 5):
+            self.east_idle_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
+        for i in range(6, 11):
+            self.east_walking_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
+        for i in range(12, 17):
+            self.east_running_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
+        for i in range(18, 21):
+            self.east_run_stop_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
+        for i in range(22, 31):
+            self.east_roll_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
+        for i in range(32, 53):
+            self.east_slash_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
+        for i in range(54, 67):
+            self.east_x_slash_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
+        for i in range(68, 71):
+            self.east_dash_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
+        for i in range(72, 81):
+            self.east_dash_stab_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
+
+        # Load the northeast facing frames
+        for i in range(0, 5):
+            self.northeast_idle_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
+        for i in range(6, 11):
+            self.northeast_walking_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
+        for i in range(12, 17):
+            self.northeast_running_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
+        for i in range(18, 21):
+            self.northeast_run_stop_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
+        for i in range(22, 31):
+            self.northeast_roll_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
+        for i in range(32, 41):
+            self.northeast_dash_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
+        for i in range(42, 55):
+            self.northeast_dash_slash_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
+        for i in range(56, 77):
+            self.northeast_slash_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
+
+        # Load the northwest facing frames
+        for i in range(0, 5):
+            self.northwest_idle_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
+        for i in range(6, 11):
+            self.northwest_walking_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
+        for i in range(12, 17):
+            self.northwest_running_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
+        for i in range(18, 21):
+            self.northwest_run_stop_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
+        for i in range(22, 31):
+            self.northwest_roll_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
+        for i in range(32, 41):
+            self.northwest_dash_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
+        for i in range(42, 55):
+            self.northwest_dash_slash_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
+        for i in range(56, 77):
+            self.northwest_slash_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
+
+        # Load the southeast facing frames
+        for i in range(0, 5):
+            self.southeast_idle_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
+        for i in range(6, 11):
+            self.southeast_walking_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
+        for i in range(12, 17):
+            self.southeast_running_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
+        for i in range(18, 21):
+            self.southeast_run_stop_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
+        for i in range(22, 25):
+            self.southeast_dash_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
+        for i in range(26, 35):
+            self.southeast_roll_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
+        for i in range(36, 45):
+            self.southeast_dash_stab_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
+        for i in range(46, 59):
+            self.southeast_dash_slash_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
+        for i in range(60, 82):
+            self.southeast_slash_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
+
+        # Load the southwest facing frames
+        for i in range(0, 5):
+            self.southwest_idle_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
+        for i in range(6, 11):
+            self.southwest_walking_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
+        for i in range(12, 17):
+            self.southwest_running_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
+        for i in range(18, 21):
+            self.southwest_run_stop_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
+        for i in range(22, 25):
+            self.southwest_dash_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
+        for i in range(26, 35):
+            self.southwest_roll_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
+        for i in range(36, 45):
+            self.southwest_dash_stab_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
+        for i in range(46, 59):
+            self.southwest_dash_slash_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
+        for i in range(60, 82):
+            self.southwest_slash_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
+
     def update_animation(self, delta_time: float = 1 / 10):
         # Update the animation frame
         self.elapsed_time += delta_time
@@ -367,161 +525,3 @@ class Seraphima(arcade.Sprite):
                 self.texture = self.southeast_idle_frames[self.current_frame]
             else:
                 self.current_frame = 0
-
-    def load_frames(self):
-
-        # Load the north facing frames
-        for i in range(0, 5):
-            self.north_idle_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
-        for i in range(6, 11):
-            self.north_walking_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
-        for i in range(12, 17):
-            self.north_running_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
-        for i in range(18, 21):
-            self.north_run_stop_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
-        for i in range(22, 43):
-            self.north_slash_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
-        for i in range(44, 53):
-            self.north_roll_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
-        for i in range(54, 57):
-            self.north_dash_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
-        for i in range(58, 67):
-            self.north_dash_stab_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
-        for i in range(68, 81):
-            self.north_dash_slash_frames.append(arcade.load_texture(f"assets/player/north-{i}.png"))
-
-        # Load the west facing frames
-        for i in range(0, 5):
-            self.west_idle_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
-        for i in range(6, 11):
-            self.west_walking_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
-        for i in range(12, 17):
-            self.west_running_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
-        for i in range(18, 21):
-            self.west_run_stop_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
-        for i in range(22, 31):
-            self.west_roll_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
-        for i in range(32, 53):
-            self.west_slash_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
-        for i in range(54, 67):
-            self.west_x_slash_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
-        for i in range(68, 71):
-            self.west_dash_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
-        for i in range(72, 81):
-            self.west_dash_stab_frames.append(arcade.load_texture(f"assets/player/west-{i}.png"))
-
-        # Load the south facing frames
-        for i in range(0, 5):
-            self.south_idle_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
-        for i in range(6, 11):
-            self.south_walking_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
-        for i in range(12, 17):
-            self.south_running_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
-        for i in range(18, 21):
-            self.south_run_stop_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
-        for i in range(22, 43):
-            self.south_slash_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
-        for i in range(44, 53):
-            self.south_roll_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
-        for i in range(54, 57):
-            self.south_dash_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
-        for i in range(58, 67):
-            self.south_dash_stab_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
-        for i in range(68, 81):
-            self.south_dash_slash_frames.append(arcade.load_texture(f"assets/player/south-{i}.png"))
-
-        # Load the east facing frames
-        for i in range(0, 5):
-            self.east_idle_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
-        for i in range(6, 11):
-            self.east_walking_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
-        for i in range(12, 17):
-            self.east_running_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
-        for i in range(18, 21):
-            self.east_run_stop_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
-        for i in range(22, 31):
-            self.east_roll_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
-        for i in range(32, 53):
-            self.east_slash_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
-        for i in range(54, 67):
-            self.east_x_slash_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
-        for i in range(68, 71):
-            self.east_dash_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
-        for i in range(72, 81):
-            self.east_dash_stab_frames.append(arcade.load_texture(f"assets/player/east-{i}.png"))
-
-        # Load the northeast facing frames
-        for i in range(0, 5):
-            self.northeast_idle_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
-        for i in range(6, 11):
-            self.northeast_walking_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
-        for i in range(12, 17):
-            self.northeast_running_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
-        for i in range(18, 21):
-            self.northeast_run_stop_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
-        for i in range(22, 31):
-            self.northeast_roll_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
-        for i in range(32, 41):
-            self.northeast_dash_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
-        for i in range(42, 55):
-            self.northeast_dash_slash_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
-        for i in range(56, 77):
-            self.northeast_slash_frames.append(arcade.load_texture(f"assets/player/northeast-{i}.png"))
-
-        # Load the northwest facing frames
-        for i in range(0, 5):
-            self.northwest_idle_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
-        for i in range(6, 11):
-            self.northwest_walking_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
-        for i in range(12, 17):
-            self.northwest_running_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
-        for i in range(18, 21):
-            self.northwest_run_stop_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
-        for i in range(22, 31):
-            self.northwest_roll_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
-        for i in range(32, 41):
-            self.northwest_dash_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
-        for i in range(42, 55):
-            self.northwest_dash_slash_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
-        for i in range(56, 77):
-            self.northwest_slash_frames.append(arcade.load_texture(f"assets/player/northwest-{i}.png"))
-
-        # Load the southeast facing frames
-        for i in range(0, 5):
-            self.southeast_idle_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
-        for i in range(6, 11):
-            self.southeast_walking_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
-        for i in range(12, 17):
-            self.southeast_running_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
-        for i in range(18, 21):
-            self.southeast_run_stop_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
-        for i in range(22, 25):
-            self.southeast_dash_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
-        for i in range(26, 35):
-            self.southeast_roll_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
-        for i in range(36, 45):
-            self.southeast_dash_stab_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
-        for i in range(46, 59):
-            self.southeast_dash_slash_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
-        for i in range(60, 82):
-            self.southeast_slash_frames.append(arcade.load_texture(f"assets/player/southeast-{i}.png"))
-
-        # Load the southwest facing frames
-        for i in range(0, 5):
-            self.southwest_idle_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
-        for i in range(6, 11):
-            self.southwest_walking_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
-        for i in range(12, 17):
-            self.southwest_running_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
-        for i in range(18, 21):
-            self.southwest_run_stop_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
-        for i in range(22, 25):
-            self.southwest_dash_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
-        for i in range(26, 35):
-            self.southwest_roll_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
-        for i in range(36, 45):
-            self.southwest_dash_stab_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
-        for i in range(46, 59):
-            self.southwest_dash_slash_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
-        for i in range(60, 82):
-            self.southwest_slash_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
