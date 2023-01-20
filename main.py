@@ -88,13 +88,13 @@ class MyGame(arcade.Window):
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         arcade.set_background_color((108, 121, 147))
 
-        # Pathfinder vars
+        # Make the pathfinding vars
         self.playing_field_left_boundary = 0
         self.playing_field_right_boundary = self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING
         self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
         self.playing_field_bottom_boundary = 0
         self.grid_size = 128 * s.SPRITE_SCALING
-        self.barrier_list = arcade.AStarBarrierList(self.player_sprite, self.wall_list, self.grid_size,
+        self.barrier_list = arcade.AStarBarrierList(self.player_sprite, self.wall_list, self.grid_size * 2,
                                                     self.playing_field_left_boundary,
                                                     self.playing_field_right_boundary,
                                                     self.playing_field_bottom_boundary,
@@ -102,7 +102,7 @@ class MyGame(arcade.Window):
 
     def on_draw(self):
         self.camera.use()
-        # Draw the monsters and their paths beneath the shadows if the debug key is pressed
+        # Draw the monsters, and their paths beneath the shadows if the debug key is pressed
         self.channel1.use()
         self.channel1.clear()
         # Draw the path if the debug mode is on
@@ -180,17 +180,6 @@ class MyGame(arcade.Window):
             if arcade.check_for_collision_with_list(projectile, self.wall_list):
                 projectile.is_hitting_wall = True
 
-        # Calculate the path
-        for monster in self.monster_list:
-            try:
-                self.path = arcade.astar_calculate_path(monster.position,
-                                                        self.player_sprite.position,
-                                                        self.barrier_list,
-                                                        diagonal_movement=False)
-                self.path_list.append(self.path)
-            except ValueError:
-                continue
-
         # Make a projectile if the player is slashing and there currently isn't another one
         if self.player_sprite.is_slashing and self.player_sprite.c_key_timer == 0 and not self.swordslash_list:
             slash_projectile = ss.SwordSlash(self.player_sprite)
@@ -250,13 +239,20 @@ class MyGame(arcade.Window):
             if arcade.check_for_collision_with_list(monster, self.wall_list) and not monster.is_hunting:
                 monster.change_x *= -1
                 monster.change_y *= -1
-            elif arcade.check_for_collision_with_list(monster, self.wall_list) and monster.is_hunting:
-                monster.change_x *= 0
-                monster.change_y *= 0
 
             # Handle the ghosts movement
             elif not monster.is_being_hurt or self.health > 0:
-                if self.path and \
+                # Try to calculate the path
+                try:
+                    self.path = arcade.astar_calculate_path(monster.position,
+                                                            self.player_sprite.position,
+                                                            self.barrier_list,
+                                                            diagonal_movement=False)
+                    self.path_list.append(self.path)
+                except ValueError:
+                    pass
+
+                if self.path and not self.is_dead and \
                         arcade.get_distance_between_sprites(monster, self.player_sprite) < s.MONSTER_VISION_RANGE:
 
                     if not monster.is_hunting:
