@@ -102,14 +102,14 @@ class MyGame(arcade.Window):
 
     def on_draw(self):
         self.camera.use()
-        # Draw the monsters, and their paths beneath the shadows if the debug key is pressed
         self.channel1.use()
         self.channel1.clear()
+
         # Draw the path if the debug mode is on
         if arcade.key.T and arcade.key.D in self.key_press_buffer and len(self.path_list) > 0:
             for path in self.path_list:
                 if path is not None:
-                    arcade.draw_line_strip(path, arcade.color.BLUE, 2)
+                    arcade.draw_line_strip(path, (30, 33, 40), 2)
             self.path_list = []
         self.monster_list.draw()
 
