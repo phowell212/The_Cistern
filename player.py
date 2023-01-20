@@ -192,6 +192,11 @@ class Seraphima(arcade.Sprite):
             self.just_stopped_running = False
             self.is_running = False
 
+        # Make sure the player is only moving if they have some velocity
+        if self.change_x == 0 and self.change_y == 0:
+            self.is_walking = False
+            self.is_running = False
+
         if self.is_slashing and self.is_running:
             if self.current_direction == self.directions[0] and \
                     self.current_frame < self.north_dash_slash_frames.__len__():

@@ -106,7 +106,7 @@ class MyGame(arcade.Window):
         self.channel1.use()
         self.channel1.clear()
         # Draw the path if the debug mode is on
-        if arcade.key.T in self.key_press_buffer and len(self.path_list) > 0:
+        if arcade.key.T and arcade.key.D in self.key_press_buffer and len(self.path_list) > 0:
             for path in self.path_list:
                 if path is not None:
                     arcade.draw_line_strip(path, arcade.color.BLUE, 2)
@@ -165,7 +165,7 @@ class MyGame(arcade.Window):
                 self.monster_list.append(self.ghost_sprite)
                 self.has_spawned_player_death_ghost = True
 
-    def on_update(self, delta_time: float = 1 / 240):
+    def on_update(self, delta_time: float = 1 / 120):
 
         # Update the physics engine
         self.player_and_wall_collider.update()
