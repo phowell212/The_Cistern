@@ -110,7 +110,7 @@ class MyGame(arcade.Window):
             for path in self.path_list:
                 if path is not None:
                     arcade.draw_line_strip(path, (30, 33, 40), 2)
-            self.path_list = []
+        self.path_list = []
         self.monster_list.draw()
 
         # Draw the walls
@@ -143,15 +143,34 @@ class MyGame(arcade.Window):
         arcade.draw_text(score_text, start_x=40, start_y=32, color=(255, 255, 242), font_size=19,
                          font_name="Garamond")
 
+        # Draw the debug info if the debug mode is on
+        if arcade.key.T and arcade.key.D in self.key_press_buffer:
+            num_ghosts_hunting = 0
+            monster_velocities = []
+            for monster in self.monster_list:
+                if monster.is_hunting:
+                    num_ghosts_hunting += 1
+                monster_velocities.append((monster.change_x, monster.change_y))
+            text = f"Player position: {self.player_sprite.position}.     " \
+                   f"Ghosts hunting you: {float(num_ghosts_hunting)}."
+            for i in range((len(monster_velocities))):
+                ghost_velocity_text = f"\n    Ghost {i} velocity: {monster_velocities[i]}."
+                arcade.draw_text(ghost_velocity_text, start_x=40, start_y=838-(i * 26), color=(255, 255, 242),
+                                 font_size=19, font_name="Garamond")
+            arcade.draw_text(text, start_x=40, start_y=864, color=(255, 255, 242), font_size=19,
+                             font_name="Garamond")
+
         # Draw game over if dead
         if self.is_dead:
             arcade.draw_text("GAME OVER", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2,
                              color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
                              anchor_y="baseline", bold=True)
+            for monster in self.monster_list:
+                monster.can_hunt = False
 
             # If the player isn't already transparent make the player sprite slowly fade out
             if self.player_sprite.alpha != 0:
-                self.player_sprite.alpha -= 0.5
+                self.player_sprite.alpha -= 0.15
                 self.player_sprite.alpha = max(0, self.player_sprite.alpha)
             elif not self.is_faded_out:
                 self.is_faded_out = True
@@ -162,6 +181,7 @@ class MyGame(arcade.Window):
                 self.ghost_sprite = ghost.GhostMonster(self.player_sprite.center_x, self.player_sprite.center_y,
                                                        s.MONSTER_SCALING)
                 self.ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+                self.player_sprite.remove_from_sprite_lists()
                 self.monster_list.append(self.ghost_sprite)
                 self.has_spawned_player_death_ghost = True
 
@@ -241,13 +261,18 @@ class MyGame(arcade.Window):
                 monster.change_y *= -1
 
             # Handle the ghosts movement
-            elif not monster.is_being_hurt or self.health > 0:
+            elif not monster.is_being_hurt and monster.can_hunt:
                 self.move_monster(monster)
 
         # Play the background music again if it's finished
         if time.time() > self.music_timer:
             arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
             self.music_timer = time.time() + (5 * 60) + 57
+
+        # Make sure the player cant get pushed into walls if they are dead
+        if self.is_dead:
+            self.player_sprite.change_x = 0
+            self.player_sprite.change_y = 0
 
     def load_shader(self):
         shader_file_path = Path("shaders/level_1_shader.glsl")
@@ -283,6 +308,9 @@ class MyGame(arcade.Window):
                 if wall.collides_with_sprite(wall_check):
                     overlap = True
                     break
+                elif wall.collides_with_list(self.player_list):
+                    overlap = True
+                    break
             if not overlap:
                 self.wall_list.append(wall)
             else:
@@ -294,6 +322,7 @@ class MyGame(arcade.Window):
                 wall.angle = 90
 
     def move_monster(self, monster):
+
         # Try to calculate the path
         try:
             self.path = arcade.astar_calculate_path(monster.position,
@@ -330,6 +359,12 @@ class MyGame(arcade.Window):
             monster.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
             monster.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
 
+            # Check if the speed is less than 0.7 units
+            speed = math.sqrt(monster.change_x ** 2 + monster.change_y ** 2)
+            if speed < 0.7:
+                monster.change_x = monster.change_x * 0.7 / speed
+                monster.change_y = monster.change_y * 0.7 / speed
+
             # Recalculate distance after the move
             distance = math.sqrt((monster.center_x - next_x) ** 2 + (monster.center_y - next_y) ** 2)
 
@@ -345,7 +380,7 @@ class MyGame(arcade.Window):
             if monster.is_hunting:
                 monster.is_hunting = False
 
-            # If we can't find a path, just move randomly:
+            # If we can't find a path, or are far enough away from the player just move randomly:
             if random.randint(0, 100) == 0:
                 monster.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
                 monster.change_y = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)

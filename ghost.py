@@ -17,6 +17,7 @@ class GhostMonster(arcade.Sprite):
         self.is_being_hurt = False
         self.is_spawned = False
         self.is_hunting = False
+        self.can_hunt = True
 
         # Init counters and values
         self.current_frame = 0
