@@ -6,26 +6,35 @@ import math
 class GhostMonster(arcade.Sprite):
     def __init__(self, center_x, center_y, scale):
         super().__init__()
+
+        # Init animation frame arrays
         self.north_idle_frames = []
         self.south_idle_frames = []
         self.hurt_frames = []
         self.death_frames = []
         self.spawn_frames = []
+
+        # Init flags
         self.is_being_hurt = False
+        self.is_spawned = False
+
+        # Init counters and values
         self.current_frame = 0
         self.hurt_frame = 0
         self.death_frame = 0
         self.spawn_frame = 0
-        self.is_spawned = False
         self.update_interval = 1 / 10
         self.health = 7
-        self.scale = scale
-        self.center_x, self.center_y = center_x, center_y
-        self.directions = ["north", "south"]
-        self.current_direction = self.directions[1]
         self.time = 0
         self.bob_frequency = 5
         self.bob_amplitude = 0.3
+        self.current_path_position = 0
+        self.scale = scale
+
+        # Init directions and position
+        self.center_x, self.center_y = center_x, center_y
+        self.directions = ["north", "south"]
+        self.current_direction = self.directions[1]
         self.load_frames()
 
     def update_animation(self, delta_time: float = 1 / 30):
@@ -75,11 +84,6 @@ class GhostMonster(arcade.Sprite):
             # Make the ghost bob
             self.time += 1 / 60
             self.center_y += math.sin(self.time * self.bob_frequency) * self.bob_amplitude
-
-            # Make the ghost move
-            if random.randint(0, 100) == 0:
-                self.change_x = random.randint(-1, 1)
-                self.change_y = random.randint(-1, 1)
 
         else:
             self.update_animation(1 / 2)

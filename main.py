@@ -1,3 +1,4 @@
+import math
 import random
 import arcade
 import time
@@ -49,6 +50,10 @@ class MyGame(arcade.Window):
         arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
         self.music_timer = time.time() + (5 * 60) + 57
 
+        # Init the pathfinding vars
+        self.path = None
+        self.barrier_list = None
+
         # Load the level map
         map_location = "assets/level/level_map.json"
         layer_options = {"Tile Layer 1": {"use_spatial_hash": True, "spatial_hash_cell_size": 128}}
@@ -64,7 +69,7 @@ class MyGame(arcade.Window):
         self.player_sprite = player.Seraphima(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
         self.player_list.append(self.player_sprite)
         self.generate_walls(self.level_map.width, self.level_map.height)
-        self.ghost_sprite = ghost.GhostMonster(self.map_center_x, self.map_center_y + 60, s.MONSTER_SCALING)
+        self.ghost_sprite = ghost.GhostMonster(self.map_center_x, self.map_center_y + 200, s.MONSTER_SCALING)
         self.ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
         self.monster_list.append(self.ghost_sprite)
         self.load_heart_frames()
@@ -81,6 +86,12 @@ class MyGame(arcade.Window):
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         arcade.set_background_color((108, 121, 147))
+
+        # Set up the pathfinder (will run once per monster in the update loop)
+        self.playing_field_left_boundary = 10
+        self.playing_field_bottom_boundary = 10
+        self.playing_field_right_boundary = self.level_map.width - 10
+        self.playing_field_top_boundary = self.level_map.height - 10
 
     def on_draw(self):
         self.camera.use()
@@ -113,6 +124,8 @@ class MyGame(arcade.Window):
         # Draw the GUI
         self.camera_gui.use()
         self.heart_list.draw()
+        if self.path:
+            arcade.draw_line_strip(self.path, arcade.color.BLUE, 2)
 
         # Draw our score on the screen, scrolling it with the viewport
         # the score is increased 11 times per monster killed, so we divide it by 11 to get the actual score
@@ -129,8 +142,6 @@ class MyGame(arcade.Window):
             # If the player isn't already transparent make the player sprite slowly fade out
             if self.player_sprite.alpha != 0:
                 self.player_sprite.alpha -= 0.5
-                if self.player_sprite.alpha <= 0:
-                    self.player_sprite.kill()
                 self.player_sprite.alpha = max(0, self.player_sprite.alpha)
             elif not self.is_faded_out:
                 self.is_faded_out = True
@@ -222,11 +233,19 @@ class MyGame(arcade.Window):
             # Handle the ghosts movement
             elif not monster.is_being_hurt or self.health > 0:
 
-                # If the ghost is close to the player, Rush them down
-                distance = arcade.get_distance_between_sprites(monster, self.player_sprite)
-                if distance < s.GHOST_RUSH_DISTANCE:
-                    monster.change_x = (self.player_sprite.center_x - monster.center_x) * s.GHOST_RUSH_SPEED
-                    monster.change_y = (self.player_sprite.center_y - monster.center_y) * s.GHOST_RUSH_SPEED
+                # Make the ghost move towards the player if they can see them
+                if not arcade.check_for_collision(monster, self.player_sprite) and not self.is_dead and \
+                        arcade.get_distance_between_sprites(monster, self.player_sprite) < s.MONSTER_VISION_RANGE:
+                    angle = math.atan2(self.player_sprite.center_y - monster.center_y,
+                                       self.player_sprite.center_x - monster.center_x)
+
+                    monster.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
+                    monster.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
+
+                # Otherwise make the ghosts move randomly
+                elif random.randint(0, 100) == 0:
+                    monster.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
+                    monster.change_y = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
 
         # Play the background music again if it's finished
         if time.time() > self.music_timer:
@@ -303,7 +322,6 @@ class MyGame(arcade.Window):
             monster.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
 
             # Check if the new monster collides with any existing monsters, wall sprites or player
-            # The loops in the checks in a way increase the size of the monster's hitbox that is being spawned
             collision = False
             for wall in self.wall_list:
                 if monster.collides_with_sprite(wall):
