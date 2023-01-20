@@ -53,6 +53,7 @@ class MyGame(arcade.Window):
         # Init the pathfinding vars
         self.path = None
         self.barrier_list = None
+        self.path_list = []
 
         # Load the level map
         map_location = "assets/level/level_map.json"
@@ -87,18 +88,29 @@ class MyGame(arcade.Window):
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         arcade.set_background_color((108, 121, 147))
 
-        # Set up the pathfinder (will run once per monster in the update loop)
-        self.playing_field_left_boundary = 10
-        self.playing_field_bottom_boundary = 10
-        self.playing_field_right_boundary = self.level_map.width - 10
-        self.playing_field_top_boundary = self.level_map.height - 10
+        # Pathfinder vars
+        self.playing_field_left_boundary = 0
+        self.playing_field_right_boundary = self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING
+        self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
+        self.playing_field_bottom_boundary = 0
+        self.grid_size = 128 * s.SPRITE_SCALING
+        self.barrier_list = arcade.AStarBarrierList(self.player_sprite, self.wall_list, self.grid_size,
+                                                    self.playing_field_left_boundary,
+                                                    self.playing_field_right_boundary,
+                                                    self.playing_field_bottom_boundary,
+                                                    self.playing_field_top_boundary)
 
     def on_draw(self):
         self.camera.use()
-
-        # Draw the monsters beneath the wall shadows
+        # Draw the monsters and their paths beneath the shadows if the debug key is pressed
         self.channel1.use()
         self.channel1.clear()
+        # Draw the path if the debug mode is on
+        if arcade.key.T in self.key_press_buffer and len(self.path_list) > 0:
+            for path in self.path_list:
+                if path is not None:
+                    arcade.draw_line_strip(path, arcade.color.BLUE, 2)
+            self.path_list = []
         self.monster_list.draw()
 
         # Draw the walls
@@ -124,8 +136,6 @@ class MyGame(arcade.Window):
         # Draw the GUI
         self.camera_gui.use()
         self.heart_list.draw()
-        if self.path:
-            arcade.draw_line_strip(self.path, arcade.color.BLUE, 2)
 
         # Draw our score on the screen, scrolling it with the viewport
         # the score is increased 11 times per monster killed, so we divide it by 11 to get the actual score
@@ -169,6 +179,17 @@ class MyGame(arcade.Window):
             projectile.update()
             if arcade.check_for_collision_with_list(projectile, self.wall_list):
                 projectile.is_hitting_wall = True
+
+        # Calculate the path
+        for monster in self.monster_list:
+            try:
+                self.path = arcade.astar_calculate_path(monster.position,
+                                                        self.player_sprite.position,
+                                                        self.barrier_list,
+                                                        diagonal_movement=False)
+                self.path_list.append(self.path)
+            except ValueError:
+                continue
 
         # Make a projectile if the player is slashing and there currently isn't another one
         if self.player_sprite.is_slashing and self.player_sprite.c_key_timer == 0 and not self.swordslash_list:
@@ -224,28 +245,62 @@ class MyGame(arcade.Window):
         # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
         self.spawn_ghosts_on_empty_list()
 
-        # Make sure the new monsters cant walk through walls, this causes monsters to bounce off the walls
+        # Make sure the new monsters cant walk through walls and bounce off of them if they aren't hunting
         for monster in self.monster_list:
-            if arcade.check_for_collision_with_list(monster, self.wall_list):
+            if arcade.check_for_collision_with_list(monster, self.wall_list) and not monster.is_hunting:
                 monster.change_x *= -1
                 monster.change_y *= -1
+            elif arcade.check_for_collision_with_list(monster, self.wall_list) and monster.is_hunting:
+                monster.change_x *= 0
+                monster.change_y *= 0
 
             # Handle the ghosts movement
             elif not monster.is_being_hurt or self.health > 0:
-
-                # Make the ghost move towards the player if they can see them
-                if not arcade.check_for_collision(monster, self.player_sprite) and not self.is_dead and \
+                if self.path and \
                         arcade.get_distance_between_sprites(monster, self.player_sprite) < s.MONSTER_VISION_RANGE:
-                    angle = math.atan2(self.player_sprite.center_y - monster.center_y,
-                                       self.player_sprite.center_x - monster.center_x)
 
+                    if not monster.is_hunting:
+                        monster.is_hunting = True
+
+                    # Figure out where we want to go
+                    try:
+                        next_x = self.path[monster.current_path_position][0]
+                        next_y = self.path[monster.current_path_position][1]
+                    except IndexError:
+                        # We are at the end of the path
+                        next_x = self.player_sprite.center_x
+                        next_y = self.player_sprite.center_y
+
+                    # What's the difference between the two
+                    diff_x = next_x - monster.center_x
+                    diff_y = next_y - monster.center_y
+
+                    # What's our angle
+                    angle = math.atan2(diff_y, diff_x)
+
+                    # Calculate the travel vector
                     monster.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
                     monster.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
 
-                # Otherwise make the ghosts move randomly
-                elif random.randint(0, 100) == 0:
-                    monster.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
-                    monster.change_y = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
+                    # Recalculate distance after the move
+                    distance = math.sqrt((monster.center_x - next_x) ** 2 + (monster.center_y - next_y) ** 2)
+
+                    # If we're close enough, move to the next point
+                    if distance < s.MONSTER_MOVEMENT_SPEED:
+                        monster.current_path_position += 1
+
+                        # If we're at the end of the path, start over
+                        if monster.current_path_position >= len(self.path):
+                            monster.current_path_position = 0
+
+                else:
+                    if monster.is_hunting:
+                        monster.is_hunting = False
+
+                    # If we can't find a path, just move randomly:
+                    if random.randint(0, 100) == 0:
+                        monster.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
+                        monster.change_y = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
 
         # Play the background music again if it's finished
         if time.time() > self.music_timer:

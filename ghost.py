@@ -1,5 +1,4 @@
 import arcade
-import random
 import math
 
 
@@ -17,6 +16,7 @@ class GhostMonster(arcade.Sprite):
         # Init flags
         self.is_being_hurt = False
         self.is_spawned = False
+        self.is_hunting = False
 
         # Init counters and values
         self.current_frame = 0
