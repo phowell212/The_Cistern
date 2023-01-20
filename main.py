@@ -324,14 +324,15 @@ class MyGame(arcade.Window):
     def move_monster(self, monster):
 
         # Try to calculate the path
-        try:
-            self.path = arcade.astar_calculate_path(monster.position,
-                                                    self.player_sprite.position,
-                                                    self.barrier_list,
-                                                    diagonal_movement=False)
-            self.path_list.append(self.path)
-        except ValueError:
-            pass
+        if arcade.get_distance_between_sprites(monster, self.player_sprite) < s.MONSTER_VISION_RANGE:
+            try:
+                self.path = arcade.astar_calculate_path(monster.position,
+                                                        self.player_sprite.position,
+                                                        self.barrier_list,
+                                                        diagonal_movement=False)
+                self.path_list.append(self.path)
+            except ValueError:
+                pass
 
         if self.path and not self.is_dead and \
                 arcade.get_distance_between_sprites(monster, self.player_sprite) < s.MONSTER_VISION_RANGE:
