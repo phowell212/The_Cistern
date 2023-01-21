@@ -97,7 +97,7 @@ class MyGame(arcade.Window):
         self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
         self.playing_field_bottom_boundary = 0
         self.grid_size = 128 * s.SPRITE_SCALING
-        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size,
+        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size * 1.5,
                                                     self.playing_field_left_boundary,
                                                     self.playing_field_right_boundary,
                                                     self.playing_field_bottom_boundary,
@@ -115,7 +115,7 @@ class MyGame(arcade.Window):
                     monster.debug_path = arcade.astar_calculate_path(monster.position,
                                                                      self.seraphima.position,
                                                                      self.barrier_list,
-                                                                     diagonal_movement=True)
+                                                                     diagonal_movement=False)
                 except ValueError:
                     pass
                 if monster.debug_path is not None:
@@ -165,10 +165,10 @@ class MyGame(arcade.Window):
                    f"Ghosts hunting you: {float(num_ghosts_hunting)}."
             for i in range((len(monster_velocities))):
                 ghost_velocity_text = f"\n    Ghost {i} velocity: {monster_velocities[i]}.   "
-                arcade.draw_text(ghost_velocity_text, start_x=40, start_y=834-(i * 30 * 2), color=(255, 255, 242),
+                arcade.draw_text(ghost_velocity_text, start_x=40, start_y=834 - (i * 30 * 2), color=(255, 255, 242),
                                  font_size=19, font_name="Garamond")
                 ghost_position_text = f"Ghost {i} position: {self.monster_list[i].position}."
-                arcade.draw_text(ghost_position_text, start_x=90, start_y=804-(i * 30 * 2), color=(255, 255, 242),
+                arcade.draw_text(ghost_position_text, start_x=90, start_y=804 - (i * 30 * 2), color=(255, 255, 242),
                                  font_size=19, font_name="Garamond")
             arcade.draw_text(text, start_x=40, start_y=864, color=(255, 255, 242), font_size=19,
                              font_name="Garamond")
@@ -252,17 +252,9 @@ class MyGame(arcade.Window):
         for monster in player_collisions:
             if self.seraphima.is_slashing:
                 monster.is_being_hurt = True
+                self.handle_player_damage()
             else:
-
-                # Handle player damage
-                self.health -= 1
-                if self.health == 0 and self.heart_list:
-                    self.heart_list.pop()
-                    self.health = s.HEART_HEALTH
-                if self.health > 0:
-                    continue
-                else:
-                    self.is_dead = True
+                self.handle_player_damage()
 
         # If a ghost dies increase the counter
         for monster in self.monster_list:
@@ -332,6 +324,14 @@ class MyGame(arcade.Window):
                 wall.center_y = y
             if random.random() < 0.5:
                 wall.angle = 90
+
+    def handle_player_damage(self):
+        self.health -= 1
+        if self.health == 0 and self.heart_list:
+            self.heart_list.pop()
+            self.health = s.HEART_HEALTH
+        if self.health < 0:
+            self.is_dead = True
 
     def move_monster(self, monster):
 
