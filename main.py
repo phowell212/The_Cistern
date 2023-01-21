@@ -364,12 +364,6 @@ class MyGame(arcade.Window):
             monster.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
             monster.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
 
-            # Check if the speed is less than 0.7 units
-            speed = math.sqrt(monster.change_x ** 2 + monster.change_y ** 2)
-            if speed < 0.7:
-                monster.change_x += monster.change_x * 0.7 / speed
-                monster.change_y += monster.change_y * 0.7 / speed
-
             # Recalculate distance after the move
             distance = math.sqrt((monster.center_x - next_x) ** 2 + (monster.center_y - next_y) ** 2)
 
@@ -390,7 +384,7 @@ class MyGame(arcade.Window):
                 monster.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
                 monster.change_y = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
 
-        # Make the monster respawn if they move off the play area
+        # Make the monster respawn if they move off the play area, and do so outside the player's view
         if monster.center_x < 0 or \
                 monster.center_x > self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING:
             spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
