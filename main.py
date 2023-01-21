@@ -97,7 +97,7 @@ class MyGame(arcade.Window):
         self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
         self.playing_field_bottom_boundary = 0
         self.grid_size = 128 * s.SPRITE_SCALING
-        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size,
+        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size * 1.5,
                                                     self.playing_field_left_boundary,
                                                     self.playing_field_right_boundary,
                                                     self.playing_field_bottom_boundary,
@@ -115,7 +115,7 @@ class MyGame(arcade.Window):
                     monster.debug_path = arcade.astar_calculate_path(monster.position,
                                                                      self.seraphima.position,
                                                                      self.barrier_list,
-                                                                     diagonal_movement=True)
+                                                                     diagonal_movement=False)
                 except ValueError:
                     pass
                 if monster.debug_path is not None:
