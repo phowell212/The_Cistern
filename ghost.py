@@ -17,6 +17,7 @@ class GhostMonster(arcade.Sprite):
         self.is_being_hurt = False
         self.is_spawned = False
         self.is_hunting = False
+        self.is_stuck = False
         self.can_hunt = True
 
         # Init counters and values
@@ -30,9 +31,13 @@ class GhostMonster(arcade.Sprite):
         self.bob_frequency = 5
         self.bob_amplitude = 0.3
         self.current_path_position = 0
+        self.time_since_move = 0
+        self.hunt_cooldown = 60
         self.scale = scale
 
         # Init directions and position
+        self.starting_x = center_x
+        self.starting_y = center_y
         self.center_x, self.center_y = center_x, center_y
         self.directions = ["north", "south"]
         self.current_direction = self.directions[1]

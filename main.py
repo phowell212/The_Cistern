@@ -174,7 +174,7 @@ class MyGame(arcade.Window):
                              font_name="Garamond")
 
         # Draw game over if dead
-        if self.is_dead:
+        if not self.heart_list:
             arcade.draw_text("GAME OVER", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2,
                              color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
                              anchor_y="baseline", bold=True)
@@ -269,6 +269,31 @@ class MyGame(arcade.Window):
 
         # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
         self.spawn_ghosts_on_empty_list()
+
+        # Get the ghosts un-stuck if they have been stuck for a while
+        # Check if the ghost has moved a significant amount in the last 1-second plus some random time
+        for monster in self.monster_list:
+            if abs(monster.center_x - monster.starting_x) < 0.01 and abs(monster.center_y - monster.starting_y) < 0.01:
+                if not monster.is_stuck:
+                    monster.starting_x = monster.center_x
+                    monster.starting_y = monster.center_y
+                    monster.is_stuck = True
+                monster.time_since_move += delta_time
+            else:
+                monster.time_since_move = 0
+                monster.is_stuck = False
+
+            if monster.time_since_move > 1 + random.uniform(0, 0.5):
+                monster.can_hunt = False
+                monster.hunt_cooldown = 0.5 + random.uniform(0, 0.5)
+                monster.time_since_move = 0
+
+            # Decrement the hunt cooldown if it is active
+            if not monster.can_hunt:
+                monster.hunt_cooldown -= delta_time
+                if monster.hunt_cooldown <= 0:
+                    monster.can_hunt = True
+                    monster.hunt_cooldown = 0
 
         for monster in self.monster_list:
             if not monster.is_being_hurt and monster.can_hunt:
@@ -442,7 +467,7 @@ class MyGame(arcade.Window):
         self.camera.move_to(position, speed)
 
     def on_key_press(self, key, modifiers):
-        if not self.is_dead:
+        if self.heart_list:
             self.key_press_buffer.add(key)
 
     def process_key_presses(self):
@@ -597,5 +622,5 @@ class MyGame(arcade.Window):
 
 if __name__ == "__main__":
     window = MyGame(s.SCREEN_WIDTH, s.SCREEN_HEIGHT, s.SCREEN_TITLE)
-    window.set_location(35, 35)
+    window.set_location(0, 35)
     arcade.run()
