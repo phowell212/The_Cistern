@@ -202,9 +202,6 @@ class MyGame(arcade.Window):
         self.player_and_monster_collider.update()
         self.player_and_wall_collider.update()
 
-        # Update our own hacky monster physics engine cause you cant access the monster inside a simple physics engine
-        self.update_monster_physics()
-
         # Update the movement of the monsters, projectiles, and camera
         self.monster_list.update()
         self.scroll_to_player()
@@ -288,8 +285,39 @@ class MyGame(arcade.Window):
                     monster.hunt_cooldown = 60
 
         for monster in self.monster_list:
-            if not monster.is_being_hurt and monster.can_hunt:
+            if not monster.is_being_hurt:
                 self.move_monster(monster)
+
+            # Make the monster respawn if they move off the play area
+            if monster.center_x < 0 or \
+                    monster.center_x > self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING:
+                spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
+                spawn_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
+                distance = math.sqrt(
+                    (spawn_x - self.seraphima.center_x) ** 2 + (spawn_y - self.seraphima.center_y) ** 2)
+                while distance < s.SPOTLIGHT_SIZE:
+                    spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
+                    spawn_y = random.randint(0,
+                                             self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
+                    distance = math.sqrt(
+                        (spawn_x - self.seraphima.center_x) ** 2 + (spawn_y - self.seraphima.center_y) ** 2)
+                monster.center_x = spawn_x
+            if monster.center_y < 0 or \
+                    monster.center_y > self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING:
+                spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
+                spawn_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
+                distance = math.sqrt(
+                    (spawn_x - self.seraphima.center_x) ** 2 + (spawn_y - self.seraphima.center_y) ** 2)
+                while distance < s.SPOTLIGHT_SIZE:
+                    spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
+                    spawn_y = random.randint(0,
+                                             self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
+                    distance = math.sqrt(
+                        (spawn_x - self.seraphima.center_x) ** 2 + (spawn_y - self.seraphima.center_y) ** 2)
+                monster.center_y = spawn_y
+
+        # Update our own hacky monster physics engine cause you cant access the monster inside a simple physics engine
+        self.update_monster_physics()
 
         # Play the background music again if it's finished
         if time.time() > self.music_timer:
