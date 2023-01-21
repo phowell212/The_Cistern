@@ -202,16 +202,23 @@ class MyGame(arcade.Window):
 
         # Update the physics engine
         self.player_and_wall_collider.update()
-        for engine in self.monster_phys_engines:
-            # Keep the array clean
-            if engine.player_sprite is None:
-                self.monster_phys_engines.remove(engine)
-        for engine in self.monster_phys_engines:
-            if self.health >= 0:
-                engine.update()
-            else:
-                if self.monster_phys_engines.index(engine) % 2 == 0:
-                    engine.update()
+
+        # Our own hacky monster physics engine because I cant use the builtin ones without causing a memory leak
+        for monster in self.monster_list:
+            for wall in self.wall_list:
+                if arcade.check_for_collision(monster, wall):
+                    if not monster.is_hunting:
+                        monster.change_x = -monster.change_x
+                        monster.change_y = -monster.change_y
+                    else:
+                        if monster.change_x > 0 and monster.right >= wall.left:
+                            monster.change_x = 0
+                        elif monster.change_x < 0 and monster.left <= wall.right:
+                            monster.change_x = 0
+                        elif monster.change_y > 0 and monster.top >= wall.bottom:
+                            monster.change_y = 0
+                        elif monster.change_y < 0 and monster.bottom <= wall.top:
+                            monster.change_y = 0
 
         self.monster_list.update()
         self.scroll_to_player()
@@ -439,8 +446,6 @@ class MyGame(arcade.Window):
                 collision = True
             if not collision:
                 self.monster_list.append(monster)
-                self.monster_phys_engines.append(arcade.PhysicsEngineSimple(monster, self.wall_list))
-                self.monster_phys_engines.append(arcade.PhysicsEngineSimple(monster, self.player_list))
             else:
 
                 # If there is a collision, Don't spawn the monster and try again
