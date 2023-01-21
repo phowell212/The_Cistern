@@ -621,5 +621,5 @@ class MyGame(arcade.Window):
 
 if __name__ == "__main__":
     window = MyGame(s.SCREEN_WIDTH, s.SCREEN_HEIGHT, s.SCREEN_TITLE)
-    window.set_location(0, 20)
+    window.set_location(0, 30)
     arcade.run()
