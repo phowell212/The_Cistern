@@ -252,17 +252,10 @@ class MyGame(arcade.Window):
         for monster in player_collisions:
             if self.seraphima.is_slashing:
                 monster.is_being_hurt = True
+                self.hangle_player_damage
             else:
+                self.handle_player_damage
 
-                # Handle player damage
-                self.health -= 1
-                if self.health == 0 and self.heart_list:
-                    self.heart_list.pop()
-                    self.health = s.HEART_HEALTH
-                if self.health > 0:
-                    continue
-                else:
-                    self.is_dead = True
 
         # If a ghost dies increase the counter
         for monster in self.monster_list:
@@ -333,18 +326,23 @@ class MyGame(arcade.Window):
             if random.random() < 0.5:
                 wall.angle = 90
 
+    def handle_player_damage(self):
+        self.health -= 1
+        if self.health == 0 and self.heart_list:
+            self.heart_list.pop()
+            self.health = s.HEART_HEALTH
+        if self.health < 0:
+            self.is_dead = True
+
     def move_monster(self, monster):
 
         # Try to calculate the path
         if arcade.get_distance_between_sprites(monster, self.seraphima) < s.MONSTER_VISION_RANGE:
-            try:
-                self.path = arcade.astar_calculate_path(monster.position,
-                                                        self.seraphima.position,
-                                                        self.barrier_list,
-                                                        diagonal_movement=False)
-                self.path_list.append(self.path)
-            except ValueError:
-                pass
+            self.path = arcade.astar_calculate_path(monster.position,
+                                                    self.seraphima.position,
+                                                    self.barrier_list,
+                                                    diagonal_movement=False)
+            self.path_list.append(self.path)
 
         if self.path and not self.is_dead and \
                 arcade.get_distance_between_sprites(monster, self.seraphima) < s.MONSTER_VISION_RANGE:
