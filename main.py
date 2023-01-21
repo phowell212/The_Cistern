@@ -165,10 +165,10 @@ class MyGame(arcade.Window):
                    f"Ghosts hunting you: {float(num_ghosts_hunting)}."
             for i in range((len(monster_velocities))):
                 ghost_velocity_text = f"\n    Ghost {i} velocity: {monster_velocities[i]}.   "
-                arcade.draw_text(ghost_velocity_text, start_x=40, start_y=834-(i * 30 * 2), color=(255, 255, 242),
+                arcade.draw_text(ghost_velocity_text, start_x=40, start_y=834 - (i * 30 * 2), color=(255, 255, 242),
                                  font_size=19, font_name="Garamond")
                 ghost_position_text = f"Ghost {i} position: {self.monster_list[i].position}."
-                arcade.draw_text(ghost_position_text, start_x=90, start_y=804-(i * 30 * 2), color=(255, 255, 242),
+                arcade.draw_text(ghost_position_text, start_x=90, start_y=804 - (i * 30 * 2), color=(255, 255, 242),
                                  font_size=19, font_name="Garamond")
             arcade.draw_text(text, start_x=40, start_y=864, color=(255, 255, 242), font_size=19,
                              font_name="Garamond")
@@ -206,8 +206,12 @@ class MyGame(arcade.Window):
             # Keep the array clean
             if engine.player_sprite is None:
                 self.monster_phys_engines.remove(engine)
-            else:
+        for engine in self.monster_phys_engines:
+            if self.health >= 0:
                 engine.update()
+            else:
+                if self.monster_phys_engines.index(engine) % 2 == 0:
+                    engine.update()
 
         self.monster_list.update()
         self.scroll_to_player()
@@ -252,15 +256,15 @@ class MyGame(arcade.Window):
         for monster in player_collisions:
             if self.seraphima.is_slashing:
                 monster.is_being_hurt = True
-                self.hangle_player_damage()
+                self.handle_player_damage()
             else:
                 self.handle_player_damage()
-
 
         # If a ghost dies increase the counter
         for monster in self.monster_list:
             if monster.health == 0:
                 self.score += 1
+                self.health += 0.75
 
         # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
         self.spawn_ghosts_on_empty_list()
@@ -273,11 +277,6 @@ class MyGame(arcade.Window):
         if time.time() > self.music_timer:
             arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
             self.music_timer = time.time() + (5 * 60) + 57
-
-        # Make sure the player cant get pushed into walls if they are dead
-        if self.is_dead:
-            self.seraphima.change_x = 0
-            self.seraphima.change_y = 0
 
     def load_shader(self):
         shader_file_path = Path("shaders/level_1_shader.glsl")
