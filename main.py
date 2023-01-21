@@ -252,9 +252,9 @@ class MyGame(arcade.Window):
         for monster in player_collisions:
             if self.seraphima.is_slashing:
                 monster.is_being_hurt = True
-                self.hangle_player_damage
+                self.hangle_player_damage()
             else:
-                self.handle_player_damage
+                self.handle_player_damage()
 
 
         # If a ghost dies increase the counter
