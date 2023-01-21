@@ -78,7 +78,7 @@ SOUTH:
 '''
 
 
-class Seraphima(arcade.Sprite):
+class Player(arcade.Sprite):
     def __init__(self, center_x, center_y, scale):
         super().__init__()
 

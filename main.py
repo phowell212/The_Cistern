@@ -22,7 +22,7 @@ class MyGame(arcade.Window):
         self.load_shader()
 
         # Init the sprites
-        self.player_sprite = None
+        self.seraphima = None
         self.ghost_sprite = None
         self.wall_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
@@ -67,8 +67,8 @@ class MyGame(arcade.Window):
         self.wall_list.extend(scene_wall_sprite_list)
 
         # Create the sprites
-        self.player_sprite = player.Seraphima(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
-        self.player_list.append(self.player_sprite)
+        self.seraphima = player.Player(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
+        self.player_list.append(self.seraphima)
         self.generate_walls(self.level_map.width, self.level_map.height)
         self.ghost_sprite = ghost.GhostMonster(self.map_center_x, self.map_center_y + 200, s.MONSTER_SCALING)
         self.ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
@@ -81,11 +81,14 @@ class MyGame(arcade.Window):
             self.heart_list.append(heart)
 
         # Make the physics engine
-        self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.player_sprite, self.wall_list)
-        self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.player_sprite, self.monster_list)
-        self.monster_and_wall_collider = arcade.PhysicsEngineSimple(self.ghost_sprite, self.wall_list)
+        self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.seraphima, self.wall_list)
+        player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
+        monster_and_wall_collider = arcade.PhysicsEngineSimple(self.ghost_sprite, self.wall_list)
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
+        self.monster_phys_engines = []
+        self.monster_phys_engines.append(monster_and_wall_collider)
+        self.monster_phys_engines.append(player_and_monster_collider)
         arcade.set_background_color((108, 121, 147))
 
         # Make the pathfinding vars
@@ -94,7 +97,7 @@ class MyGame(arcade.Window):
         self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
         self.playing_field_bottom_boundary = 0
         self.grid_size = 128 * s.SPRITE_SCALING
-        self.barrier_list = arcade.AStarBarrierList(self.player_sprite, self.wall_list, self.grid_size * 4,
+        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size,
                                                     self.playing_field_left_boundary,
                                                     self.playing_field_right_boundary,
                                                     self.playing_field_bottom_boundary,
@@ -110,9 +113,9 @@ class MyGame(arcade.Window):
             for monster in self.monster_list:
                 try:
                     monster.debug_path = arcade.astar_calculate_path(monster.position,
-                                                            self.player_sprite.position,
-                                                            self.barrier_list,
-                                                            diagonal_movement=True)
+                                                                     self.seraphima.position,
+                                                                     self.barrier_list,
+                                                                     diagonal_movement=True)
                 except ValueError:
                     pass
                 if monster.debug_path is not None:
@@ -128,8 +131,8 @@ class MyGame(arcade.Window):
         self.clear()
 
         # Calculate the light position
-        position = (self.player_sprite.position[0] - self.camera.position[0],
-                    self.player_sprite.position[1] - self.camera.position[1])
+        position = (self.seraphima.position[0] - self.camera.position[0],
+                    self.seraphima.position[1] - self.camera.position[1])
 
         # Run the shader and render to the window
         self.box_shadertoy.program['lightPosition'] = position
@@ -158,7 +161,7 @@ class MyGame(arcade.Window):
                 if monster.is_hunting:
                     num_ghosts_hunting += 1
                 monster_velocities.append((monster.change_x, monster.change_y))
-            text = f"Player position: {self.player_sprite.position}.     " \
+            text = f"Player position: {self.seraphima.position}.     " \
                    f"Ghosts hunting you: {float(num_ghosts_hunting)}."
             for i in range((len(monster_velocities))):
                 ghost_velocity_text = f"\n    Ghost {i} velocity: {monster_velocities[i]}.   "
@@ -179,19 +182,19 @@ class MyGame(arcade.Window):
                 monster.can_hunt = False
 
             # If the player isn't already transparent make the player sprite slowly fade out
-            if self.player_sprite.alpha != 0:
-                self.player_sprite.alpha -= 0.15
-                self.player_sprite.alpha = max(0, self.player_sprite.alpha)
+            if self.seraphima.alpha != 0:
+                self.seraphima.alpha -= 0.15
+                self.seraphima.alpha = max(0, self.seraphima.alpha)
             elif not self.is_faded_out:
                 self.is_faded_out = True
                 self.has_spawned_player_death_ghost = False
 
             # If the player is fully transparent, spawn a ghost monster on their death location
             elif not self.has_spawned_player_death_ghost:
-                self.ghost_sprite = ghost.GhostMonster(self.player_sprite.center_x, self.player_sprite.center_y,
+                self.ghost_sprite = ghost.GhostMonster(self.seraphima.center_x, self.seraphima.center_y,
                                                        s.MONSTER_SCALING)
                 self.ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
-                self.player_sprite.remove_from_sprite_lists()
+                self.seraphima.remove_from_sprite_lists()
                 self.monster_list.append(self.ghost_sprite)
                 self.has_spawned_player_death_ghost = True
 
@@ -199,8 +202,13 @@ class MyGame(arcade.Window):
 
         # Update the physics engine
         self.player_and_wall_collider.update()
-        self.player_and_monster_collider.update()
-        self.monster_and_wall_collider.update()
+        for engine in self.monster_phys_engines:
+            # Keep the array clean
+            if engine.player_sprite is None:
+                self.monster_phys_engines.remove(engine)
+            else:
+                engine.update()
+
         self.monster_list.update()
         self.scroll_to_player()
         self.process_key_presses()
@@ -211,16 +219,16 @@ class MyGame(arcade.Window):
                 projectile.is_hitting_wall = True
 
         # Make a projectile if the player is slashing and there currently isn't another one
-        if self.player_sprite.is_slashing and self.player_sprite.c_key_timer == 0 and not self.swordslash_list:
-            slash_projectile = ss.SwordSlash(self.player_sprite)
+        if self.seraphima.is_slashing and self.seraphima.c_key_timer == 0 and not self.swordslash_list:
+            slash_projectile = ss.SwordSlash(self.seraphima)
             self.swordslash_list.append(slash_projectile)
             arcade.play_sound(random.choice(self.swoosh_sounds), s.SWOOSH_VOLUME)
 
         # Update the player
-        self.player_sprite.update_animation(delta_time)
-        if self.player_sprite.c_key_timer > 0:
-            self.player_sprite.change_x *= s.SLASH_CHARGE_SPEED_MODIFIER
-            self.player_sprite.change_y *= s.SLASH_CHARGE_SPEED_MODIFIER
+        self.seraphima.update_animation(delta_time)
+        if self.seraphima.c_key_timer > 0:
+            self.seraphima.change_x *= s.SLASH_CHARGE_SPEED_MODIFIER
+            self.seraphima.change_y *= s.SLASH_CHARGE_SPEED_MODIFIER
 
         # Update the heart frames, so they match the animation speed of the player
         self.heart_frame += 9 * delta_time
@@ -236,13 +244,13 @@ class MyGame(arcade.Window):
             break
 
         # Handle the player's slash
-        player_collisions = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
+        player_collisions = arcade.check_for_collision_with_list(self.seraphima, self.monster_list)
         for projectile in self.swordslash_list:
             projectile_collisions = arcade.check_for_collision_with_list(projectile, self.monster_list)
             for monster in projectile_collisions:
                 monster.is_being_hurt = True
         for monster in player_collisions:
-            if self.player_sprite.is_slashing:
+            if self.seraphima.is_slashing:
                 monster.is_being_hurt = True
             else:
 
@@ -275,8 +283,8 @@ class MyGame(arcade.Window):
 
         # Make sure the player cant get pushed into walls if they are dead
         if self.is_dead:
-            self.player_sprite.change_x = 0
-            self.player_sprite.change_y = 0
+            self.seraphima.change_x = 0
+            self.seraphima.change_y = 0
 
     def load_shader(self):
         shader_file_path = Path("shaders/level_1_shader.glsl")
@@ -328,18 +336,18 @@ class MyGame(arcade.Window):
     def move_monster(self, monster):
 
         # Try to calculate the path
-        if arcade.get_distance_between_sprites(monster, self.player_sprite) < s.MONSTER_VISION_RANGE:
+        if arcade.get_distance_between_sprites(monster, self.seraphima) < s.MONSTER_VISION_RANGE:
             try:
                 self.path = arcade.astar_calculate_path(monster.position,
-                                                        self.player_sprite.position,
+                                                        self.seraphima.position,
                                                         self.barrier_list,
-                                                        diagonal_movement=True)
+                                                        diagonal_movement=False)
                 self.path_list.append(self.path)
             except ValueError:
                 pass
 
         if self.path and not self.is_dead and \
-                arcade.get_distance_between_sprites(monster, self.player_sprite) < s.MONSTER_VISION_RANGE:
+                arcade.get_distance_between_sprites(monster, self.seraphima) < s.MONSTER_VISION_RANGE:
 
             if not monster.is_hunting:
                 monster.is_hunting = True
@@ -350,8 +358,8 @@ class MyGame(arcade.Window):
                 next_y = self.path[monster.current_path_position][1]
             except IndexError:
                 # We are at the end of the path
-                next_x = self.player_sprite.center_x
-                next_y = self.player_sprite.center_y
+                next_x = self.seraphima.center_x
+                next_y = self.seraphima.center_y
 
             # What's the difference between the two
             diff_x = next_x - monster.center_x
@@ -384,36 +392,10 @@ class MyGame(arcade.Window):
                 monster.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
                 monster.change_y = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
 
-        # Make the monster respawn if they move off the play area, and do so outside the player's view
-        if monster.center_x < 0 or \
-                monster.center_x > self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING:
-            spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
-            spawn_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
-            distance = math.sqrt(
-                (spawn_x - self.player_sprite.center_x) ** 2 + (spawn_y - self.player_sprite.center_y) ** 2)
-            while distance < s.SPOTLIGHT_SIZE:
-                spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
-                spawn_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
-                distance = math.sqrt(
-                    (spawn_x - self.player_sprite.center_x) ** 2 + (spawn_y - self.player_sprite.center_y) ** 2)
-            monster.center_x = spawn_x
-        if monster.center_y < 0 or \
-                monster.center_y > self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING:
-            spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
-            spawn_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
-            distance = math.sqrt(
-                (spawn_x - self.player_sprite.center_x) ** 2 + (spawn_y - self.player_sprite.center_y) ** 2)
-            while distance < s.SPOTLIGHT_SIZE:
-                spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
-                spawn_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
-                distance = math.sqrt(
-                    (spawn_x - self.player_sprite.center_x) ** 2 + (spawn_y - self.player_sprite.center_y) ** 2)
-            monster.center_y = spawn_y
-
     def spawn_ghosts(self):
         for i in range(int(self.ghosts_to_spawn)):
-            random_x = random.uniform(self.player_sprite.center_x - 50, self.player_sprite.center_x + 50)
-            random_y = random.uniform(self.player_sprite.center_y - 50, self.player_sprite.center_y + 50)
+            random_x = random.uniform(self.seraphima.center_x - 50, self.seraphima.center_x + 50)
+            random_y = random.uniform(self.seraphima.center_y - 50, self.seraphima.center_y + 50)
             if random_x < 0 or random_x > self.level_map.width or random_y < 0 or \
                     random_y > self.level_map.height:
                 random_x = random.uniform(0, self.width)
@@ -427,10 +409,12 @@ class MyGame(arcade.Window):
                 if monster.collides_with_sprite(wall):
                     collision = True
                     break
-            if monster.collides_with_sprite(self.player_sprite):
+            if monster.collides_with_sprite(self.seraphima):
                 collision = True
             if not collision:
                 self.monster_list.append(monster)
+                self.monster_phys_engines.append(arcade.PhysicsEngineSimple(monster, self.wall_list))
+                self.monster_phys_engines.append(arcade.PhysicsEngineSimple(monster, self.player_list))
             else:
 
                 # If there is a collision, Don't spawn the monster and try again
@@ -451,8 +435,8 @@ class MyGame(arcade.Window):
             self.no_ghost_timer = 0.0
 
     def scroll_to_player(self, speed=s.CAMERA_SPEED):
-        position = Vec2(self.player_sprite.center_x - self.width / 2,
-                        self.player_sprite.center_y - self.height / 2)
+        position = Vec2(self.seraphima.center_x - self.width / 2,
+                        self.seraphima.center_y - self.height / 2)
         self.camera.move_to(position, speed)
 
     def on_key_press(self, key, modifiers):
@@ -460,156 +444,156 @@ class MyGame(arcade.Window):
             self.key_press_buffer.add(key)
 
     def process_key_presses(self):
-        self.player_sprite.change_x = 0
-        self.player_sprite.change_y = 0
+        self.seraphima.change_x = 0
+        self.seraphima.change_y = 0
 
         # Handle slashing, hold the c key for SLASH_CHARGE_TIME to activate
         # This discourages spamming the slash key
         if arcade.key.C in self.key_press_buffer:
-            if self.player_sprite.c_key_timer == 0:
-                self.player_sprite.c_key_timer = time.time()
-            elif time.time() - self.player_sprite.c_key_timer >= s.SLASH_CHARGE_TIME:
-                self.player_sprite.is_slashing = True
-                self.player_sprite.c_key_timer = 0
+            if self.seraphima.c_key_timer == 0:
+                self.seraphima.c_key_timer = time.time()
+            elif time.time() - self.seraphima.c_key_timer >= s.SLASH_CHARGE_TIME:
+                self.seraphima.is_slashing = True
+                self.seraphima.c_key_timer = 0
 
         # Handle running, hold the shift key
         if arcade.key.LEFT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer \
                 and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
-            self.player_sprite.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
-            self.player_sprite.current_direction = "northwest"
-            self.player_sprite.is_running = True
+            self.seraphima.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
+            self.seraphima.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
+            if self.seraphima.is_slashing:
+                self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER
+                self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER
+            self.seraphima.current_direction = "northwest"
+            self.seraphima.is_running = True
         elif arcade.key.LEFT in self.key_press_buffer and arcade.key.DOWN in self.key_press_buffer \
                 and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
-            self.player_sprite.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
-            self.player_sprite.current_direction = "southwest"
-            self.player_sprite.is_running = True
+            self.seraphima.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
+            self.seraphima.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
+            if self.seraphima.is_slashing:
+                self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER
+                self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER
+            self.seraphima.current_direction = "southwest"
+            self.seraphima.is_running = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer \
                 and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
-            self.player_sprite.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
-            self.player_sprite.current_direction = "northeast"
-            self.player_sprite.is_running = True
+            self.seraphima.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
+            self.seraphima.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
+            if self.seraphima.is_slashing:
+                self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER
+                self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER
+            self.seraphima.current_direction = "northeast"
+            self.seraphima.is_running = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.DOWN in self.key_press_buffer \
                 and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
-            self.player_sprite.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
-            self.player_sprite.current_direction = "southeast"
-            self.player_sprite.is_running = True
+            self.seraphima.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
+            self.seraphima.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
+            if self.seraphima.is_slashing:
+                self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER
+                self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER
+            self.seraphima.current_direction = "southeast"
+            self.seraphima.is_running = True
         elif arcade.key.UP in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_y = s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
-            self.player_sprite.current_direction = "north"
-            self.player_sprite.is_running = True
+            self.seraphima.change_y = s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
+            if self.seraphima.is_slashing:
+                self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER
+            self.seraphima.current_direction = "north"
+            self.seraphima.is_running = True
         elif arcade.key.DOWN in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_y = -s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
-            self.player_sprite.current_direction = "south"
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER
-            self.player_sprite.is_running = True
+            self.seraphima.change_y = -s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
+            self.seraphima.current_direction = "south"
+            if self.seraphima.is_slashing:
+                self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER
+            self.seraphima.is_running = True
         elif arcade.key.LEFT in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_x = -s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
-            self.player_sprite.current_direction = "west"
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
-            self.player_sprite.is_running = True
+            self.seraphima.change_x = -s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
+            self.seraphima.current_direction = "west"
+            if self.seraphima.is_slashing:
+                self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER
+            self.seraphima.is_running = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
-            self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER
-            self.player_sprite.current_direction = "east"
-            self.player_sprite.is_running = True
+            self.seraphima.change_x = s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
+            if self.seraphima.is_slashing:
+                self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER
+            self.seraphima.current_direction = "east"
+            self.seraphima.is_running = True
 
         # Handle basic movement use the arrow keys
         elif arcade.key.LEFT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer:
-            self.player_sprite.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7
-            self.player_sprite.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
-            self.player_sprite.current_direction = "northwest"
-            self.player_sprite.is_walking = True
+            self.seraphima.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7
+            self.seraphima.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7
+            if self.seraphima.is_slashing:
+                self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
+                self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
+            self.seraphima.current_direction = "northwest"
+            self.seraphima.is_walking = True
         elif arcade.key.LEFT in self.key_press_buffer and arcade.key.DOWN in self.key_press_buffer:
-            self.player_sprite.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7
-            self.player_sprite.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
-            self.player_sprite.current_direction = "southwest"
-            self.player_sprite.is_walking = True
+            self.seraphima.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7
+            self.seraphima.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7
+            if self.seraphima.is_slashing:
+                self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
+                self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
+            self.seraphima.current_direction = "southwest"
+            self.seraphima.is_walking = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer:
-            self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7
-            self.player_sprite.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
-            self.player_sprite.current_direction = "northeast"
-            self.player_sprite.is_walking = True
+            self.seraphima.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7
+            self.seraphima.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7
+            if self.seraphima.is_slashing:
+                self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
+                self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
+            self.seraphima.current_direction = "northeast"
+            self.seraphima.is_walking = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.DOWN in self.key_press_buffer:
-            self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7
-            self.player_sprite.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
-            self.player_sprite.current_direction = "southeast"
-            self.player_sprite.is_walking = True
+            self.seraphima.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7
+            self.seraphima.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7
+            if self.seraphima.is_slashing:
+                self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
+                self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
+            self.seraphima.current_direction = "southeast"
+            self.seraphima.is_walking = True
         elif arcade.key.UP in self.key_press_buffer:
-            self.player_sprite.change_y = s.PLAYER_MOVEMENT_SPEED
-            self.player_sprite.current_direction = "north"
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
-            self.player_sprite.is_walking = True
+            self.seraphima.change_y = s.PLAYER_MOVEMENT_SPEED
+            self.seraphima.current_direction = "north"
+            if self.seraphima.is_slashing:
+                self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
+            self.seraphima.is_walking = True
         elif arcade.key.DOWN in self.key_press_buffer:
-            self.player_sprite.change_y = -s.PLAYER_MOVEMENT_SPEED
-            self.player_sprite.current_direction = "south"
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_y *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
-            self.player_sprite.is_walking = True
+            self.seraphima.change_y = -s.PLAYER_MOVEMENT_SPEED
+            self.seraphima.current_direction = "south"
+            if self.seraphima.is_slashing:
+                self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
+            self.seraphima.is_walking = True
         elif arcade.key.LEFT in self.key_press_buffer:
-            self.player_sprite.change_x = -s.PLAYER_MOVEMENT_SPEED
-            self.player_sprite.current_direction = "west"
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
-            self.player_sprite.is_walking = True
+            self.seraphima.change_x = -s.PLAYER_MOVEMENT_SPEED
+            self.seraphima.current_direction = "west"
+            if self.seraphima.is_slashing:
+                self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
+            self.seraphima.is_walking = True
         elif arcade.key.RIGHT in self.key_press_buffer:
-            self.player_sprite.change_x = s.PLAYER_MOVEMENT_SPEED
-            self.player_sprite.current_direction = "east"
-            if self.player_sprite.is_slashing:
-                self.player_sprite.change_x *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
-            self.player_sprite.is_walking = True
+            self.seraphima.change_x = s.PLAYER_MOVEMENT_SPEED
+            self.seraphima.current_direction = "east"
+            if self.seraphima.is_slashing:
+                self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER + (s.SLASH_SPEED_MODIFIER / 3)
+            self.seraphima.is_walking = True
 
         # Modify the movement speed again to make a charge effect when c is pressed
         if arcade.key.C in self.key_press_buffer:
-            self.player_sprite.change_x *= s.SLASH_CHARGE_SPEED_MODIFIER
-            self.player_sprite.change_y *= s.SLASH_CHARGE_SPEED_MODIFIER
+            self.seraphima.change_x *= s.SLASH_CHARGE_SPEED_MODIFIER
+            self.seraphima.change_y *= s.SLASH_CHARGE_SPEED_MODIFIER
 
     def on_key_release(self, key, modifiers):
         self.key_press_buffer.discard(key)
         if not self.key_press_buffer:
-            if self.player_sprite.is_walking:
-                self.player_sprite.is_walking = False
-            if self.player_sprite.is_running:
-                self.player_sprite.is_running = False
-                self.player_sprite.just_stopped_running = True
+            if self.seraphima.is_walking:
+                self.seraphima.is_walking = False
+            if self.seraphima.is_running:
+                self.seraphima.is_running = False
+                self.seraphima.just_stopped_running = True
         elif arcade.key.C not in self.key_press_buffer:
-            self.player_sprite.c_key_timer = 0
+            self.seraphima.c_key_timer = 0
 
 
 if __name__ == "__main__":
     window = MyGame(s.SCREEN_WIDTH, s.SCREEN_HEIGHT, s.SCREEN_TITLE)
-    window.set_location(1025, 35)
+    window.set_location(35, 35)
     arcade.run()
