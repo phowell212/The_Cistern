@@ -97,7 +97,7 @@ class MyGame(arcade.Window):
         self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
         self.playing_field_bottom_boundary = 0
         self.grid_size = 128 * s.SPRITE_SCALING
-        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size * 1.75,
+        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size,
                                                     self.playing_field_left_boundary,
                                                     self.playing_field_right_boundary,
                                                     self.playing_field_bottom_boundary,
@@ -198,8 +198,7 @@ class MyGame(arcade.Window):
                 self.monster_list.append(self.ghost_sprite)
                 self.has_spawned_player_death_ghost = True
 
-    def on_update(self, delta_time):
-        delta_time = float(1 / 120)
+    def on_update(self, delta_time: float = 1 / 120):
 
         # Update the physics engine
         self.player_and_wall_collider.update()
@@ -622,4 +621,5 @@ class MyGame(arcade.Window):
 
 if __name__ == "__main__":
     window = MyGame(s.SCREEN_WIDTH, s.SCREEN_HEIGHT, s.SCREEN_TITLE)
+    window.set_location(35, 35)
     arcade.run()
