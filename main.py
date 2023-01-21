@@ -393,10 +393,28 @@ class MyGame(arcade.Window):
         # Make the monster respawn if they move off the play area
         if monster.center_x < 0 or \
                 monster.center_x > self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING:
-            monster.center_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
+            spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
+            spawn_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
+            distance = math.sqrt(
+                (spawn_x - self.player_sprite.center_x) ** 2 + (spawn_y - self.player_sprite.center_y) ** 2)
+            while distance < s.SPOTLIGHT_SIZE:
+                spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
+                spawn_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
+                distance = math.sqrt(
+                    (spawn_x - self.player_sprite.center_x) ** 2 + (spawn_y - self.player_sprite.center_y) ** 2)
+            monster.center_x = spawn_x
         if monster.center_y < 0 or \
                 monster.center_y > self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING:
-            monster.center_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
+            spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
+            spawn_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
+            distance = math.sqrt(
+                (spawn_x - self.player_sprite.center_x) ** 2 + (spawn_y - self.player_sprite.center_y) ** 2)
+            while distance < s.SPOTLIGHT_SIZE:
+                spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
+                spawn_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
+                distance = math.sqrt(
+                    (spawn_x - self.player_sprite.center_x) ** 2 + (spawn_y - self.player_sprite.center_y) ** 2)
+            monster.center_y = spawn_y
 
     def spawn_ghosts(self):
         for i in range(int(self.ghosts_to_spawn)):
