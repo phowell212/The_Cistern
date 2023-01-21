@@ -134,7 +134,7 @@ class SwordSlash(arcade.Sprite):
                 elif self.player_copy.is_running and self.player_copy.current_direction == "west":
                     self.center_x -= s.SLASH_PROJECTILE_SPEED * 2
 
-    def update_animation(self, delta_time: float = s.SWORDSLASH_FPS):
+    def update_animation(self, delta_time: float = 1/30):
         # Update the animation frame
         self.current_frame += 1
 

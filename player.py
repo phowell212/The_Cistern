@@ -331,7 +331,8 @@ class Player(arcade.Sprite):
         for i in range(60, 82):
             self.southwest_slash_frames.append(arcade.load_texture(f"assets/player/southwest-{i}.png"))
 
-    def update_animation(self, delta_time: float = 1 / 10):
+    def update_animation(self, delta_time: float = 1 / 60):
+        delta_time = 1 / 60
         # Update the animation frame
         self.elapsed_time += delta_time
         if self.elapsed_time > self.update_interval:

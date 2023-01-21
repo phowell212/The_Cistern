@@ -97,7 +97,7 @@ class MyGame(arcade.Window):
         self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
         self.playing_field_bottom_boundary = 0
         self.grid_size = 128 * s.SPRITE_SCALING
-        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size,
+        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size * 1.75,
                                                     self.playing_field_left_boundary,
                                                     self.playing_field_right_boundary,
                                                     self.playing_field_bottom_boundary,
@@ -198,7 +198,8 @@ class MyGame(arcade.Window):
                 self.monster_list.append(self.ghost_sprite)
                 self.has_spawned_player_death_ghost = True
 
-    def on_update(self, delta_time: float = 1 / 120):
+    def on_update(self, delta_time):
+        delta_time = float(1 / 120)
 
         # Update the physics engine
         self.player_and_wall_collider.update()
@@ -235,7 +236,7 @@ class MyGame(arcade.Window):
             self.seraphima.change_y *= s.SLASH_CHARGE_SPEED_MODIFIER
 
         # Update the heart frames, so they match the animation speed of the player
-        self.heart_frame += 9 * delta_time
+        self.heart_frame += 18 * delta_time
         for heart in self.heart_list:
             if self.heart_frame < len(self.heart_frames):
                 heart.texture = self.heart_frames[int(self.heart_frame)]
@@ -368,6 +369,10 @@ class MyGame(arcade.Window):
             # Calculate the travel vector
             monster.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
             monster.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
+
+            if (monster.change_y ** 2 + monster.change_x ** 2) ** 0.5 > s.MONSTER_MOVEMENT_SPEED:
+                monster.change_x += s.MONSTER_MOVEMENT_SPEED * monster.change_x / abs(monster.change_x)
+                monster.change_y += s.MONSTER_MOVEMENT_SPEED * monster.change_y / abs(monster.change_y)
 
             # Recalculate distance after the move
             distance = math.sqrt((monster.center_x - next_x) ** 2 + (monster.center_y - next_y) ** 2)

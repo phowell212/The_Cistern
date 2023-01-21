@@ -72,7 +72,8 @@ class GhostMonster(arcade.Sprite):
         else:
             self.current_direction = self.directions[1]
 
-    def update_animation(self, delta_time: float = 1 / 30):
+    def update_animation(self, delta_time: float = 1 / 60):
+        delta_time = 1 / 60
         self.current_frame += self.update_interval * delta_time
 
         # If the ghost is spawning in, then play the spawn animation in full
