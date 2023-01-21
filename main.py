@@ -293,7 +293,7 @@ class MyGame(arcade.Window):
                 monster.hunt_cooldown -= delta_time
                 if monster.hunt_cooldown <= 0:
                     monster.can_hunt = True
-                    monster.hunt_cooldown = 0
+                    monster.hunt_cooldown = 60
 
         for monster in self.monster_list:
             if not monster.is_being_hurt and monster.can_hunt:
