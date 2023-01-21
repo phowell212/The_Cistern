@@ -82,13 +82,10 @@ class MyGame(arcade.Window):
 
         # Make the physics engine
         self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.seraphima, self.wall_list)
-        player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
-        monster_and_wall_collider = arcade.PhysicsEngineSimple(self.ghost_sprite, self.wall_list)
+        self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.monster_phys_engines = []
-        self.monster_phys_engines.append(monster_and_wall_collider)
-        self.monster_phys_engines.append(player_and_monster_collider)
         arcade.set_background_color((108, 121, 147))
 
         # Make the pathfinding vars
@@ -201,25 +198,14 @@ class MyGame(arcade.Window):
     def on_update(self, delta_time: float = 1 / 120):
 
         # Update the physics engine
+        self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
+        self.player_and_monster_collider.update()
         self.player_and_wall_collider.update()
 
-        # Our own hacky monster physics engine because I cant use the builtin ones without causing a memory leak
-        for monster in self.monster_list:
-            for wall in self.wall_list:
-                if arcade.check_for_collision(monster, wall):
-                    if not monster.is_hunting:
-                        monster.change_x = -monster.change_x
-                        monster.change_y = -monster.change_y
-                    else:
-                        if monster.change_x > 0 and monster.right >= wall.left:
-                            monster.change_x = 0
-                        elif monster.change_x < 0 and monster.left <= wall.right:
-                            monster.change_x = 0
-                        elif monster.change_y > 0 and monster.top >= wall.bottom:
-                            monster.change_y = 0
-                        elif monster.change_y < 0 and monster.bottom <= wall.top:
-                            monster.change_y = 0
+        # Update our own hacky monster physics engine cause you cant access the monster inside a simple physics engine
+        self.update_monster_physics()
 
+        # Update the movement of the monsters, projectiles, and camera
         self.monster_list.update()
         self.scroll_to_player()
         self.process_key_presses()
@@ -422,8 +408,8 @@ class MyGame(arcade.Window):
 
             # If we can't find a path, or are far enough away from the player just move randomly:
             if random.randint(0, 100) == 0:
-                monster.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
-                monster.change_y = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
+                monster.change_x = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
+                monster.change_y = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
 
     def spawn_ghosts(self):
         for i in range(int(self.ghosts_to_spawn)):
@@ -469,6 +455,35 @@ class MyGame(arcade.Window):
         position = Vec2(self.seraphima.center_x - self.width / 2,
                         self.seraphima.center_y - self.height / 2)
         self.camera.move_to(position, speed)
+
+    def update_monster_physics(self):
+        for monster in self.monster_list:
+            for wall in self.wall_list:
+                if arcade.check_for_collision(monster, wall):
+                    if not monster.is_hunting:
+                        monster.change_x = -monster.change_x
+                        monster.change_y = -monster.change_y
+                        if monster.change_x > 0 and monster.right >= wall.left:
+                            monster.center_x += 1
+                        elif monster.change_x < 0 and monster.left <= wall.right:
+                            monster.center_x -= 1
+                        elif monster.change_y > 0 and monster.top >= wall.bottom:
+                            monster.center_y += 1
+                        elif monster.change_y < 0 and monster.bottom <= wall.top:
+                            monster.center_y -= 1
+                    else:
+                        if monster.change_x > 0 and monster.right >= wall.left:
+                            monster.change_x = 0
+                            monster.center_x += 1
+                        elif monster.change_x < 0 and monster.left <= wall.right:
+                            monster.change_x = 0
+                            monster.center_x -= 1
+                        elif monster.change_y > 0 and monster.top >= wall.bottom:
+                            monster.change_y = 0
+                            monster.center_y += 1
+                        elif monster.change_y < 0 and monster.bottom <= wall.top:
+                            monster.change_y = 0
+                            monster.center_y -= 1
 
     def on_key_press(self, key, modifiers):
         if self.heart_list:
