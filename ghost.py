@@ -27,13 +27,14 @@ class GhostMonster(arcade.Sprite):
         self.death_frame = 0
         self.spawn_frame = 0
         self.update_interval = 1 / 10
-        self.health = 7
+        self.health = 3
         self.time = 0
         self.bob_frequency = 5
         self.bob_amplitude = 0.3
         self.current_path_position = 0
         self.time_since_move = 0
         self.hunt_cooldown = 60
+        self.movement_speed_modifier = 1
         self.scale = scale
 
         # Init directions and position
@@ -92,8 +93,8 @@ class GhostMonster(arcade.Sprite):
 
         # If the sprite has no health, play that animation then kill it
         elif self.health <= 0 and self.death_frame < len(self.death_frames):
-            self.texture = self.death_frames[self.death_frame]
-            self.death_frame += 1
+            self.texture = self.death_frames[int(self.death_frame)]
+            self.death_frame += 0.5
         elif self.health <= 0:
             self.death_frame = 0
             self.kill()

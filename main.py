@@ -33,8 +33,8 @@ class MyGame(arcade.Window):
 
         # Init counters, constants, arrays, flags, and sounds
         self.key_press_buffer = set()
-        self.ghosts_to_spawn = 2.0
-        self.ghosts_to_spawn_multiplier = 1.25
+        self.ghosts_to_spawn = 4.0
+        self.ghosts_to_spawn_multiplier = 1.4
         self.no_ghost_timer = 0.0
         self.score = 0
         self.music_timer = time.time()
@@ -173,7 +173,14 @@ class MyGame(arcade.Window):
     def draw_gui(self):
         self.camera_gui.use()
         self.heart_list.draw()
-        score_text = f"Score: {self.score / 11}     Ghosts: {float(len(self.monster_list))}"
+        score_text = f"Score: {float(int(self.score / 6.5))}"
+        for monster in self.monster_list:
+            if monster.death_frame > 0:
+                score_text = f"Score: {self.score / 6.5}"
+                break
+        ghost_text = f"Ghosts: {len(self.monster_list)}"
+        arcade.draw_text(ghost_text, start_x=40, start_y=70, color=(255, 255, 242), font_size=19,
+                         font_name="Garamond")
         arcade.draw_text(score_text, start_x=40, start_y=32, color=(255, 255, 242), font_size=19,
                          font_name="Garamond")
 
@@ -231,7 +238,7 @@ class MyGame(arcade.Window):
                 self.has_spawned_player_death_ghost = True
 
     def update_physics(self):
-        if not self.is_dead:
+        if self.heart_list:
             self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
             self.player_and_monster_collider.update()
             self.player_and_wall_collider.update()
@@ -314,7 +321,7 @@ class MyGame(arcade.Window):
         # If a ghost dies increase the counter
         for monster in self.monster_list:
             if monster.health == 0:
-                self.score += 1
+                self.score += 1 * monster.scale
 
     def update_monsters(self):
         self.spawn_ghosts_on_empty_list()
@@ -346,6 +353,10 @@ class MyGame(arcade.Window):
                 monster.change_x = 0
             if monster.bottom == 32 and monster.change_y < 0:
                 monster.change_y = 0
+
+            # If the monster is too far gone kill it
+            if monster.left < 0 or monster.top > 2559 or monster.right > 2559 or monster.bottom < 0:
+                monster.health = 0
 
     def update_music(self):
         if time.time() > self.music_timer:
@@ -443,11 +454,14 @@ class MyGame(arcade.Window):
             angle = math.atan2(diff_y, diff_x)
 
             # Calculate the travel vector
-            monster.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
+            monster.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED * monster.movement_speed_modifier
             monster.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
-            if (monster.change_y ** 2 + monster.change_x ** 2) ** 0.5 > s.MONSTER_MOVEMENT_SPEED:
-                monster.change_x += s.MONSTER_MOVEMENT_SPEED * monster.change_x / abs(monster.change_x)
-                monster.change_y += s.MONSTER_MOVEMENT_SPEED * monster.change_y / abs(monster.change_y)
+            if (monster.change_y ** 2 + monster.change_x ** 2) ** 0.5 > s.MONSTER_MOVEMENT_SPEED * \
+                    monster.movement_speed_modifier:
+                monster.change_x += s.MONSTER_MOVEMENT_SPEED * monster.movement_speed_modifier * monster.change_x / \
+                                    abs(monster.change_x)
+                monster.change_y += s.MONSTER_MOVEMENT_SPEED * monster.movement_speed_modifier * monster.change_y / \
+                                    abs(monster.change_y)
 
             # Recalculate distance after the move
             distance = math.sqrt((monster.center_x - next_x) ** 2 + (monster.center_y - next_y) ** 2)
@@ -503,14 +517,28 @@ class MyGame(arcade.Window):
                 collision = True
             if not collision:
                 if random.random() > 0.9:
-                    monster.scale *= random.randint(50, 250) / 100
+                    monster.scale *= random.randint(90, 250) / 100
                 if random.random() > 0.95:
-                    monster.scale *= random.randint(60, 150) / 100
+                    monster.scale *= random.randint(90, 150) / 100
                 self.monster_list.append(monster)
             else:
 
                 # If there is a collision, Don't spawn the monster and try again
                 self.ghosts_to_spawn += 1
+
+            # If there are too many monsters, don't spawn more, instead increase the movement
+            over_ghosts = len(self.monster_list) - 25
+            if over_ghosts > 0:
+                for monster in self.monster_list:
+                    if over_ghosts >= 0:
+                        break
+                    elif monster.movement_speed_modifier < 1.9:
+                        monster.movement_speed_modifier += 0.1
+                        over_ghosts -= 1
+                    else:
+                        over_ghosts -= 1
+            if self.ghosts_to_spawn > 25:
+                self.ghosts_to_spawn = 25
 
     def spawn_ghosts_on_empty_list(self):
 
