@@ -317,14 +317,18 @@ class MyGame(arcade.Window):
                     overlap = True
                     break
             if not overlap:
+                if random.random() > 0.5:
+                    wall.angle = 45
+                if random.random() > 0.9:
+                    wall.scale *= random.randint(50, 200) / 100
+                if random.random() > 0.9:
+                    wall.scale *= random.randint(50, 200) / 100
                 self.wall_list.append(wall)
             else:
                 x = random.randint(100, map_width - 100)
                 y = random.randint(100, map_height - 100)
                 wall.center_x = x
                 wall.center_y = y
-            if random.random() < 0.5:
-                wall.angle = 45
 
     def handle_player_damage(self):
         self.health -= 1
