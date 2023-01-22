@@ -368,13 +368,6 @@ class MyGame(arcade.Window):
             if monster.left < 0 or monster.top > 2559 or monster.right > 2559 or monster.bottom < 0:
                 monster.health = 0
 
-            # Time the direction lock
-            if monster.direction_lock:
-                monster.direction_lock_timer += 1
-                if monster.direction_lock_timer > monster.direction_lock_stop_time:
-                    monster.direction_lock = False
-                    monster.direction_lock_timer = 0
-
     def update_music(self):
         if time.time() > self.music_timer:
             arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)

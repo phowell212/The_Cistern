@@ -35,7 +35,7 @@ class GhostMonster(arcade.Sprite):
         self.current_path_position = 0
         self.movement_speed_modifier = 1
         self.direction_lock_timer = 0
-        self.direction_lock_stop_time = 0.75 * 120
+        self.direction_lock_stop_time = 20
         self.scale = scale
 
         # Init directions and position
@@ -79,8 +79,17 @@ class GhostMonster(arcade.Sprite):
         if not self.direction_lock:
             if self.change_y > 0:
                 self.current_direction = self.directions[0]
+                self.direction_lock = True
             else:
                 self.current_direction = self.directions[1]
+                self.direction_lock = True
+
+        # Time the direction lock
+        if self.direction_lock:
+            self.direction_lock_timer += 1
+            if self.direction_lock_timer > self.direction_lock_stop_time:
+                self.direction_lock = False
+                self.direction_lock_timer = 0
 
     def update_animation(self, delta_time: float = 1 / 60):
         delta_time = 1 / 60
