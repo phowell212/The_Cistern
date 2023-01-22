@@ -411,6 +411,7 @@ class MyGame(arcade.Window):
             distance = math.sqrt(
                 (spawn_x - self.seraphima.center_x) ** 2 + (spawn_y - self.seraphima.center_y) ** 2)
         monster.center_x = spawn_x
+        monster.center_y = spawn_y
 
     def spawn_ghosts(self):
         for i in range(int(self.ghosts_to_spawn)):
