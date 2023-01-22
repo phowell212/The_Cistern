@@ -8,5 +8,5 @@ setup(
     license='Open Source',
     author='Phineas',
     author_email='h@aquil.us',
-    description='A simple game where you can explore and kill ghosts. Arrow keys to move, shift to sprint, c to slash.'
+    description='A simple game where you can explore and kill ghosts. Arrow keys to move, shift to walk, c to slash.'
 )

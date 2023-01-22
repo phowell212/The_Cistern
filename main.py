@@ -185,16 +185,22 @@ class MyGame(arcade.Window):
                 if monster.is_hunting:
                     num_ghosts_hunting += 1
                 monster_velocities.append((monster.change_x, monster.change_y))
-            text = f"Player position: {self.seraphima.position}.     " \
-                   f"Ghosts hunting you: {float(num_ghosts_hunting)}."
+            text = f"Player position: ({int(self.seraphima.position[0])}, {int(self.seraphima.position[1])}).     " \
+                   f"Player tlbr: ({int(self.seraphima.top)}, {int(self.seraphima.left)}, " \
+                   f"{int(self.seraphima.bottom)}, {int(self.seraphima.right)}).   " \
+                   f"Ghosts hunting you: {num_ghosts_hunting}."
             for i in range((len(monster_velocities))):
-                ghost_velocity_text = f"\n    Ghost {i} velocity: {monster_velocities[i]}.   "
-                arcade.draw_text(ghost_velocity_text, start_x=40, start_y=834 - (i * 30 * 2), color=(255, 255, 242),
+                ghost_velocity_text = f"\n    Ghost {i} velocity: ({int(monster_velocities[i][0])}," \
+                                      f" {int(monster_velocities[i][1])}).   "
+                arcade.draw_text(ghost_velocity_text, start_x=40, start_y=904 - (i * 30 * 2), color=(255, 255, 242),
                                  font_size=19, font_name="Garamond")
-                ghost_position_text = f"Ghost {i} position: {self.monster_list[i].position}."
-                arcade.draw_text(ghost_position_text, start_x=90, start_y=804 - (i * 30 * 2), color=(255, 255, 242),
+                ghost_position_text = f"Ghost {i} position: ({int(self.monster_list[i].position[0])}, " \
+                                      f" {int(self.monster_list[i].position[1])})."
+                arcade.draw_text(ghost_position_text, start_x=90, start_y=874 - (i * 30 * 2), color=(255, 255, 242),
                                  font_size=19, font_name="Garamond")
-            arcade.draw_text(text, start_x=40, start_y=864, color=(255, 255, 242), font_size=19,
+                if i == 4:
+                    break
+            arcade.draw_text(text, start_x=40, start_y=934, color=(255, 255, 242), font_size=19,
                              font_name="Garamond")
 
     def draw_game_over(self):
@@ -314,13 +320,30 @@ class MyGame(arcade.Window):
             if not monster.is_being_hurt:
                 self.move_monster(monster)
 
-            # Make the monster respawn_monster if they move off the play area
-            if monster.center_x < 0 or \
-                    monster.center_x > self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING:
-                self.respawn_monster(monster)
-            if monster.center_y < 0 or \
-                    monster.center_y > self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING:
-                self.respawn_monster(monster)
+            # Make the monster move into the play area if they are outside it
+            if monster.left < 45:
+                monster.change_x = 0
+                monster.center_x += 1
+            if monster.top > 2500:
+                monster.change_y = 0
+                monster.center_y -= 1
+            if monster.right > 2500:
+                monster.change_x = 0
+                monster.center_x -= 1
+            if monster.bottom < 55:
+                monster.change_y = 1
+                monster.center_y += 1
+
+            # @TODO: Edit these bounds so they match up with the walls better and the monster can always hunt
+            # Make the monster not be able to move outside the play area if they attempt to
+            if monster.left == 45 and monster.change_x < 0:
+                monster.change_x = 0
+            if monster.top == 2500 and monster.change_y > 0:
+                monster.change_y = 0
+            if monster.right == 2500 and monster.change_x > 0:
+                monster.change_x = 0
+            if monster.bottom == 55 and monster.change_y < 0:
+                monster.change_y = 0
 
     def update_music(self):
         if time.time() > self.music_timer:
