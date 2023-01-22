@@ -193,6 +193,7 @@ class MyGame(arcade.Window):
                                                        s.MONSTER_SCALING)
                 self.ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
                 self.seraphima.remove_from_sprite_lists()
+                self.ghost_sprite.alpha = s.GHOST_ALPHA
                 self.monster_list.append(self.ghost_sprite)
                 self.has_spawned_player_death_ghost = True
 
