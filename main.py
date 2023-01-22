@@ -252,25 +252,33 @@ class MyGame(arcade.Window):
                         monster.change_y = -monster.change_y
                         if monster.change_x > 0 and monster.right >= wall.left:
                             monster.center_x += 1
+                            monster.direction_lock = True
                         elif monster.change_x < 0 and monster.left <= wall.right:
                             monster.center_x -= 1
+                            monster.direction_lock = True
                         elif monster.change_y > 0 and monster.top >= wall.bottom:
                             monster.center_y += 1
+                            monster.direction_lock = True
                         elif monster.change_y < 0 and monster.bottom <= wall.top:
                             monster.center_y -= 1
+                            monster.direction_lock = True
                     else:
                         if monster.change_x > 0 and monster.right >= wall.left:
                             monster.change_x = 0
                             monster.center_x += 1
+                            monster.direction_lock = True
                         elif monster.change_x < 0 and monster.left <= wall.right:
                             monster.change_x = 0
                             monster.center_x -= 1
+                            monster.direction_lock = True
                         elif monster.change_y > 0 and monster.top >= wall.bottom:
                             monster.change_y = 0
                             monster.center_y += 1
+                            monster.direction_lock = True
                         elif monster.change_y < 0 and monster.bottom <= wall.top:
                             monster.change_y = 0
                             monster.center_y -= 1
+                            monster.direction_lock = True
 
     def update_movement(self, delta_time):
         self.monster_list.update()
@@ -344,19 +352,30 @@ class MyGame(arcade.Window):
                 monster.change_y = 1
                 monster.center_y += 1
 
-            # Make the monster not be able to move outside the play area if they attempt to
+            # Make the monster not be able to move outside the play area if they attempt to, and lock their direction
             if monster.left == 32 and monster.change_x < 0:
                 monster.change_x = 0
+                monster.direction_lock = True
             if monster.top == 2527 and monster.change_y > 0:
                 monster.change_y = 0
+                monster.direction_lock = True
             if monster.right == 2527 and monster.change_x > 0:
                 monster.change_x = 0
+                monster.direction_lock = True
             if monster.bottom == 32 and monster.change_y < 0:
                 monster.change_y = 0
+                monster.direction_lock = True
 
             # If the monster is too far gone kill it
             if monster.left < 0 or monster.top > 2559 or monster.right > 2559 or monster.bottom < 0:
                 monster.health = 0
+
+            # Time the direction lock
+            if monster.direction_lock:
+                monster.direction_lock_timer += 1
+                if monster.direction_lock_timer > monster.direction_lock_stop_time:
+                    monster.direction_lock = False
+                    monster.direction_lock_timer = 0
 
     def update_music(self):
         if time.time() > self.music_timer:

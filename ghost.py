@@ -20,6 +20,7 @@ class GhostMonster(arcade.Sprite):
         self.is_hunting = False
         self.is_stuck = False
         self.can_hunt = True
+        self.direction_lock = False
 
         # Init counters and values
         self.current_frame = 0
@@ -32,9 +33,9 @@ class GhostMonster(arcade.Sprite):
         self.bob_frequency = 5
         self.bob_amplitude = 0.3
         self.current_path_position = 0
-        self.time_since_move = 0
-        self.hunt_cooldown = 60
         self.movement_speed_modifier = 1
+        self.direction_lock_timer = 0
+        self.direction_lock_stop_time = 0.75 * 120
         self.scale = scale
 
         # Init directions and position
@@ -75,10 +76,11 @@ class GhostMonster(arcade.Sprite):
             self.update_animation(1 / 2)
 
         # Update the ghost's direction
-        if self.change_y > 0:
-            self.current_direction = self.directions[0]
-        else:
-            self.current_direction = self.directions[1]
+        if not self.direction_lock:
+            if self.change_y > 0:
+                self.current_direction = self.directions[0]
+            else:
+                self.current_direction = self.directions[1]
 
     def update_animation(self, delta_time: float = 1 / 60):
         delta_time = 1 / 60
