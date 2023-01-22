@@ -72,6 +72,7 @@ class MyGame(arcade.Window):
         self.generate_walls(self.level_map.width, self.level_map.height)
         self.ghost_sprite = ghost.GhostMonster(self.map_center_x, self.map_center_y + 200, s.MONSTER_SCALING)
         self.ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+        self.ghost_sprite.alpha = s.GHOST_ALPHA
         self.monster_list.append(self.ghost_sprite)
         self.load_heart_frames()
         for i in range(int(self.health / 10)):
@@ -431,6 +432,7 @@ class MyGame(arcade.Window):
             if monster.collides_with_sprite(self.seraphima):
                 collision = True
             if not collision:
+                monster.alpha = s.GHOST_ALPHA
                 self.monster_list.append(monster)
             else:
 
@@ -502,9 +504,9 @@ class MyGame(arcade.Window):
                 self.seraphima.is_slashing = True
                 self.seraphima.c_key_timer = 0
 
-        # Handle running, hold the shift key
+        # Handle running, use the arrow keys
         if arcade.key.LEFT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer \
-                and arcade.key.LSHIFT in self.key_press_buffer:
+                and not arcade.key.LSHIFT in self.key_press_buffer:
             self.seraphima.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
             self.seraphima.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
             if self.seraphima.is_slashing:
@@ -513,7 +515,7 @@ class MyGame(arcade.Window):
             self.seraphima.current_direction = "northwest"
             self.seraphima.is_running = True
         elif arcade.key.LEFT in self.key_press_buffer and arcade.key.DOWN in self.key_press_buffer \
-                and arcade.key.LSHIFT in self.key_press_buffer:
+                and not arcade.key.LSHIFT in self.key_press_buffer:
             self.seraphima.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
             self.seraphima.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
             if self.seraphima.is_slashing:
@@ -522,7 +524,7 @@ class MyGame(arcade.Window):
             self.seraphima.current_direction = "southwest"
             self.seraphima.is_running = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer \
-                and arcade.key.LSHIFT in self.key_press_buffer:
+                and not arcade.key.LSHIFT in self.key_press_buffer:
             self.seraphima.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
             self.seraphima.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
             if self.seraphima.is_slashing:
@@ -531,7 +533,7 @@ class MyGame(arcade.Window):
             self.seraphima.current_direction = "northeast"
             self.seraphima.is_running = True
         elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.DOWN in self.key_press_buffer \
-                and arcade.key.LSHIFT in self.key_press_buffer:
+                and not arcade.key.LSHIFT in self.key_press_buffer:
             self.seraphima.change_x = s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
             self.seraphima.change_y = -s.PLAYER_MOVEMENT_SPEED * 0.7 * s.PLAYER_RUN_SPEED_MODIFIER
             if self.seraphima.is_slashing:
@@ -539,32 +541,32 @@ class MyGame(arcade.Window):
                 self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER
             self.seraphima.current_direction = "southeast"
             self.seraphima.is_running = True
-        elif arcade.key.UP in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
+        elif arcade.key.UP in self.key_press_buffer and not arcade.key.LSHIFT in self.key_press_buffer:
             self.seraphima.change_y = s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
             if self.seraphima.is_slashing:
                 self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER
             self.seraphima.current_direction = "north"
             self.seraphima.is_running = True
-        elif arcade.key.DOWN in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
+        elif arcade.key.DOWN in self.key_press_buffer and not arcade.key.LSHIFT in self.key_press_buffer:
             self.seraphima.change_y = -s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
             self.seraphima.current_direction = "south"
             if self.seraphima.is_slashing:
                 self.seraphima.change_y *= s.SLASH_SPEED_MODIFIER
             self.seraphima.is_running = True
-        elif arcade.key.LEFT in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
+        elif arcade.key.LEFT in self.key_press_buffer and not arcade.key.LSHIFT in self.key_press_buffer:
             self.seraphima.change_x = -s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
             self.seraphima.current_direction = "west"
             if self.seraphima.is_slashing:
                 self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER
             self.seraphima.is_running = True
-        elif arcade.key.RIGHT in self.key_press_buffer and arcade.key.LSHIFT in self.key_press_buffer:
+        elif arcade.key.RIGHT in self.key_press_buffer and not arcade.key.LSHIFT in self.key_press_buffer:
             self.seraphima.change_x = s.PLAYER_MOVEMENT_SPEED * s.PLAYER_RUN_SPEED_MODIFIER
             if self.seraphima.is_slashing:
                 self.seraphima.change_x *= s.SLASH_SPEED_MODIFIER
             self.seraphima.current_direction = "east"
             self.seraphima.is_running = True
 
-        # Handle basic movement use the arrow keys
+        # Handle walking, hold the shift key
         elif arcade.key.LEFT in self.key_press_buffer and arcade.key.UP in self.key_press_buffer:
             self.seraphima.change_x = -s.PLAYER_MOVEMENT_SPEED * 0.7
             self.seraphima.change_y = s.PLAYER_MOVEMENT_SPEED * 0.7
