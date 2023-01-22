@@ -198,9 +198,10 @@ class MyGame(arcade.Window):
     def on_update(self, delta_time: float = 1 / 120):
 
         # Update the physics engine
-        self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
-        self.player_and_monster_collider.update()
-        self.player_and_wall_collider.update()
+        if not self.is_dead:
+            self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
+            self.player_and_monster_collider.update()
+            self.player_and_wall_collider.update()
 
         # Update the movement of the monsters, projectiles, and camera
         self.monster_list.update()
@@ -254,35 +255,9 @@ class MyGame(arcade.Window):
         for monster in self.monster_list:
             if monster.health == 0:
                 self.score += 1
-                self.health += 0.75
 
         # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
         self.spawn_ghosts_on_empty_list()
-
-        # Get the ghosts un-stuck if they have been stuck for a while
-        # Check if the ghost has moved a significant amount in the last 1-second plus some random time
-        for monster in self.monster_list:
-            if abs(monster.center_x - monster.starting_x) < 0.01 and abs(monster.center_y - monster.starting_y) < 0.01:
-                if not monster.is_stuck:
-                    monster.starting_x = monster.center_x
-                    monster.starting_y = monster.center_y
-                    monster.is_stuck = True
-                monster.time_since_move += delta_time
-            else:
-                monster.time_since_move = 0
-                monster.is_stuck = False
-
-            if monster.time_since_move > 1 + random.uniform(0, 0.5):
-                monster.can_hunt = False
-                monster.hunt_cooldown = 0.5 + random.uniform(0, 0.5)
-                monster.time_since_move = 0
-
-            # Decrement the hunt cooldown if it is active
-            if not monster.can_hunt:
-                monster.hunt_cooldown -= delta_time
-                if monster.hunt_cooldown <= 0:
-                    monster.can_hunt = True
-                    monster.hunt_cooldown = 60
 
         for monster in self.monster_list:
             if not monster.is_being_hurt:
