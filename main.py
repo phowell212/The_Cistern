@@ -321,28 +321,27 @@ class MyGame(arcade.Window):
                 self.move_monster(monster)
 
             # Make the monster move into the play area if they are outside it
-            if monster.left < 45:
+            if monster.left < 32:
                 monster.change_x = 0
                 monster.center_x += 1
-            if monster.top > 2500:
+            if monster.top > 2527:
                 monster.change_y = 0
                 monster.center_y -= 1
-            if monster.right > 2500:
+            if monster.right > 2527:
                 monster.change_x = 0
                 monster.center_x -= 1
-            if monster.bottom < 55:
+            if monster.bottom < 32:
                 monster.change_y = 1
                 monster.center_y += 1
 
-            # @TODO: Edit these bounds so they match up with the walls better and the monster can always hunt
             # Make the monster not be able to move outside the play area if they attempt to
-            if monster.left == 45 and monster.change_x < 0:
+            if monster.left == 32 and monster.change_x < 0:
                 monster.change_x = 0
-            if monster.top == 2500 and monster.change_y > 0:
+            if monster.top == 2527 and monster.change_y > 0:
                 monster.change_y = 0
-            if monster.right == 2500 and monster.change_x > 0:
+            if monster.right == 2527 and monster.change_x > 0:
                 monster.change_x = 0
-            if monster.bottom == 55 and monster.change_y < 0:
+            if monster.bottom == 32 and monster.change_y < 0:
                 monster.change_y = 0
 
     def update_music(self):
