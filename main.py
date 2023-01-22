@@ -23,7 +23,6 @@ class MyGame(arcade.Window):
 
         # Init the sprites
         self.seraphima = None
-        self.ghost_sprite = None
         self.wall_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.monster_list = arcade.SpriteList()
@@ -67,21 +66,17 @@ class MyGame(arcade.Window):
         self.wall_list.extend(scene_wall_sprite_list)
         self.generate_walls(self.level_map.width, self.level_map.height)
 
-        self.init_level_1()
-
-    def init_level_1(self):
         # Create playing field sprites
         self.seraphima = player.Player(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
         self.player_list.append(self.seraphima)
-        self.ghost_sprite = ghost.GhostMonster(self.map_center_x, self.map_center_y + 200, s.MONSTER_SCALING)
-        self.ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
-        self.monster_list.append(self.ghost_sprite)
+        self.spawn_ghosts_on_empty_list()
         self.load_heart_frames()
         for i in range(int(self.health / 10)):
             heart = arcade.Sprite("assets/heart/heart-0.png", s.HEART_SCALING)
             heart.center_x = (self.width - 200) + i * 40
             heart.center_y = 45
             self.heart_list.append(heart)
+        self.heart_list.reverse()
 
         # Make the physics engine
         self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.seraphima, self.wall_list)

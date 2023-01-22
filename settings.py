@@ -34,7 +34,7 @@ HEART_SCALING = 0.1
 GHOST_ALPHA = 210
 
 # Health settings, amount of life per heart
-HEART_HEALTH = 10
+HEART_HEALTH = 20
 PLAYER_STARTING_HEALTH = 40
 
 # Volume settings
