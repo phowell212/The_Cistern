@@ -173,12 +173,12 @@ class MyGame(arcade.Window):
     def draw_gui(self):
         self.camera_gui.use()
         self.heart_list.draw()
-        score_text = f"Score: {float(int(self.score / 6.5))}"
+        score_text = f"Score: {int(self.score / 6.5)}.0"
         for monster in self.monster_list:
             if monster.death_frame > 0:
                 score_text = f"Score: {self.score / 6.5}"
                 break
-        ghost_text = f"Ghosts: {len(self.monster_list)}"
+        ghost_text = f"Ghosts: {len(self.monster_list)}.0"
         arcade.draw_text(ghost_text, start_x=40, start_y=70, color=(255, 255, 242), font_size=19,
                          font_name="Garamond")
         arcade.draw_text(score_text, start_x=40, start_y=32, color=(255, 255, 242), font_size=19,
