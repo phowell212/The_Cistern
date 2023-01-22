@@ -243,7 +243,7 @@ class MyGame(arcade.Window):
             self.player_and_monster_collider.update()
             self.player_and_wall_collider.update()
 
-        # Our own monster physics because arcade.SimplePhysicsEngine sucks multiple updating spritelists
+        # Our own monster physics because arcade.SimplePhysicsEngine sucks with multiple updating spritelists
         for monster in self.monster_list:
             for wall in self.wall_list:
                 if arcade.check_for_collision(monster, wall):
