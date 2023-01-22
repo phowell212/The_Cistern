@@ -303,9 +303,7 @@ class MyGame(arcade.Window):
         for monster in player_collisions:
             if self.seraphima.is_slashing:
                 monster.is_being_hurt = True
-                self.handle_player_damage()
-            else:
-                self.handle_player_damage()
+            self.handle_player_damage()
 
     def update_seraphima(self, delta_time):
         self.seraphima.update_animation(delta_time)
@@ -366,7 +364,7 @@ class MyGame(arcade.Window):
                 monster.change_y = 0
                 monster.direction_lock = True
 
-            # If the monster is too far gone kill it
+            # If the monster is too far gone just kill it
             if monster.left < 0 or monster.top > 2559 or monster.right > 2559 or monster.bottom < 0:
                 monster.health = 0
 
