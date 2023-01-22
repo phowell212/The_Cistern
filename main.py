@@ -185,17 +185,19 @@ class MyGame(arcade.Window):
                 if monster.is_hunting:
                     num_ghosts_hunting += 1
                 monster_velocities.append((monster.change_x, monster.change_y))
-            text = f"Player position: ({int(self.seraphima.position[0])}, {int(self.seraphima.position[1])}).     " \
-                   f"Player tlbr: ({int(self.seraphima.top)}, {int(self.seraphima.left)}, " \
-                   f"{int(self.seraphima.bottom)}, {int(self.seraphima.right)}).   " \
-                   f"Ghosts hunting you: {num_ghosts_hunting}."
+            text = f"Player position: ({int(self.seraphima.position[0])}, {int(self.seraphima.position[1])}), " \
+                   f" ({int(self.seraphima.top)}, {int(self.seraphima.left)}, " \
+                   f"{int(self.seraphima.bottom)}, {int(self.seraphima.right)})."
+            ghost_hunting_text = f"Ghosts hunting you: {num_ghosts_hunting}."
+            arcade.draw_text(ghost_hunting_text, start_x=40, start_y=964, color=(255, 255, 242), font_size=19,
+                             font_name="Garamond")
             for i in range((len(monster_velocities))):
-                ghost_velocity_text = f"\n    Ghost {i} velocity: ({int(monster_velocities[i][0])}," \
-                                      f" {int(monster_velocities[i][1])}).   "
-                arcade.draw_text(ghost_velocity_text, start_x=40, start_y=904 - (i * 30 * 2), color=(255, 255, 242),
-                                 font_size=19, font_name="Garamond")
+                ghost_velocity_text = f"\n    Ghost {i} velocity: ({int(monster_velocities[i][0])}, " \
+                                      f" {int(monster_velocities[i][1])})."
                 ghost_position_text = f"Ghost {i} position: ({int(self.monster_list[i].position[0])}, " \
                                       f" {int(self.monster_list[i].position[1])})."
+                arcade.draw_text(ghost_velocity_text, start_x=40, start_y=904 - (i * 30 * 2), color=(255, 255, 242),
+                                 font_size=19, font_name="Garamond")
                 arcade.draw_text(ghost_position_text, start_x=90, start_y=874 - (i * 30 * 2), color=(255, 255, 242),
                                  font_size=19, font_name="Garamond")
                 if i == 4:
@@ -234,6 +236,7 @@ class MyGame(arcade.Window):
             self.player_and_monster_collider.update()
             self.player_and_wall_collider.update()
 
+        # Our own monster physics because arcade.SimplePhysicsEngine sucks multiple updating spritelists
         for monster in self.monster_list:
             for wall in self.wall_list:
                 if arcade.check_for_collision(monster, wall):
