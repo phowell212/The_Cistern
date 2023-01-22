@@ -215,7 +215,7 @@ class MyGame(arcade.Window):
 
                 # If the player isn't already transparent make the player sprite slowly fade out
             if self.seraphima.alpha != 0:
-                self.seraphima.alpha -= 0.15
+                self.seraphima.alpha -= 0.03 * self.seraphima.alpha
                 self.seraphima.alpha = max(0, self.seraphima.alpha)
             elif not self.is_faded_out:
                 self.is_faded_out = True
