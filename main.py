@@ -4,8 +4,8 @@ import arcade
 import time
 import ghost
 import player
+import swordslash
 import settings as s
-import swordslash as ss
 from arcade.experimental import Shadertoy
 from pathlib import Path
 from pyglet.math import Vec2
@@ -103,7 +103,39 @@ class MyGame(arcade.Window):
         self.channel1.use()
         self.channel1.clear()
 
-        # Draw the path if the debug mode is on
+        self.draw_path()
+        self.draw_monsters()
+        self.draw_walls()
+        self.draw_player()
+        self.draw_gui()
+        self.draw_debug_info()
+        self.draw_game_over()
+
+    def on_update(self, delta_time: float = 1 / 120):
+        self.update_physics()
+        self.update_movement(delta_time)
+        self.update_projectiles()
+        self.update_seraphima(delta_time)
+        self.update_gui(delta_time)
+        self.update_monsters()
+        self.update_music()
+
+    def on_key_press(self, key, modifiers):
+        if self.heart_list:
+            self.key_press_buffer.add(key)
+
+    def on_key_release(self, key, modifiers):
+        self.key_press_buffer.discard(key)
+        if not self.key_press_buffer:
+            if self.seraphima.is_walking:
+                self.seraphima.is_walking = False
+            if self.seraphima.is_running:
+                self.seraphima.is_running = False
+                self.seraphima.just_stopped_running = True
+        elif arcade.key.C not in self.key_press_buffer:
+            self.seraphima.c_key_timer = 0
+
+    def draw_path(self):
         if arcade.key.D in self.key_press_buffer:
             for monster in self.monster_list:
                 try:
@@ -116,39 +148,36 @@ class MyGame(arcade.Window):
                 if monster.debug_path is not None:
                     arcade.draw_line_strip(monster.debug_path, (30, 33, 40), 2)
         self.path_list = []
+
+    def draw_monsters(self):
         self.monster_list.draw()
 
-        # Draw the walls
+    def draw_walls(self):
         self.channel0.use()
         self.channel0.clear()
         self.wall_list.draw()
         self.use()
         self.clear()
 
-        # Calculate the light position
+    def draw_player(self):
         position = (self.seraphima.position[0] - self.camera.position[0],
                     self.seraphima.position[1] - self.camera.position[1])
 
-        # Run the shader and render to the window
         self.box_shadertoy.program['lightPosition'] = position
         self.box_shadertoy.program['lightSize'] = s.SPOTLIGHT_SIZE
         self.box_shadertoy.render()
 
-        # Draw the player
         self.player_list.draw()
         self.swordslash_list.draw()
 
-        # Draw the GUI
+    def draw_gui(self):
         self.camera_gui.use()
         self.heart_list.draw()
-
-        # Draw our score on the screen, scrolling it with the viewport
-        # the score is increased 11 times per monster killed, so we divide it by 11 to get the actual score
         score_text = f"Score: {self.score / 11}     Ghosts: {float(len(self.monster_list))}"
         arcade.draw_text(score_text, start_x=40, start_y=32, color=(255, 255, 242), font_size=19,
                          font_name="Garamond")
 
-        # Draw the debug info if the debug mode is on
+    def draw_debug_info(self):
         if arcade.key.D in self.key_press_buffer:
             num_ghosts_hunting = 0
             monster_velocities = []
@@ -168,40 +197,46 @@ class MyGame(arcade.Window):
             arcade.draw_text(text, start_x=40, start_y=864, color=(255, 255, 242), font_size=19,
                              font_name="Garamond")
 
-        # Draw game over if dead
+    def draw_game_over(self):
         if not self.heart_list:
             arcade.draw_text("GAME OVER", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2,
-                             color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
-                             anchor_y="baseline", bold=True)
-            for monster in self.monster_list:
-                monster.can_hunt = False
+                             color=(255, 255, 242), font_size=72, font_name="Garamond")
 
-            # If the player isn't already transparent make the player sprite slowly fade out
-            if self.seraphima.alpha != 0:
-                self.seraphima.alpha -= 0.15
-                self.seraphima.alpha = max(0, self.seraphima.alpha)
-            elif not self.is_faded_out:
-                self.is_faded_out = True
-                self.has_spawned_player_death_ghost = False
-
-            # If the player is fully transparent, spawn a ghost monster on their death location
-            elif not self.has_spawned_player_death_ghost:
-                self.ghost_sprite = ghost.GhostMonster(self.seraphima.center_x, self.seraphima.center_y,
-                                                       s.MONSTER_SCALING)
-                self.ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
-                self.seraphima.remove_from_sprite_lists()
-                self.monster_list.append(self.ghost_sprite)
-                self.has_spawned_player_death_ghost = True
-
-    def on_update(self, delta_time: float = 1 / 120):
-
-        # Update the physics engine
+    def update_physics(self):
         if not self.is_dead:
             self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
             self.player_and_monster_collider.update()
             self.player_and_wall_collider.update()
 
-        # Update the movement of the monsters, projectiles, and camera
+        for monster in self.monster_list:
+            for wall in self.wall_list:
+                if arcade.check_for_collision(monster, wall):
+                    if not monster.is_hunting:
+                        monster.change_x = -monster.change_x
+                        monster.change_y = -monster.change_y
+                        if monster.change_x > 0 and monster.right >= wall.left:
+                            monster.center_x += 1
+                        elif monster.change_x < 0 and monster.left <= wall.right:
+                            monster.center_x -= 1
+                        elif monster.change_y > 0 and monster.top >= wall.bottom:
+                            monster.center_y += 1
+                        elif monster.change_y < 0 and monster.bottom <= wall.top:
+                            monster.center_y -= 1
+                    else:
+                        if monster.change_x > 0 and monster.right >= wall.left:
+                            monster.change_x = 0
+                            monster.center_x += 1
+                        elif monster.change_x < 0 and monster.left <= wall.right:
+                            monster.change_x = 0
+                            monster.center_x -= 1
+                        elif monster.change_y > 0 and monster.top >= wall.bottom:
+                            monster.change_y = 0
+                            monster.center_y += 1
+                        elif monster.change_y < 0 and monster.bottom <= wall.top:
+                            monster.change_y = 0
+                            monster.center_y -= 1
+
+    def update_movement(self, delta_time):
         self.monster_list.update()
         self.scroll_to_player()
         self.process_key_presses()
@@ -211,32 +246,11 @@ class MyGame(arcade.Window):
             if arcade.check_for_collision_with_list(projectile, self.wall_list):
                 projectile.is_hitting_wall = True
 
-        # Make a projectile if the player is slashing and there currently isn't another one
+    def update_projectiles(self):
         if self.seraphima.is_slashing and self.seraphima.c_key_timer == 0 and not self.swordslash_list:
-            slash_projectile = ss.SwordSlash(self.seraphima)
+            slash_projectile = swordslash.SwordSlash(self.seraphima)
             self.swordslash_list.append(slash_projectile)
             arcade.play_sound(random.choice(self.swoosh_sounds), s.SWOOSH_VOLUME)
-
-        # Update the player
-        self.seraphima.update_animation(delta_time)
-        if self.seraphima.c_key_timer > 0:
-            self.seraphima.change_x *= s.SLASH_CHARGE_SPEED_MODIFIER
-            self.seraphima.change_y *= s.SLASH_CHARGE_SPEED_MODIFIER
-
-        # Update the heart frames, so they match the animation speed of the player
-        self.heart_frame += 18 * delta_time
-        for heart in self.heart_list:
-            if self.heart_frame < len(self.heart_frames):
-                heart.texture = self.heart_frames[int(self.heart_frame)]
-            else:
-                self.heart_frame = 0
-
-        # Set the first heart's size to represent the player's health
-        for heart in self.heart_list:
-            heart.scale = (self.health / len(self.heart_list)) / 100
-            break
-
-        # Handle the player's slash
         player_collisions = arcade.check_for_collision_with_list(self.seraphima, self.monster_list)
         for projectile in self.swordslash_list:
             projectile_collisions = arcade.check_for_collision_with_list(projectile, self.monster_list)
@@ -249,12 +263,31 @@ class MyGame(arcade.Window):
             else:
                 self.handle_player_damage()
 
+    def update_seraphima(self, delta_time):
+        self.seraphima.update_animation(delta_time)
+        if self.seraphima.c_key_timer > 0:
+            self.seraphima.change_x *= s.SLASH_CHARGE_SPEED_MODIFIER
+            self.seraphima.change_y *= s.SLASH_CHARGE_SPEED_MODIFIER
+
+    def update_gui(self, delta_time):
+        self.heart_frame += 18 * delta_time
+        for heart in self.heart_list:
+            if self.heart_frame < len(self.heart_frames):
+                heart.texture = self.heart_frames[int(self.heart_frame)]
+            else:
+                self.heart_frame = 0
+
+        # Set the first heart's size to represent the player's health
+        for heart in self.heart_list:
+            heart.scale = (self.health / len(self.heart_list)) / 100
+            break
+
         # If a ghost dies increase the counter
         for monster in self.monster_list:
             if monster.health == 0:
                 self.score += 1
 
-        # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
+    def update_monsters(self):
         self.spawn_ghosts_on_empty_list()
 
         for monster in self.monster_list:
@@ -269,10 +302,7 @@ class MyGame(arcade.Window):
                     monster.center_y > self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING:
                 self.respawn_monster(monster)
 
-        # Update our own hacky monster physics engine cause you cant access the monster inside a simple physics engine
-        self.update_monster_physics()
-
-        # Play the background music again if it's finished
+    def update_music(self):
         if time.time() > self.music_timer:
             arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
             self.music_timer = time.time() + (5 * 60) + 57
@@ -456,39 +486,6 @@ class MyGame(arcade.Window):
                         self.seraphima.center_y - self.height / 2)
         self.camera.move_to(position, speed)
 
-    def update_monster_physics(self):
-        for monster in self.monster_list:
-            for wall in self.wall_list:
-                if arcade.check_for_collision(monster, wall):
-                    if not monster.is_hunting:
-                        monster.change_x = -monster.change_x
-                        monster.change_y = -monster.change_y
-                        if monster.change_x > 0 and monster.right >= wall.left:
-                            monster.center_x += 1
-                        elif monster.change_x < 0 and monster.left <= wall.right:
-                            monster.center_x -= 1
-                        elif monster.change_y > 0 and monster.top >= wall.bottom:
-                            monster.center_y += 1
-                        elif monster.change_y < 0 and monster.bottom <= wall.top:
-                            monster.center_y -= 1
-                    else:
-                        if monster.change_x > 0 and monster.right >= wall.left:
-                            monster.change_x = 0
-                            monster.center_x += 1
-                        elif monster.change_x < 0 and monster.left <= wall.right:
-                            monster.change_x = 0
-                            monster.center_x -= 1
-                        elif monster.change_y > 0 and monster.top >= wall.bottom:
-                            monster.change_y = 0
-                            monster.center_y += 1
-                        elif monster.change_y < 0 and monster.bottom <= wall.top:
-                            monster.change_y = 0
-                            monster.center_y -= 1
-
-    def on_key_press(self, key, modifiers):
-        if self.heart_list:
-            self.key_press_buffer.add(key)
-
     def process_key_presses(self):
         self.seraphima.change_x = 0
         self.seraphima.change_y = 0
@@ -630,17 +627,6 @@ class MyGame(arcade.Window):
         # Make sure the player is not running if the shift key is pressed
         if arcade.key.LSHIFT in self.key_press_buffer:
             self.seraphima.is_running = False
-
-    def on_key_release(self, key, modifiers):
-        self.key_press_buffer.discard(key)
-        if not self.key_press_buffer:
-            if self.seraphima.is_walking:
-                self.seraphima.is_walking = False
-            if self.seraphima.is_running:
-                self.seraphima.is_running = False
-                self.seraphima.just_stopped_running = True
-        elif arcade.key.C not in self.key_press_buffer:
-            self.seraphima.c_key_timer = 0
 
 
 if __name__ == "__main__":
