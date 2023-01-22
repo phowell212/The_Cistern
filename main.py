@@ -427,6 +427,10 @@ class MyGame(arcade.Window):
             if monster.collides_with_sprite(self.seraphima):
                 collision = True
             if not collision:
+                if random.random() > 0.9:
+                    monster.scale *= random.randint(50, 250) / 100
+                if random.random() > 0.95:
+                    monster.scale *= random.randint(60, 150) / 100
                 self.monster_list.append(monster)
             else:
 
