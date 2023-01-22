@@ -200,7 +200,27 @@ class MyGame(arcade.Window):
     def draw_game_over(self):
         if not self.heart_list:
             arcade.draw_text("GAME OVER", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2,
-                             color=(255, 255, 242), font_size=72, font_name="Garamond")
+                             color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
+                             anchor_y="baseline", bold=True)
+            for monster in self.monster_list:
+                monster.can_hunt = False
+
+                # If the player isn't already transparent make the player sprite slowly fade out
+            if self.seraphima.alpha != 0:
+                self.seraphima.alpha -= 0.15
+                self.seraphima.alpha = max(0, self.seraphima.alpha)
+            elif not self.is_faded_out:
+                self.is_faded_out = True
+                self.has_spawned_player_death_ghost = False
+
+                # If the player is fully transparent, spawn a ghost monster on their death location
+            elif not self.has_spawned_player_death_ghost:
+                ghost_sprite = ghost.GhostMonster(self.seraphima.center_x, self.seraphima.center_y,
+                                                  s.PLAYER_SCALING)
+                ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+                self.seraphima.remove_from_sprite_lists()
+                self.monster_list.append(ghost_sprite)
+                self.has_spawned_player_death_ghost = True
 
     def update_physics(self):
         if not self.is_dead:
