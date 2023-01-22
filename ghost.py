@@ -1,5 +1,6 @@
 import arcade
 import math
+import settings as s
 
 
 class GhostMonster(arcade.Sprite):
@@ -43,6 +44,7 @@ class GhostMonster(arcade.Sprite):
         self.current_direction = self.directions[1]
         self.load_frames()
         self.debug_path = None
+        self.alpha = s.GHOST_ALPHA
 
     def load_frames(self):
         for i in range(0, 1):

@@ -65,14 +65,16 @@ class MyGame(arcade.Window):
         self.wall_tile_map = arcade.Scene.from_tilemap(self.wall_tile_map)
         scene_wall_sprite_list = self.wall_tile_map.get_sprite_list("Tile Layer 1")
         self.wall_list.extend(scene_wall_sprite_list)
+        self.generate_walls(self.level_map.width, self.level_map.height)
 
-        # Create the sprites
+        self.init_level_1()
+
+    def init_level_1(self):
+        # Create playing field sprites
         self.seraphima = player.Player(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
         self.player_list.append(self.seraphima)
-        self.generate_walls(self.level_map.width, self.level_map.height)
         self.ghost_sprite = ghost.GhostMonster(self.map_center_x, self.map_center_y + 200, s.MONSTER_SCALING)
         self.ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
-        self.ghost_sprite.alpha = s.GHOST_ALPHA
         self.monster_list.append(self.ghost_sprite)
         self.load_heart_frames()
         for i in range(int(self.health / 10)):
@@ -193,7 +195,6 @@ class MyGame(arcade.Window):
                                                        s.MONSTER_SCALING)
                 self.ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
                 self.seraphima.remove_from_sprite_lists()
-                self.ghost_sprite.alpha = s.GHOST_ALPHA
                 self.monster_list.append(self.ghost_sprite)
                 self.has_spawned_player_death_ghost = True
 
@@ -349,10 +350,8 @@ class MyGame(arcade.Window):
                                                     self.barrier_list,
                                                     diagonal_movement=False)
             self.path_list.append(self.path)
-
         if self.path and not self.is_dead and \
                 arcade.get_distance_between_sprites(monster, self.seraphima) < s.MONSTER_VISION_RANGE:
-
             if not monster.is_hunting:
                 monster.is_hunting = True
 
@@ -361,6 +360,7 @@ class MyGame(arcade.Window):
                 next_x = self.path[monster.current_path_position][0]
                 next_y = self.path[monster.current_path_position][1]
             except IndexError:
+
                 # We are at the end of the path
                 next_x = self.seraphima.center_x
                 next_y = self.seraphima.center_y
@@ -375,7 +375,6 @@ class MyGame(arcade.Window):
             # Calculate the travel vector
             monster.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
             monster.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
-
             if (monster.change_y ** 2 + monster.change_x ** 2) ** 0.5 > s.MONSTER_MOVEMENT_SPEED:
                 monster.change_x += s.MONSTER_MOVEMENT_SPEED * monster.change_x / abs(monster.change_x)
                 monster.change_y += s.MONSTER_MOVEMENT_SPEED * monster.change_y / abs(monster.change_y)
@@ -390,7 +389,6 @@ class MyGame(arcade.Window):
                 # If we're at the end of the path, start over
                 if monster.current_path_position >= len(self.path):
                     monster.current_path_position = 0
-
         else:
             if monster.is_hunting:
                 monster.is_hunting = False
@@ -434,7 +432,6 @@ class MyGame(arcade.Window):
             if monster.collides_with_sprite(self.seraphima):
                 collision = True
             if not collision:
-                monster.alpha = s.GHOST_ALPHA
                 self.monster_list.append(monster)
             else:
 
@@ -630,6 +627,10 @@ class MyGame(arcade.Window):
         if arcade.key.C in self.key_press_buffer:
             self.seraphima.change_x *= s.SLASH_CHARGE_SPEED_MODIFIER
             self.seraphima.change_y *= s.SLASH_CHARGE_SPEED_MODIFIER
+
+        # Make sure the player is not running if the shift key is pressed
+        if arcade.key.LSHIFT in self.key_press_buffer:
+            self.seraphima.is_running = False
 
     def on_key_release(self, key, modifiers):
         self.key_press_buffer.discard(key)

@@ -333,6 +333,7 @@ class Player(arcade.Sprite):
 
     def update_animation(self, delta_time: float = 1 / 60):
         delta_time = 1 / 60
+
         # Update the animation frame
         self.elapsed_time += delta_time
         if self.elapsed_time > self.update_interval:
