@@ -344,7 +344,7 @@ class MyGame(arcade.Window):
                 wall.center_x = x
                 wall.center_y = y
             if random.random() < 0.5:
-                wall.angle = 90
+                wall.angle = 45
 
     def handle_player_damage(self):
         self.health -= 1
