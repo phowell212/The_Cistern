@@ -36,7 +36,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
         // Grab a coordinate between where we are and the light
         vec2 samplePoint = mix(normalizedFragCoord, normalizedLightCoord, t);
         // Is there something there? If so, we'll assume we are in shadow
-	    float shadowAmount = terrain(samplePoint);
+        float shadowAmount = terrain(samplePoint);
         // Multiply the light amount.
         // (Multiply in case we want to upgrade to soft shadows)
         lightAmount *= shadowAmount;

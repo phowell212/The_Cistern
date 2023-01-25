@@ -1,3 +1,4 @@
 arcade~=2.6.17
 pyglet~=2.0.dev23
 setuptools~=65.5.0
+Pillow~=9.3.0

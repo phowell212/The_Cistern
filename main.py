@@ -5,6 +5,7 @@ import time
 import ghost
 import player
 import swordslash
+import darkfairy
 import settings as s
 from arcade.experimental import Shadertoy
 from pathlib import Path
@@ -28,9 +29,9 @@ class MyGame(arcade.Window):
         self.monster_list = arcade.SpriteList()
         self.swordslash_list = arcade.SpriteList()
         self.heart_list = arcade.SpriteList()
+        self.boss_list = arcade.SpriteList()
         self.heart_frames = []
         self.heart_frame = 0
-
         # Init counters, constants, arrays, flags, and sounds
         self.key_press_buffer = set()
         self.ghosts_to_spawn = 4.0
@@ -78,9 +79,14 @@ class MyGame(arcade.Window):
             self.heart_list.append(heart)
         self.heart_list.reverse()
 
+        self.boss = darkfairy.DarkFairy(self.map_center_x + 100, self.map_center_y + 300, s.BOSS_SCALING)
+        self.boss_list.append(self.boss)
+
         # Make the physics engine
         self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.seraphima, self.wall_list)
         self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
+        self.player_and_boss_collider = arcade.PhysicsEngineSimple(self.seraphima, self.boss_list)
+        self.boss_and_wall_collider = arcade.PhysicsEngineSimple(self.boss, self.wall_list)
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.monster_phys_engines = []
@@ -119,6 +125,7 @@ class MyGame(arcade.Window):
         self.update_gui(delta_time)
         self.update_monsters()
         self.update_music()
+        self.boss_list.update()
 
     def on_key_press(self, key, modifiers):
         if self.heart_list:
@@ -151,6 +158,7 @@ class MyGame(arcade.Window):
 
     def draw_monsters(self):
         self.monster_list.draw()
+        self.boss_list.draw()
 
     def draw_walls(self):
         self.channel0.use()
@@ -242,6 +250,11 @@ class MyGame(arcade.Window):
             self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
             self.player_and_monster_collider.update()
             self.player_and_wall_collider.update()
+            self.player_and_boss_collider.update()
+            try:
+                self.boss_and_wall_collider.update()
+            except AttributeError:
+                pass
 
         # Our own monster physics because arcade.SimplePhysicsEngine sucks with multiple updating spritelists
         for monster in self.monster_list:
@@ -279,6 +292,13 @@ class MyGame(arcade.Window):
                             monster.change_y = 0
                             monster.center_y -= 1
                             monster.direction_lock = True
+
+        # Handle boss damage
+        if self.boss_list:
+            for projectile in self.swordslash_list:
+                if arcade.check_for_collision(projectile, self.boss_list[0]):
+                    self.boss_list[0].health -= 1
+                    self.boss_list[0].is_being_hurt = True
 
     def update_movement(self, delta_time):
         self.monster_list.update()
@@ -331,6 +351,12 @@ class MyGame(arcade.Window):
 
     def update_monsters(self):
         self.spawn_ghosts_on_empty_list()
+        self.move_boss()
+
+        # Let the boss attack:
+        if self.boss_list:
+            if random.randint(0, 100) == 0:
+                self.boss_list[0].casting = True
 
         for monster in self.monster_list:
             if not monster.is_being_hurt:
@@ -396,7 +422,7 @@ class MyGame(arcade.Window):
     def generate_walls(self, map_width, map_height):
         map_width = int(map_width * self.level_map.tile_width * s.SPRITE_SCALING)
         map_height = int(map_height * self.level_map.tile_height * s.SPRITE_SCALING)
-        for _ in range(150):
+        for i in range(150):
             x = random.randint(100, map_width - 100)
             y = random.randint(100, map_height - 100)
             wall = arcade.Sprite("assets/level/wall.png", s.SPRITE_SCALING)
@@ -408,6 +434,9 @@ class MyGame(arcade.Window):
                     overlap = True
                     break
                 elif wall.collides_with_list(self.player_list):
+                    overlap = True
+                    break
+                elif wall.collides_with_list(self.boss_list):
                     overlap = True
                     break
             if not overlap:
@@ -491,6 +520,11 @@ class MyGame(arcade.Window):
             if random.randint(0, 100) == 0:
                 monster.change_x = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
                 monster.change_y = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
+
+    def move_boss(self):
+        if random.randint(0, 100) == 0:
+            self.boss.change_x = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
+            self.boss.change_y = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
 
     def respawn_monster(self, monster):
         spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
