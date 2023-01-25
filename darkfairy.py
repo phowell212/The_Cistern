@@ -1,6 +1,7 @@
 import arcade
 import settings as s
 
+
 class DarkFairy(arcade.Sprite):
     def __init__(self, center_x, center_y, scale):
         super().__init__()

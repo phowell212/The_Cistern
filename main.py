@@ -253,7 +253,7 @@ class MyGame(arcade.Window):
             self.player_and_boss_collider.update()
             try:
                 self.boss_and_wall_collider.update()
-            except AttributeError:
+            except ValueError:
                 pass
 
         # Our own monster physics because arcade.SimplePhysicsEngine sucks with multiple updating spritelists
@@ -301,7 +301,7 @@ class MyGame(arcade.Window):
 
     def update_movement(self, delta_time):
         self.monster_list.update()
-        self.scroll_to_player()
+        self.scroll_to_playe()
         self.process_key_presses()
         for projectile in self.swordslash_list:
             projectile.update_animation(delta_time)
