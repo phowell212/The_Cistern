@@ -61,7 +61,7 @@ class SwordSlash(arcade.Sprite):
         self.load_frames()
 
     def load_frames(self):
-        for i in range(1, 14):
+        for i in range(1, 15):
             self.northwest_frames.append(arcade.load_texture(f"assets/swordslash/ss_northwest-{i}.png"))
             self.southwest_frames.append(arcade.load_texture(f"assets/swordslash/ss_southwest-{i}.png"))
             self.northeast_frames.append(arcade.load_texture(f"assets/swordslash/ss_northeast-{i}.png"))

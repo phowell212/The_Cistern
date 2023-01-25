@@ -48,14 +48,12 @@ class GhostMonster(arcade.Sprite):
         self.alpha = s.GHOST_ALPHA
 
     def load_frames(self):
-        for i in range(0, 1):
-            self.north_idle_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_north-{i}.png"))
-        for i in range(0, 1):
-            self.south_idle_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_south-{i}.png"))
         for i in range(0, 7):
             self.hurt_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_scream-{i}.png"))
         for i in range(0, 10):
             self.death_frames.append(arcade.load_texture(f"assets/enemies/ghost/g_death-{i}.png"))
+        self.north_idle_frames.append(arcade.load_texture("assets/enemies/ghost/g_north-0.png"))
+        self.south_idle_frames.append(arcade.load_texture("assets/enemies/ghost/g_south-0.png"))
         self.spawn_frames = self.death_frames[::-1]
         self.spawn_frames = self.spawn_frames[1:]
 

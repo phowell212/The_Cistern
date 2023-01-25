@@ -297,8 +297,8 @@ class MyGame(arcade.Window):
         if self.boss_list:
             for projectile in self.swordslash_list:
                 if arcade.check_for_collision(projectile, self.boss_list[0]):
-                    self.boss_list[0].health -= 1
-                    self.boss_list[0].is_being_hurt = True
+                    self.boss.health -= 1
+                    self.boss.is_being_hurt = True
 
     def update_movement(self, delta_time):
         self.monster_list.update()
@@ -356,7 +356,7 @@ class MyGame(arcade.Window):
         # Let the boss attack:
         if self.boss_list:
             if random.randint(0, 100) == 0:
-                self.boss_list[0].casting = True
+                self.boss.is_casting = True
 
         for monster in self.monster_list:
             if not monster.is_being_hurt:

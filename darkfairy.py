@@ -16,7 +16,7 @@ class DarkFairy(arcade.Sprite):
         self.death_frames = []
 
         # Init the boss variables
-        self.health = 15
+        self.health = 100
         self.is_casting = False
         self.is_being_hurt = False
         self.is_transforming = False
@@ -40,9 +40,6 @@ class DarkFairy(arcade.Sprite):
         for i in range(0, 7):
             self.phase_1_cast_frames.append(arcade.load_texture(
                 f"assets/enemies/darkfairy_new/darkfairy_phase1_castspell_{i}.png"))
-        for i in range(0, 1):
-            self.phase_1_hurt_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_new/darkfairy_phase1_hurt_{i}.png"))
         for i in range(0, 6):
             self.phase_1_idle_frames.append(arcade.load_texture(
                 f"assets/enemies/darkfairy_new/darkfairy_phase1_idle{i}.png"))
@@ -55,9 +52,6 @@ class DarkFairy(arcade.Sprite):
         for i in range(0, 3):
             self.phase_2_cast_frames.append(arcade.load_texture(
                 f"assets/enemies/darkfairy_new/darkfairy_phase2_castspell_{i}.png"))
-        for i in range(0, 2):
-            self.phase_2_hurt_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_new/darkfairy_phase2_hurt_{i}.png"))
         for i in range(0, 9):
             self.death_frames.append(arcade.load_texture(
                 f"assets/enemies/darkfairy_new/darkfairy_phase2_death_0{i}.png"))
@@ -68,8 +62,10 @@ class DarkFairy(arcade.Sprite):
             f"assets/enemies/darkfairy_new/darkfairy_phase2_idle_0.png"))
         self.phase_2_idle_frames.append(arcade.load_texture(
             f"assets/enemies/darkfairy_new/darkfairy_phase2_idle_1.png"))
-
-        print(self.phase_1_idle_frames[0].size)
+        self.phase_2_hurt_frames.append(arcade.load_texture(
+            f"assets/enemies/darkfairy_new/darkfairy_phase2_hurt_0.png"))
+        self.phase_2_hurt_frames.append(arcade.load_texture(
+            f"assets/enemies/darkfairy_new/darkfairy_phase2_hurt_1.png"))
 
     def update_animation(self, delta_time: float = 1 / 60):
         delta_time = 1.25  # Play with this
@@ -93,7 +89,7 @@ class DarkFairy(arcade.Sprite):
                         self.current_frame = 0
                         self.phase = 2
 
-            elif self.is_casting and self.casting_frame < len(self.phase_1_cast_frames):
+            elif self.is_casting and self.casting_frame < len(self.phase_1_cast_frames) and not self.is_being_hurt:
                 self.texture = self.phase_1_cast_frames[int(self.casting_frame)]
                 self.casting_frame += self.update_interval * delta_time
                 if self.casting_frame > len(self.phase_1_cast_frames):
@@ -102,7 +98,7 @@ class DarkFairy(arcade.Sprite):
 
             elif self.is_being_hurt and self.hurt_frame < len(self.phase_1_hurt_frames):
                 self.texture = self.phase_1_hurt_frames[int(self.hurt_frame)]
-                self.hurt_frame += self.update_interval * delta_time
+                self.hurt_frame += 1 / 3
                 if self.hurt_frame > len(self.phase_1_hurt_frames):
                     self.is_being_hurt = False
                     self.hurt_frame = 0
