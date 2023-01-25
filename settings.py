@@ -34,9 +34,10 @@ BOSS_SCALING = 0.35
 # Alpha
 GHOST_ALPHA = 210
 
-# Health settings, amount of life per heart
+# Health settings
 HEART_HEALTH = 20
 PLAYER_STARTING_HEALTH = 40
+BOSS_HEALTH = 15
 
 # Volume settings
 # MUSIC_VOLUME = 0.3

@@ -294,11 +294,10 @@ class MyGame(arcade.Window):
                             monster.direction_lock = True
 
         # Handle boss damage
-        if self.boss_list:
-            for projectile in self.swordslash_list:
-                if arcade.check_for_collision(projectile, self.boss_list[0]):
-                    self.boss.health -= 1
-                    self.boss.is_being_hurt = True
+        for projectile in self.swordslash_list:
+            if arcade.check_for_collision(projectile, self.boss):
+                self.boss.health -= 1
+                self.boss.is_being_hurt = True
 
     def update_movement(self, delta_time):
         self.monster_list.update()

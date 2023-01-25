@@ -1,5 +1,5 @@
 import arcade
-
+import settings as s
 
 class DarkFairy(arcade.Sprite):
     def __init__(self, center_x, center_y, scale):
@@ -16,7 +16,7 @@ class DarkFairy(arcade.Sprite):
         self.death_frames = []
 
         # Init the boss variables
-        self.health = 100
+        self.health = s.BOSS_HEALTH
         self.is_casting = False
         self.is_being_hurt = False
         self.is_transforming = False
@@ -33,42 +33,46 @@ class DarkFairy(arcade.Sprite):
         self.scale = scale
 
         self.load_frames()
-        self.phase_1_idle_frames.extend(self.phase_1_idle_frames[::-1])
-        self.phase_2_idle_frames.extend(self.phase_2_idle_frames[::-1])
 
     def load_frames(self):
         for i in range(0, 7):
             self.phase_1_cast_frames.append(arcade.load_texture(
                 f"assets/enemies/darkfairy_new/darkfairy_phase1_castspell_{i}.png"))
-        for i in range(0, 6):
+        for i in range(0, 2):
+            self.phase_1_hurt_frames.append(arcade.load_texture(
+                f"assets/enemies/darkfairy_new/darkfairy_phase1_hurt_{i}.png"))
+        for i in range(0, 7):
             self.phase_1_idle_frames.append(arcade.load_texture(
                 f"assets/enemies/darkfairy_new/darkfairy_phase1_idle{i}.png"))
-        for i in range(0, 9):
+        for i in range(0, 10):
             self.transform_frames.append(arcade.load_texture(
                 f"assets/enemies/darkfairy_new/darkfairy_transformation_into_phase2_0{i}.png"))
-        for i in range(0, 5):
+        for i in range(0, 6):
             self.transform_frames.append(arcade.load_texture(
                 f"assets/enemies/darkfairy_new/darkfairy_transformation_into_phase2_1{i}.png"))
-        for i in range(0, 3):
+        for i in range(0, 4):
             self.phase_2_cast_frames.append(arcade.load_texture(
                 f"assets/enemies/darkfairy_new/darkfairy_phase2_castspell_{i}.png"))
-        for i in range(0, 9):
+        for i in range(0, 3):
+            self.phase_2_hurt_frames.append(arcade.load_texture(
+                f"assets/enemies/darkfairy_new/darkfairy_phase2_hurt_{i}.png"))
+        for i in range(0, 2):
+            self.phase_2_idle_frames.append(arcade.load_texture(
+                f"assets/enemies/darkfairy_new/darkfairy_phase2_idle_{i}.png"))
+        for i in range(0, 10):
             self.death_frames.append(arcade.load_texture(
                 f"assets/enemies/darkfairy_new/darkfairy_phase2_death_0{i}.png"))
-        for i in range(0, 3):
+        for i in range(0, 4):
             self.death_frames.append(arcade.load_texture(
                 f"assets/enemies/darkfairy_new/darkfairy_phase2_death_1{i}.png"))
-        self.phase_2_idle_frames.append(arcade.load_texture(
-            f"assets/enemies/darkfairy_new/darkfairy_phase2_idle_0.png"))
-        self.phase_2_idle_frames.append(arcade.load_texture(
-            f"assets/enemies/darkfairy_new/darkfairy_phase2_idle_1.png"))
-        self.phase_2_hurt_frames.append(arcade.load_texture(
-            f"assets/enemies/darkfairy_new/darkfairy_phase2_hurt_0.png"))
-        self.phase_2_hurt_frames.append(arcade.load_texture(
-            f"assets/enemies/darkfairy_new/darkfairy_phase2_hurt_1.png"))
+
+        self.phase_1_idle_frames.extend(self.phase_1_idle_frames[::-1])
+        self.phase_2_idle_frames.extend(self.phase_2_idle_frames[::-1])
+        self.phase_1_cast_frames.extend(self.phase_1_cast_frames[::-1])
+        self.phase_2_cast_frames.extend(self.phase_2_cast_frames[::-1])
 
     def update_animation(self, delta_time: float = 1 / 60):
-        delta_time = 1.25  # Play with this
+        delta_time = 1.25
         self.current_frame += self.update_interval * delta_time
 
         if self.phase == 1:
@@ -85,21 +89,23 @@ class DarkFairy(arcade.Sprite):
                         self.texture = self.transform_frames[int(self.current_frame)]
                     except IndexError:
                         self.is_transforming = False
-                        self.health = 100
+                        self.health = s.BOSS_HEALTH
                         self.current_frame = 0
                         self.phase = 2
 
             elif self.is_casting and self.casting_frame < len(self.phase_1_cast_frames) and not self.is_being_hurt:
-                self.texture = self.phase_1_cast_frames[int(self.casting_frame)]
-                self.casting_frame += self.update_interval * delta_time
-                if self.casting_frame > len(self.phase_1_cast_frames):
+                self.casting_frame += 1 / 3
+                try:
+                    self.texture = self.phase_1_cast_frames[int(self.casting_frame)]
+                except IndexError:
                     self.is_casting = False
                     self.casting_frame = 0
 
             elif self.is_being_hurt and self.hurt_frame < len(self.phase_1_hurt_frames):
-                self.texture = self.phase_1_hurt_frames[int(self.hurt_frame)]
                 self.hurt_frame += 1 / 3
-                if self.hurt_frame > len(self.phase_1_hurt_frames):
+                try:
+                    self.texture = self.phase_1_hurt_frames[int(self.hurt_frame)]
+                except IndexError:
                     self.is_being_hurt = False
                     self.hurt_frame = 0
 
@@ -126,16 +132,18 @@ class DarkFairy(arcade.Sprite):
                         self.kill()
 
             elif self.is_casting and self.casting_frame < len(self.phase_2_cast_frames):
-                self.texture = self.phase_2_cast_frames[int(self.casting_frame)]
-                self.casting_frame += self.update_interval * delta_time
-                if self.casting_frame > len(self.phase_2_cast_frames):
+                self.casting_frame += 1 / 3
+                try:
+                    self.texture = self.phase_2_cast_frames[int(self.casting_frame)]
+                except IndexError:
                     self.is_casting = False
                     self.casting_frame = 0
 
             elif self.is_being_hurt and self.hurt_frame < len(self.phase_2_hurt_frames):
-                self.texture = self.phase_2_hurt_frames[int(self.hurt_frame)]
-                self.hurt_frame += self.update_interval * delta_time
-                if self.hurt_frame > len(self.phase_2_hurt_frames):
+                self.hurt_frame += 1 / 3
+                try:
+                    self.texture = self.phase_2_hurt_frames[int(self.hurt_frame)]
+                except IndexError:
                     self.is_being_hurt = False
                     self.hurt_frame = 0
 
