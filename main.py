@@ -273,7 +273,6 @@ class MyGame(arcade.Window):
             self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
             self.player_and_monster_collider.update()
             self.player_and_wall_collider.update()
-            self.player_and_boss_collider.update()
 
         if self.boss_list:
             for boss in self.boss_list:
@@ -533,7 +532,7 @@ class MyGame(arcade.Window):
                 arcade.get_distance_between_sprites(monster, self.seraphima) < s.MONSTER_VISION_RANGE:
             if not monster.is_hunting:
                 monster.is_hunting = True
-            self.follow_path(monster, self.path)
+            self.follow_path(monster, self.path, s.MONSTER_MOVEMENT_SPEED)
         else:
             if monster.is_hunting:
                 monster.is_hunting = False
@@ -547,14 +546,16 @@ class MyGame(arcade.Window):
         self.path = arcade.astar_calculate_path(spell.position, self.seraphima.position, self.barrier_list,
                                                 diagonal_movement=False)
         if self.path:
-            self.follow_path(spell, self.path)
+            self.follow_path(spell, self.path, s.SPELL_MOVEMENT_SPEED)
 
     def move_boss(self, boss):
         if random.randint(0, 100) == 0:
-            boss.change_x = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
-            boss.change_y = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
+            boss.change_x = random.randint(int(-s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier),
+                                           int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
+            boss.change_y = random.randint(int(-s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier),
+                                           int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
 
-    def follow_path(self, target, path):
+    def follow_path(self, target, path, speed):
         # Figure out where we want to go
         try:
             next_x = path[target.current_path_position][0]
@@ -573,20 +574,20 @@ class MyGame(arcade.Window):
         angle = math.atan2(diff_y, diff_x)
 
         # Calculate the travel vector
-        target.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED * target.movement_speed_modifier
-        target.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
-        if (target.change_y ** 2 + target.change_x ** 2) ** 0.5 > s.MONSTER_MOVEMENT_SPEED * \
+        target.change_x = math.cos(angle) * speed * target.movement_speed_modifier
+        target.change_y = math.sin(angle) * speed * target.movement_speed_modifier
+        if (target.change_y ** 2 + target.change_x ** 2) ** 0.5 > speed * \
                 target.movement_speed_modifier:
-            target.change_x += s.MONSTER_MOVEMENT_SPEED * target.movement_speed_modifier * target.change_x / \
+            target.change_x += speed * target.movement_speed_modifier * target.change_x / \
                                abs(target.change_x)
-            target.change_y += s.MONSTER_MOVEMENT_SPEED * target.movement_speed_modifier * target.change_y / \
+            target.change_y += speed * target.movement_speed_modifier * target.change_y / \
                                abs(target.change_y)
 
         # Recalculate distance after the move
         distance = math.sqrt((target.center_x - next_x) ** 2 + (target.center_y - next_y) ** 2)
 
         # If we're close enough, move to the next point
-        if distance < s.MONSTER_MOVEMENT_SPEED:
+        if distance < speed:
             target.current_path_position += 1
 
             # If we're at the end of the path, start over
