@@ -84,9 +84,10 @@ class MyGame(arcade.Window):
 
         # Make the physics engine
         self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.seraphima, self.wall_list)
-        self.player_and_ghost_collider = arcade.PhysicsEngineSimple(self.seraphima, self.ghost_list)
+        self.player_and_ghost_collider = None
         self.player_and_boss_collider = None
         self.boss_and_wall_collider = None
+        self.ghost_and_wall_collider = None
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.ghost_phys_engines = []
@@ -278,42 +279,9 @@ class MyGame(arcade.Window):
                 self.boss_and_wall_collider = arcade.PhysicsEngineSimple(boss, self.wall_list)
                 self.boss_and_wall_collider.update()
 
-        # Our own ghost physics because arcade.SimplePhysicsEngine sucks with multiple updating spritelists
         for ghost in self.ghost_list:
-            for wall in self.wall_list:
-                if arcade.check_for_collision(ghost, wall):
-                    if not ghost.is_hunting:
-                        ghost.change_x = -ghost.change_x
-                        ghost.change_y = -ghost.change_y
-                        if ghost.change_x < 0 and ghost.right >= wall.left:
-                            ghost.center_x += 1
-                            ghost.direction_lock = True
-                        elif ghost.change_x > 0 and ghost.left <= wall.right:
-                            ghost.center_x -= 1
-                            ghost.direction_lock = True
-                        elif ghost.change_y > 0 and ghost.top >= wall.bottom:
-                            ghost.center_y += 1
-                            ghost.direction_lock = True
-                        elif ghost.change_y < 0 and ghost.bottom <= wall.top:
-                            ghost.center_y -= 1
-                            ghost.direction_lock = True
-                    else:
-                        if ghost.change_x > 0 and ghost.right >= wall.left:
-                            ghost.change_x = 0
-                            ghost.center_x += 1
-                            ghost.direction_lock = True
-                        elif ghost.change_x < 0 and ghost.left <= wall.right:
-                            ghost.change_x = 0
-                            ghost.center_x -= 1
-                            ghost.direction_lock = True
-                        elif ghost.change_y > 0 and ghost.top >= wall.bottom:
-                            ghost.change_y = 0
-                            ghost.center_y += 1
-                            ghost.direction_lock = True
-                        elif ghost.change_y < 0 and ghost.bottom <= wall.top:
-                            ghost.change_y = 0
-                            ghost.center_y -= 1
-                            ghost.direction_lock = True
+            self.ghost_and_wall_collider = arcade.PhysicsEngineSimple(ghost, self.wall_list)
+            self.ghost_and_wall_collider.update()
 
     def update_movement(self, delta_time):
         self.ghost_list.update()
