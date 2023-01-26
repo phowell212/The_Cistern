@@ -42,8 +42,7 @@ PLAYER_STARTING_HEALTH = 40
 BOSS_HEALTH = 20
 
 # Volume settings
-# MUSIC_VOLUME = 0.3
-MUSIC_VOLUME = 0.0
+MUSIC_VOLUME = 0.3
 SWOOSH_VOLUME = 0.2
 
 # other global variables
