@@ -15,7 +15,7 @@ class DarkFairySpell(arcade.Sprite):
         self.phase_1_frames = []
         self.current_frame = 0
         self.update_interval = 8
-        self.min_spawn_distance = 70
+        self.min_spawn_distance = 90
         self.movement_speed_modifier = 2.5
         self.current_path_position = 0
         self.load_frames()

@@ -109,8 +109,8 @@ class GhostMonster(arcade.Sprite):
 
         # If the monster is being hurt, play the hurt animation
         elif self.is_being_hurt and self.hurt_frame < len(self.hurt_frames) - 1:
-            self.hurt_frame += 1
-            self.texture = self.hurt_frames[self.hurt_frame]
+            self.hurt_frame += 1 / 3
+            self.texture = self.hurt_frames[int(self.hurt_frame)]
         elif self.is_being_hurt:
             self.health -= 1
             self.is_being_hurt = False

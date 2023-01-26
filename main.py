@@ -364,15 +364,14 @@ class MyGame(arcade.Window):
                 ghost.health = 0
 
     def update_bosses(self):
-
-        # Let the boss attack:
         if self.boss_list:
+            self.move_boss()
+
+            # Let the boss cast spells
             for boss in self.boss_list:
-                self.move_boss(boss)
-                if (random.randint(0, 9999) == 0 and arcade.get_distance_between_sprites(self.seraphima, boss) < 900 and
-                    boss.phase == 1) or (random.randint(0, 50) == 0 and
-                                         arcade.get_distance_between_sprites(self.seraphima,
-                                                                             boss) < 400 and boss.phase == 2):
+                if (random.randint(0, 90) == 0 and arcade.get_distance_between_sprites(self.seraphima, boss) < 700 and
+                        boss.phase == 1 and not self.dark_fairy_spell_list) or (random.randint(0, 80) == 0 and
+                        arcade.get_distance_between_sprites(self.seraphima, boss) < 400 and boss.phase == 2):
                     boss.is_casting = True
                     spell_x = self.seraphima.center_x + random.randint(-300, 300)
                     spell_y = self.seraphima.center_y + random.randint(-300, 300)
@@ -494,24 +493,13 @@ class MyGame(arcade.Window):
         if self.path:
             self.follow_path(spell, self.path, s.SPELL_MOVEMENT_SPEED)
 
-    def move_boss(self, boss):
-        if random.randint(0, 100) == 0:
-            boss.change_x = random.randint(int(-s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier),
-                                           int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
-            boss.change_y = random.randint(int(-s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier),
-                                           int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
-            if boss.left < 35:
-                boss.center_x += 1
-                boss.change_x = -boss.change_x
-            elif boss.right > 2524:
-                boss.center_x -= 1
-                boss.change_x = -boss.change_x
-            if boss.bottom < 35:
-                boss.center_y += 1
-                boss.change_y = -boss.change_y
-            elif boss.top > 2524:
-                boss.center_y -= 1
-                boss.change_y = -boss.change_y
+    def move_boss(self):
+        for boss in self.boss_list:
+            if random.randint(0, 100) == 0:
+                boss.change_x = random.randint(int(-s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier),
+                                               int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
+                boss.change_y = random.randint(int(-s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier),
+                                               int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
 
     def follow_path(self, target, path, speed):
         # Figure out where we want to go
