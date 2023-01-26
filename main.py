@@ -48,7 +48,6 @@ class MyGame(arcade.Window):
         self.is_faded_out = False
         self.has_spawned_player_death_ghost = True
         self.swoosh_sounds = []
-        self.ghosts_killed = 0
         for i in range(0, 3):
             self.swoosh_sounds.append(arcade.load_sound(f"sounds/sword_swoosh-{i}.mp3"))
         arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
@@ -419,7 +418,7 @@ class MyGame(arcade.Window):
         self.boss_list.update()
         if s.ghosts_killed % 15 == 0 and s.ghosts_killed != 0:
             self.spawn_boss()
-            self.ghosts_killed += 1
+            s.ghosts_killed += 1
 
     def update_music(self):
         if time.time() > self.music_timer:
