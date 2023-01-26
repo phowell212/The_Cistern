@@ -2,12 +2,12 @@ import math
 import random
 import arcade
 import time
-import ghost
 import player
 import swordslash
 import darkfairy
 import darkfairy_spell
 import settings as s
+import ghost as g
 from arcade.experimental import Shadertoy
 from pathlib import Path
 from pyglet.math import Vec2
@@ -27,7 +27,7 @@ class MyGame(arcade.Window):
         self.seraphima = None
         self.wall_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
-        self.monster_list = arcade.SpriteList()
+        self.ghost_list = arcade.SpriteList()
         self.swordslash_list = arcade.SpriteList()
         self.heart_list = arcade.SpriteList()
         self.boss_list = arcade.SpriteList()
@@ -84,12 +84,12 @@ class MyGame(arcade.Window):
 
         # Make the physics engine
         self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.seraphima, self.wall_list)
-        self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
+        self.player_and_ghost_collider = arcade.PhysicsEngineSimple(self.seraphima, self.ghost_list)
         self.player_and_boss_collider = arcade.PhysicsEngineSimple(self.seraphima, self.boss_list)
         self.boss_and_wall_collider = None
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
-        self.monster_phys_engines = []
+        self.ghost_phys_engines = []
         arcade.set_background_color((108, 121, 147))
 
         # Make the pathfinding vars
@@ -110,7 +110,7 @@ class MyGame(arcade.Window):
         self.channel1.clear()
 
         self.draw_paths()
-        self.draw_monsters()
+        self.draw_ghosts()
         self.draw_walls()
         self.draw_player()
         self.draw_gui()
@@ -123,7 +123,7 @@ class MyGame(arcade.Window):
         self.update_projectiles()
         self.update_seraphima(delta_time)
         self.update_gui(delta_time)
-        self.update_monsters()
+        self.update_ghosts()
         self.update_boss()
         self.update_music()
 
@@ -144,16 +144,16 @@ class MyGame(arcade.Window):
 
     def draw_paths(self):
         if arcade.key.D in self.key_press_buffer:
-            for monster in self.monster_list:
+            for ghost in self.ghost_list:
                 try:
-                    monster.debug_path = arcade.astar_calculate_path(monster.position,
-                                                                     self.seraphima.position,
-                                                                     self.barrier_list,
-                                                                     diagonal_movement=True)
+                    ghost.debug_path = arcade.astar_calculate_path(ghost.position,
+                                                                   self.seraphima.position,
+                                                                   self.barrier_list,
+                                                                   diagonal_movement=True)
                 except ValueError:
                     pass
-                if monster.debug_path is not None:
-                    arcade.draw_line_strip(monster.debug_path, (30, 33, 40), 2)
+                if ghost.debug_path is not None:
+                    arcade.draw_line_strip(ghost.debug_path, (30, 33, 40), 2)
 
             for boss in self.boss_list:
                 try:
@@ -177,8 +177,8 @@ class MyGame(arcade.Window):
                 if spell.debug_path is not None:
                     arcade.draw_line_strip(spell.debug_path, (30, 33, 40), 2)
 
-    def draw_monsters(self):
-        self.monster_list.draw()
+    def draw_ghosts(self):
+        self.ghost_list.draw()
         self.boss_list.draw()
         self.dark_fairy_spell_list.draw()
 
@@ -204,11 +204,11 @@ class MyGame(arcade.Window):
         self.camera_gui.use()
         self.heart_list.draw()
         score_text = f"Score: {int(self.score / 6.5)}.0"
-        for monster in self.monster_list:
-            if monster.death_frame > 0:
+        for ghost in self.ghost_list:
+            if ghost.death_frame > 0:
                 score_text = f"Score: {self.score / 6.5}"
                 break
-        ghost_text = f"Ghosts: {len(self.monster_list)}.0"
+        ghost_text = f"Ghosts: {len(self.ghost_list)}.0"
         arcade.draw_text(ghost_text, start_x=40, start_y=70, color=(255, 255, 242), font_size=19,
                          font_name="Garamond")
         arcade.draw_text(score_text, start_x=40, start_y=32, color=(255, 255, 242), font_size=19,
@@ -217,22 +217,22 @@ class MyGame(arcade.Window):
     def draw_debug_info(self):
         if arcade.key.D in self.key_press_buffer:
             num_ghosts_hunting = 0
-            monster_velocities = []
-            for monster in self.monster_list:
-                if monster.is_hunting:
+            ghost_velocities = []
+            for ghost in self.ghost_list:
+                if ghost.is_hunting:
                     num_ghosts_hunting += 1
-                monster_velocities.append((monster.change_x, monster.change_y))
+                ghost_velocities.append((ghost.change_x, ghost.change_y))
             text = f"Player position: ({int(self.seraphima.position[0])}, {int(self.seraphima.position[1])}), " \
                    f" ({int(self.seraphima.top)}, {int(self.seraphima.left)}, " \
                    f"{int(self.seraphima.bottom)}, {int(self.seraphima.right)})."
             ghost_hunting_text = f"Ghosts hunting you: {num_ghosts_hunting}."
             arcade.draw_text(ghost_hunting_text, start_x=40, start_y=964, color=(255, 255, 242), font_size=19,
                              font_name="Garamond")
-            for i in range((len(monster_velocities))):
-                ghost_velocity_text = f"\n    Ghost {i} velocity: ({int(monster_velocities[i][0])}, " \
-                                      f" {int(monster_velocities[i][1])})."
-                ghost_position_text = f"Ghost {i} position: ({int(self.monster_list[i].position[0])}, " \
-                                      f" {int(self.monster_list[i].position[1])})."
+            for i in range((len(ghost_velocities))):
+                ghost_velocity_text = f"\n    Ghost {i} velocity: ({int(ghost_velocities[i][0])}, " \
+                                      f" {int(ghost_velocities[i][1])})."
+                ghost_position_text = f"Ghost {i} position: ({int(self.ghost_list[i].position[0])}, " \
+                                      f" {int(self.ghost_list[i].position[1])})."
                 arcade.draw_text(ghost_velocity_text, start_x=40, start_y=904 - (i * 30 * 2), color=(255, 255, 242),
                                  font_size=19, font_name="Garamond")
                 arcade.draw_text(ghost_position_text, start_x=90, start_y=874 - (i * 30 * 2), color=(255, 255, 242),
@@ -247,10 +247,10 @@ class MyGame(arcade.Window):
             arcade.draw_text("GAME OVER", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2,
                              color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
                              anchor_y="baseline", bold=True)
-            for monster in self.monster_list:
-                monster.can_hunt = False
+            for ghost in self.ghost_list:
+                ghost.can_hunt = False
 
-                # If the player isn't already transparent make the player sprite slowly fade out
+            # If the player isn't already transparent make the player sprite slowly fade out
             if self.seraphima.alpha != 0:
                 self.seraphima.alpha -= 0.03 * self.seraphima.alpha
                 self.seraphima.alpha = max(0, self.seraphima.alpha)
@@ -258,19 +258,19 @@ class MyGame(arcade.Window):
                 self.is_faded_out = True
                 self.has_spawned_player_death_ghost = False
 
-                # If the player is fully transparent, spawn a ghost monster on their death location
+            # If the player is fully transparent, spawn a ghost on their death location
             elif not self.has_spawned_player_death_ghost:
-                ghost_sprite = ghost.GhostMonster(self.seraphima.center_x, self.seraphima.center_y,
-                                                  s.PLAYER_SCALING)
+                ghost_sprite = g.GhostMonster(self.seraphima.center_x, self.seraphima.center_y,
+                                                s.PLAYER_SCALING)
                 ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
                 self.seraphima.remove_from_sprite_lists()
-                self.monster_list.append(ghost_sprite)
+                self.ghost_list.append(ghost_sprite)
                 self.has_spawned_player_death_ghost = True
 
     def update_physics(self):
         if self.heart_list:
-            self.player_and_monster_collider = arcade.PhysicsEngineSimple(self.seraphima, self.monster_list)
-            self.player_and_monster_collider.update()
+            self.player_and_ghost_collider = arcade.PhysicsEngineSimple(self.seraphima, self.ghost_list)
+            self.player_and_ghost_collider.update()
             self.player_and_wall_collider.update()
 
         if self.boss_list:
@@ -278,45 +278,45 @@ class MyGame(arcade.Window):
                 self.boss_and_wall_collider = arcade.PhysicsEngineSimple(boss, self.wall_list)
                 self.boss_and_wall_collider.update()
 
-        # Our own monster physics because arcade.SimplePhysicsEngine sucks with multiple updating spritelists
-        for monster in self.monster_list:
+        # Our own ghost physics because arcade.SimplePhysicsEngine sucks with multiple updating spritelists
+        for ghost in self.ghost_list:
             for wall in self.wall_list:
-                if arcade.check_for_collision(monster, wall):
-                    if not monster.is_hunting:
-                        monster.change_x = -monster.change_x
-                        monster.change_y = -monster.change_y
-                        if monster.change_x > 0 and monster.right >= wall.left:
-                            monster.center_x += 1
-                            monster.direction_lock = True
-                        elif monster.change_x < 0 and monster.left <= wall.right:
-                            monster.center_x -= 1
-                            monster.direction_lock = True
-                        elif monster.change_y > 0 and monster.top >= wall.bottom:
-                            monster.center_y += 1
-                            monster.direction_lock = True
-                        elif monster.change_y < 0 and monster.bottom <= wall.top:
-                            monster.center_y -= 1
-                            monster.direction_lock = True
+                if arcade.check_for_collision(ghost, wall):
+                    if not ghost.is_hunting:
+                        ghost.change_x = -ghost.change_x
+                        ghost.change_y = -ghost.change_y
+                        if ghost.change_x > 0 and ghost.right >= wall.left:
+                            ghost.center_x += 1
+                            ghost.direction_lock = True
+                        elif ghost.change_x < 0 and ghost.left <= wall.right:
+                            ghost.center_x -= 1
+                            ghost.direction_lock = True
+                        elif ghost.change_y > 0 and ghost.top >= wall.bottom:
+                            ghost.center_y += 1
+                            ghost.direction_lock = True
+                        elif ghost.change_y < 0 and ghost.bottom <= wall.top:
+                            ghost.center_y -= 1
+                            ghost.direction_lock = True
                     else:
-                        if monster.change_x > 0 and monster.right >= wall.left:
-                            monster.change_x = 0
-                            monster.center_x += 1
-                            monster.direction_lock = True
-                        elif monster.change_x < 0 and monster.left <= wall.right:
-                            monster.change_x = 0
-                            monster.center_x -= 1
-                            monster.direction_lock = True
-                        elif monster.change_y > 0 and monster.top >= wall.bottom:
-                            monster.change_y = 0
-                            monster.center_y += 1
-                            monster.direction_lock = True
-                        elif monster.change_y < 0 and monster.bottom <= wall.top:
-                            monster.change_y = 0
-                            monster.center_y -= 1
-                            monster.direction_lock = True
+                        if ghost.change_x > 0 and ghost.right >= wall.left:
+                            ghost.change_x = 0
+                            ghost.center_x += 1
+                            ghost.direction_lock = True
+                        elif ghost.change_x < 0 and ghost.left <= wall.right:
+                            ghost.change_x = 0
+                            ghost.center_x -= 1
+                            ghost.direction_lock = True
+                        elif ghost.change_y > 0 and ghost.top >= wall.bottom:
+                            ghost.change_y = 0
+                            ghost.center_y += 1
+                            ghost.direction_lock = True
+                        elif ghost.change_y < 0 and ghost.bottom <= wall.top:
+                            ghost.change_y = 0
+                            ghost.center_y -= 1
+                            ghost.direction_lock = True
 
     def update_movement(self, delta_time):
-        self.monster_list.update()
+        self.ghost_list.update()
         self.scroll_to_player()
         self.process_key_presses()
         for projectile in self.swordslash_list:
@@ -331,22 +331,22 @@ class MyGame(arcade.Window):
             self.swordslash_list.append(slash_projectile)
             arcade.play_sound(random.choice(self.swoosh_sounds), s.SWOOSH_VOLUME)
         for projectile in self.swordslash_list:
-            projectile_collisions = arcade.check_for_collision_with_list(projectile, self.monster_list)
-            for monster in projectile_collisions:
-                monster.is_being_hurt = True
+            projectile_collisions = arcade.check_for_collision_with_list(projectile, self.ghost_list)
+            for ghost in projectile_collisions:
+                ghost.is_being_hurt = True
             boss_collisions = arcade.check_for_collision_with_list(projectile, self.boss_list)
             for boss in boss_collisions:
                 self.handle_boss_damage(boss)
         for spell in self.dark_fairy_spell_list:
-            spell_collisions = arcade.check_for_collision_with_list(spell, self.monster_list)
-            for monster in spell_collisions:
-                monster.is_being_hurt = True
+            spell_collisions = arcade.check_for_collision_with_list(spell, self.ghost_list)
+            for ghost in spell_collisions:
+                ghost.is_being_hurt = True
             if arcade.check_for_collision(spell, self.seraphima):
                 self.handle_player_damage()
-        player_collisions = arcade.check_for_collision_with_list(self.seraphima, self.monster_list)
-        for monster in player_collisions:
+        player_collisions = arcade.check_for_collision_with_list(self.seraphima, self.ghost_list)
+        for ghost in player_collisions:
             if self.seraphima.is_slashing:
-                monster.is_being_hurt = True
+                ghost.is_being_hurt = True
             self.handle_player_damage()
 
     def update_seraphima(self, delta_time):
@@ -369,58 +369,59 @@ class MyGame(arcade.Window):
             break
 
         # If a ghost dies increase the counter
-        for monster in self.monster_list:
-            if monster.health == 0:
-                self.score += 1 * monster.scale
+        for ghost in self.ghost_list:
+            if ghost.health == 0:
+                self.score += 1 * ghost.scale
 
         # If the boss dies increase the counter
         for boss in self.boss_list:
             if boss.health == 0 and boss.phase == 2:
                 self.score += 1
 
-    def update_monsters(self):
+    def update_ghosts(self):
         self.spawn_ghosts_on_empty_list()
-        for monster in self.monster_list:
-            if not monster.is_being_hurt:
-                self.move_monster(monster)
+        for ghost in self.ghost_list:
+            if not ghost.is_being_hurt:
+                self.move_ghost(ghost)
 
-            # Make the monster move into the play area if they are outside it
-            if monster.left < 32:
-                monster.change_x = 0
-                monster.center_x += 1
-            if monster.top > 2527:
-                monster.change_y = 0
-                monster.center_y -= 1
-            if monster.right > 2527:
-                monster.change_x = 0
-                monster.center_x -= 1
-            if monster.bottom < 32:
-                monster.change_y = 1
-                monster.center_y += 1
+            # Make the ghost move into the play area if they are outside it
+            if ghost.left < 32:
+                ghost.change_x = 0
+                ghost.center_x += 1
+            if ghost.top > 2527:
+                ghost.change_y = 0
+                ghost.center_y -= 1
+            if ghost.right > 2527:
+                ghost.change_x = 0
+                ghost.center_x -= 1
+            if ghost.bottom < 32:
+                ghost.change_y = 1
+                ghost.center_y += 1
 
-            # Make the monster not be able to move outside the play area if they attempt to, and lock their direction
-            if monster.left == 32 and monster.change_x < 0:
-                monster.change_x = 0
-                monster.direction_lock = True
-            if monster.top == 2527 and monster.change_y > 0:
-                monster.change_y = 0
-                monster.direction_lock = True
-            if monster.right == 2527 and monster.change_x > 0:
-                monster.change_x = 0
-                monster.direction_lock = True
-            if monster.bottom == 32 and monster.change_y < 0:
-                monster.change_y = 0
-                monster.direction_lock = True
+            # Make the ghost not be able to move outside the play area if they attempt to, and lock their direction
+            if ghost.left == 32 and ghost.change_x < 0:
+                ghost.change_x = 0
+                ghost.direction_lock = True
+            if ghost.top == 2527 and ghost.change_y > 0:
+                ghost.change_y = 0
+                ghost.direction_lock = True
+            if ghost.right == 2527 and ghost.change_x > 0:
+                ghost.change_x = 0
+                ghost.direction_lock = True
+            if ghost.bottom == 32 and ghost.change_y < 0:
+                ghost.change_y = 0
+                ghost.direction_lock = True
 
-            # If the monster is too far gone just kill it
-            if monster.left < 0 or monster.top > 2559 or monster.right > 2559 or monster.bottom < 0:
-                monster.health = 0
+            # If the ghost is too far gone just kill it
+            if ghost.left < 0 or ghost.top > 2559 or ghost.right > 2559 or ghost.bottom < 0:
+                ghost.health = 0
 
         for spell in self.dark_fairy_spell_list:
             spell.update()
             self.move_spell(spell)
 
     def update_boss(self):
+
         # Let the boss attack:
         if self.boss_list:
             for boss in self.boss_list:
@@ -520,27 +521,27 @@ class MyGame(arcade.Window):
         DarkFairy.health -= 1
         DarkFairy.is_being_hurt = True
 
-    def move_monster(self, monster):
+    def move_ghost(self, ghost):
 
         # Try to calculate the path
-        if arcade.get_distance_between_sprites(monster, self.seraphima) < s.MONSTER_VISION_RANGE:
-            self.path = arcade.astar_calculate_path(monster.position,
+        if arcade.get_distance_between_sprites(ghost, self.seraphima) < s.MONSTER_VISION_RANGE:
+            self.path = arcade.astar_calculate_path(ghost.position,
                                                     self.seraphima.position,
                                                     self.barrier_list,
                                                     diagonal_movement=False)
         if self.path and not self.is_dead and \
-                arcade.get_distance_between_sprites(monster, self.seraphima) < s.MONSTER_VISION_RANGE:
-            if not monster.is_hunting:
-                monster.is_hunting = True
-            self.follow_path(monster, self.path, s.MONSTER_MOVEMENT_SPEED)
+                arcade.get_distance_between_sprites(ghost, self.seraphima) < s.MONSTER_VISION_RANGE:
+            if not ghost.is_hunting:
+                ghost.is_hunting = True
+            self.follow_path(ghost, self.path, s.MONSTER_MOVEMENT_SPEED)
         else:
-            if monster.is_hunting:
-                monster.is_hunting = False
+            if ghost.is_hunting:
+                ghost.is_hunting = False
 
             # If we can't find a path, or are far enough away from the player just move randomly:
             if random.randint(0, 100) == 0:
-                monster.change_x = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
-                monster.change_y = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
+                ghost.change_x = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
+                ghost.change_y = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
 
     def move_spell(self, spell):
         self.path = arcade.astar_calculate_path(spell.position, self.seraphima.position, self.barrier_list,
@@ -594,7 +595,7 @@ class MyGame(arcade.Window):
             if target.current_path_position >= len(path):
                 target.current_path_position = 0
 
-    def respawn_monster(self, monster):
+    def respawn_ghost(self, ghost):
         spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
         spawn_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
         distance = math.sqrt(
@@ -605,8 +606,8 @@ class MyGame(arcade.Window):
                                      self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
             distance = math.sqrt(
                 (spawn_x - self.seraphima.center_x) ** 2 + (spawn_y - self.seraphima.center_y) ** 2)
-        monster.center_x = spawn_x
-        monster.center_y = spawn_y
+        ghost.center_x = spawn_x
+        ghost.center_y = spawn_y
 
     def spawn_ghosts(self):
         for i in range(int(self.ghosts_to_spawn)):
@@ -616,36 +617,36 @@ class MyGame(arcade.Window):
                     random_y > self.level_map.height:
                 random_x = random.uniform(0, self.width)
                 random_y = random.uniform(0, self.height)
-            monster = ghost.GhostMonster(random_x, random_y, s.MONSTER_SCALING)
-            monster.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+            ghost = g.GhostMonster(random_x, random_y, s.MONSTER_SCALING)
+            ghost.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
 
-            # Check if the new monster collides with any existing monsters, wall sprites or player
+            # Check if the new ghost collides with any existing ghosts, wall sprites or player
             collision = False
             for wall in self.wall_list:
-                if monster.collides_with_sprite(wall):
+                if ghost.collides_with_sprite(wall):
                     collision = True
                     break
-            if monster.collides_with_sprite(self.seraphima):
+            if ghost.collides_with_sprite(self.seraphima):
                 collision = True
             if not collision:
                 if random.random() > 0.9:
-                    monster.scale *= random.randint(90, 250) / 100
+                    ghost.scale *= random.randint(90, 250) / 100
                 if random.random() > 0.95:
-                    monster.scale *= random.randint(90, 150) / 100
-                self.monster_list.append(monster)
+                    ghost.scale *= random.randint(90, 150) / 100
+                self.ghost_list.append(ghost)
             else:
 
-                # If there is a collision, Don't spawn the monster and try again
+                # If there is a collision, Don't spawn the ghost and try again
                 self.ghosts_to_spawn += 1
 
-            # If there are too many monsters, don't spawn more, instead increase the movement
-            over_ghosts = len(self.monster_list) - 25
+            # If there are too many ghosts, don't spawn more, instead increase the movement
+            over_ghosts = len(self.ghost_list) - 25
             if over_ghosts > 0:
-                for monster in self.monster_list:
+                for ghost in self.ghost_list:
                     if over_ghosts >= 0:
                         break
-                    elif monster.movement_speed_modifier < 1.9:
-                        monster.movement_speed_modifier += 0.1
+                    elif ghost.movement_speed_modifier < 1.9:
+                        ghost.movement_speed_modifier += 0.1
                         over_ghosts -= 1
                     else:
                         over_ghosts -= 1
@@ -654,8 +655,8 @@ class MyGame(arcade.Window):
 
     def spawn_ghosts_on_empty_list(self):
 
-        # Handle spawning in more monsters if there aren't any on the screen, and it's been a few seconds
-        if not self.monster_list:
+        # Handle spawning in more ghosts if there aren't any on the screen, and it's been a few seconds
+        if not self.ghost_list:
             if self.no_ghost_timer != 0:
                 self.no_ghost_timer = time.time()
             elif time.time() - self.no_ghost_timer > 5:
@@ -836,3 +837,4 @@ if __name__ == "__main__":
     window = MyGame(s.SCREEN_WIDTH, s.SCREEN_HEIGHT, s.SCREEN_TITLE)
     window.set_location(0, 30)
     arcade.run()
+
