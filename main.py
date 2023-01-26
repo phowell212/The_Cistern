@@ -87,6 +87,7 @@ class MyGame(arcade.Window):
         self.player_and_boss_collider = None
         self.boss_and_wall_collider = None
         self.ghost_and_wall_collider = None
+        self.ghost_and_ghost_collider = None
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.ghost_phys_engines = []
@@ -277,10 +278,14 @@ class MyGame(arcade.Window):
             for boss in self.boss_list:
                 self.boss_and_wall_collider = arcade.PhysicsEngineSimple(boss, self.wall_list)
                 self.boss_and_wall_collider.update()
+                self.player_and_boss_collider = arcade.PhysicsEngineSimple(self.seraphima, self.boss_list)
+                self.player_and_boss_collider.update()
 
         for ghost in self.ghost_list:
             self.ghost_and_wall_collider = arcade.PhysicsEngineSimple(ghost, self.wall_list)
             self.ghost_and_wall_collider.update()
+            self.ghost_and_ghost_collider = arcade.PhysicsEngineSimple(ghost, self.ghost_list)
+            self.ghost_and_ghost_collider.update()
 
     def update_movement(self, delta_time):
         self.ghost_list.update()
@@ -297,6 +302,7 @@ class MyGame(arcade.Window):
             slash_projectile = swordslash.SwordSlash(self.seraphima)
             self.swordslash_list.append(slash_projectile)
             arcade.play_sound(random.choice(self.swoosh_sounds), s.SWOOSH_VOLUME)
+
         for projectile in self.swordslash_list:
             projectile_collisions = arcade.check_for_collision_with_list(projectile, self.ghost_list)
             for ghost in projectile_collisions:
@@ -304,12 +310,16 @@ class MyGame(arcade.Window):
             boss_collisions = arcade.check_for_collision_with_list(projectile, self.boss_list)
             for boss in boss_collisions:
                 self.handle_boss_damage(boss)
+
         for spell in self.dark_fairy_spell_list:
+            spell.update()
+            self.move_spell(spell)
             spell_collisions = arcade.check_for_collision_with_list(spell, self.ghost_list)
             for ghost in spell_collisions:
                 ghost.is_being_hurt = True
             if arcade.check_for_collision(spell, self.seraphima):
                 self.handle_player_damage()
+
         player_collisions = arcade.check_for_collision_with_list(self.seraphima, self.ghost_list)
         for ghost in player_collisions:
             if self.seraphima.is_slashing:
@@ -350,42 +360,8 @@ class MyGame(arcade.Window):
         for ghost in self.ghost_list:
             if not ghost.is_being_hurt:
                 self.move_ghost(ghost)
-
-            # Make the ghost move into the play area if they are outside it
-            if ghost.left < 32:
-                ghost.change_x = 0
-                ghost.center_x += 1
-            if ghost.top > 2527:
-                ghost.change_y = 0
-                ghost.center_y -= 1
-            if ghost.right > 2527:
-                ghost.change_x = 0
-                ghost.center_x -= 1
-            if ghost.bottom < 32:
-                ghost.change_y = 1
-                ghost.center_y += 1
-
-            # Make the ghost not be able to move outside the play area if they attempt to, and lock their direction
-            if ghost.left == 32 and ghost.change_x < 0:
-                ghost.change_x = 0
-                ghost.direction_lock = True
-            if ghost.top == 2527 and ghost.change_y > 0:
-                ghost.change_y = 0
-                ghost.direction_lock = True
-            if ghost.right == 2527 and ghost.change_x > 0:
-                ghost.change_x = 0
-                ghost.direction_lock = True
-            if ghost.bottom == 32 and ghost.change_y < 0:
-                ghost.change_y = 0
-                ghost.direction_lock = True
-
-            # If the ghost is too far gone just kill it
             if ghost.left < 0 or ghost.top > 2559 or ghost.right > 2559 or ghost.bottom < 0:
                 ghost.health = 0
-
-        for spell in self.dark_fairy_spell_list:
-            spell.update()
-            self.move_spell(spell)
 
     def update_bosses(self):
 
@@ -393,7 +369,7 @@ class MyGame(arcade.Window):
         if self.boss_list:
             for boss in self.boss_list:
                 self.move_boss(boss)
-                if (random.randint(0, 80) == 0 and arcade.get_distance_between_sprites(self.seraphima, boss) < 900 and
+                if (random.randint(0, 9999) == 0 and arcade.get_distance_between_sprites(self.seraphima, boss) < 900 and
                     boss.phase == 1) or (random.randint(0, 50) == 0 and
                                          arcade.get_distance_between_sprites(self.seraphima,
                                                                              boss) < 400 and boss.phase == 2):
@@ -411,9 +387,6 @@ class MyGame(arcade.Window):
                             spell.center_x, spell.center_y = spell_x, spell_y
                             distance = arcade.get_distance_between_sprites(spell, self.seraphima)
                         self.dark_fairy_spell_list.append(spell)
-
-                self.player_and_boss_collider = arcade.PhysicsEngineSimple(self.seraphima, self.boss_list)
-                self.player_and_boss_collider.update()
 
         self.boss_list.update()
         if s.ghosts_killed % 15 == 0 and s.ghosts_killed != 0:
@@ -527,6 +500,18 @@ class MyGame(arcade.Window):
                                            int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
             boss.change_y = random.randint(int(-s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier),
                                            int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
+            if boss.left < 35:
+                boss.center_x += 1
+                boss.change_x = -boss.change_x
+            elif boss.right > 2524:
+                boss.center_x -= 1
+                boss.change_x = -boss.change_x
+            if boss.bottom < 35:
+                boss.center_y += 1
+                boss.change_y = -boss.change_y
+            elif boss.top > 2524:
+                boss.center_y -= 1
+                boss.change_y = -boss.change_y
 
     def follow_path(self, target, path, speed):
         # Figure out where we want to go
@@ -641,8 +626,8 @@ class MyGame(arcade.Window):
 
     def spawn_boss(self):
         for i in range(s.bosses_to_spawn):
-            boss_x = self.seraphima.center_x + random.randint(-700, 700)
-            boss_y = self.seraphima.center_y + random.randint(-700, 700)
+            boss_x = self.seraphima.center_x + random.randint(-500, 500)
+            boss_y = self.seraphima.center_y + random.randint(-500, 500)
             boss = darkfairy.DarkFairy(boss_x, boss_y, s.BOSS_SCALING)
 
             distance = arcade.get_distance_between_sprites(boss, self.seraphima)
@@ -653,8 +638,8 @@ class MyGame(arcade.Window):
             else:
                 while distance <= boss.min_spawn_distance or boss.left < 32 or boss.top > 2527 or \
                         boss.right > 2527 or boss.bottom < 32:
-                    boss_x = self.seraphima.center_x + random.randint(-700, 700)
-                    boss_y = self.seraphima.center_y + random.randint(-700, 700)
+                    boss_x = self.seraphima.center_x + random.randint(-500, 500)
+                    boss_y = self.seraphima.center_y + random.randint(-500, 500)
                     boss.center_x, boss.center_y = boss_x, boss_y
                     distance = arcade.get_distance_between_sprites(boss, self.seraphima)
                 self.boss_list.append(boss)

@@ -15,7 +15,7 @@ class DarkFairySpell(arcade.Sprite):
         self.phase_1_frames = []
         self.current_frame = 0
         self.update_interval = 8
-        self.min_spawn_distance = 30
+        self.min_spawn_distance = 70
         self.movement_speed_modifier = 2.5
         self.current_path_position = 0
         self.load_frames()
@@ -31,10 +31,10 @@ class DarkFairySpell(arcade.Sprite):
             self.phase_1_frames.append(arcade.load_texture(
                 f"assets/enemies/darkfairy_spells/darkfairy_phase1_spell_0-{i}.png"))
 
-    def update(self, delta_time: float = 1 / 60):
+    def update(self):
         self.center_x += self.change_x
         self.center_y += self.change_y
-        self.update_animation(delta_time)
+        self.update_animation()
 
     def update_animation(self, delta_time: float = 1 / 60):
         self.current_frame += delta_time * self.update_interval
