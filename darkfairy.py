@@ -23,6 +23,7 @@ class DarkFairy(arcade.Sprite):
         self.is_transforming = False
         self.is_dying = False
         self.phase = 1
+        self.min_spawn_distance = 150
         self.current_frame = 0
         self.casting_frame = 0
         self.hurt_frame = 0
@@ -131,6 +132,7 @@ class DarkFairy(arcade.Sprite):
                         self.texture = self.death_frames[int(self.current_frame)]
                     except IndexError:
                         self.kill()
+                        s.bosses_to_spawn += 1
 
             elif self.is_casting and self.casting_frame < len(self.phase_2_cast_frames):
                 self.casting_frame += 1 / 3
@@ -159,5 +161,6 @@ class DarkFairy(arcade.Sprite):
 
     def update(self):
         self.update_animation()
-        self.center_x += self.change_x
-        self.center_y += self.change_y
+        if self.health >= 0:
+            self.center_x += self.change_x
+            self.center_y += self.change_y

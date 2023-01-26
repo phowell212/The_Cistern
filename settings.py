@@ -43,3 +43,7 @@ BOSS_HEALTH = 15
 # MUSIC_VOLUME = 0.3
 MUSIC_VOLUME = 0.0
 SWOOSH_VOLUME = 0.2
+
+# other global variables
+ghosts_killed = 0
+bosses_to_spawn = 1

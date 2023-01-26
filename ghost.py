@@ -104,6 +104,7 @@ class GhostMonster(arcade.Sprite):
             self.death_frame += 0.5
         elif self.health <= 0:
             self.death_frame = 0
+            s.ghosts_killed += 1
             self.kill()
 
         # If the monster is being hurt, play the hurt animation
