@@ -588,8 +588,6 @@ class MyGame(arcade.Window):
             if not collision:
                 if random.random() > 0.9:
                     ghost.scale *= random.randint(90, 250) / 100
-                if random.random() > 0.95:
-                    ghost.scale *= random.randint(90, 150) / 100
                 self.ghost_list.append(ghost)
             else:
 
