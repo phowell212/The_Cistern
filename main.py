@@ -297,6 +297,13 @@ class MyGame(arcade.Window):
             if arcade.check_for_collision_with_list(projectile, self.wall_list):
                 projectile.is_hitting_wall = True
 
+        # Decrease the player's speed when a boss is out because for whatever reason the player's speed is increased
+        # when more bosses are spawned
+        if self.boss_list:
+            for _ in self.boss_list:
+                self.seraphima.change_x *= 0.7
+                self.seraphima.change_y *= 0.7
+
     def update_projectiles(self):
         if self.seraphima.is_slashing and self.seraphima.c_key_timer == 0 and not self.swordslash_list:
             slash_projectile = swordslash.SwordSlash(self.seraphima)
