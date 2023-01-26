@@ -109,7 +109,7 @@ class MyGame(arcade.Window):
         self.channel1.use()
         self.channel1.clear()
 
-        self.draw_paths()
+        self.draw_debug_paths()
         self.draw_ghosts()
         self.draw_walls()
         self.draw_player()
@@ -124,7 +124,7 @@ class MyGame(arcade.Window):
         self.update_seraphima(delta_time)
         self.update_gui(delta_time)
         self.update_ghosts()
-        self.update_boss()
+        self.update_bosses()
         self.update_music()
 
     def on_key_press(self, key, modifiers):
@@ -142,7 +142,7 @@ class MyGame(arcade.Window):
         elif arcade.key.C not in self.key_press_buffer:
             self.seraphima.c_key_timer = 0
 
-    def draw_paths(self):
+    def draw_debug_paths(self):
         if arcade.key.D in self.key_press_buffer:
             for ghost in self.ghost_list:
                 try:
@@ -285,10 +285,10 @@ class MyGame(arcade.Window):
                     if not ghost.is_hunting:
                         ghost.change_x = -ghost.change_x
                         ghost.change_y = -ghost.change_y
-                        if ghost.change_x > 0 and ghost.right >= wall.left:
+                        if ghost.change_x < 0 and ghost.right >= wall.left:
                             ghost.center_x += 1
                             ghost.direction_lock = True
-                        elif ghost.change_x < 0 and ghost.left <= wall.right:
+                        elif ghost.change_x > 0 and ghost.left <= wall.right:
                             ghost.center_x -= 1
                             ghost.direction_lock = True
                         elif ghost.change_y > 0 and ghost.top >= wall.bottom:
@@ -420,7 +420,7 @@ class MyGame(arcade.Window):
             spell.update()
             self.move_spell(spell)
 
-    def update_boss(self):
+    def update_bosses(self):
 
         # Let the boss attack:
         if self.boss_list:
