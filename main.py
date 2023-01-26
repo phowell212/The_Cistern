@@ -85,7 +85,7 @@ class MyGame(arcade.Window):
         # Make the physics engine
         self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.seraphima, self.wall_list)
         self.player_and_ghost_collider = arcade.PhysicsEngineSimple(self.seraphima, self.ghost_list)
-        self.player_and_boss_collider = arcade.PhysicsEngineSimple(self.seraphima, self.boss_list)
+        self.player_and_boss_collider = None
         self.boss_and_wall_collider = None
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
@@ -261,7 +261,7 @@ class MyGame(arcade.Window):
             # If the player is fully transparent, spawn a ghost on their death location
             elif not self.has_spawned_player_death_ghost:
                 ghost_sprite = g.GhostMonster(self.seraphima.center_x, self.seraphima.center_y,
-                                                s.PLAYER_SCALING)
+                                              s.PLAYER_SCALING)
                 ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
                 self.seraphima.remove_from_sprite_lists()
                 self.ghost_list.append(ghost_sprite)
@@ -376,7 +376,7 @@ class MyGame(arcade.Window):
         # If the boss dies increase the counter
         for boss in self.boss_list:
             if boss.health == 0 and boss.phase == 2:
-                self.score += 1
+                self.score += 11
 
     def update_ghosts(self):
         self.spawn_ghosts_on_empty_list()
@@ -445,8 +445,13 @@ class MyGame(arcade.Window):
                             distance = arcade.get_distance_between_sprites(spell, self.seraphima)
                         self.dark_fairy_spell_list.append(spell)
 
+                self.player_and_boss_collider = arcade.PhysicsEngineSimple(self.seraphima, self.boss_list)
+                self.player_and_boss_collider.update()
+
         self.boss_list.update()
-        self.spawn_boss_on_score()
+        if s.ghosts_killed % 15 == 0 and s.ghosts_killed != 0:
+            self.spawn_boss()
+            self.ghosts_killed += 1
 
     def update_music(self):
         if time.time() > self.music_timer:
@@ -667,23 +672,25 @@ class MyGame(arcade.Window):
             self.ghosts_to_spawn *= self.ghosts_to_spawn_multiplier
             self.no_ghost_timer = 0.0
 
-    def spawn_boss_on_score(self):
-        if s.ghosts_killed % 15 == 0 and s.ghosts_killed != 0:
-            for i in range(s.bosses_to_spawn):
-                boss_x = self.seraphima.center_x + random.randint(-500, 500)
-                boss_y = self.seraphima.center_y + random.randint(-500, 500)
-                boss = darkfairy.DarkFairy(boss_x, boss_y, s.BOSS_SCALING)
-                distance = arcade.get_distance_between_sprites(boss, self.seraphima)
-                if distance > boss.min_spawn_distance:
-                    self.boss_list.append(boss)
-                else:
-                    while distance <= boss.min_spawn_distance:
-                        boss_x = self.seraphima.center_x + random.randint(-700, 700)
-                        boss_y = self.seraphima.center_y + random.randint(-700, 700)
-                        boss.center_x, boss.center_y = boss_x, boss_y
-                        distance = arcade.get_distance_between_sprites(boss, self.seraphima)
-                    self.boss_list.append(boss)
-            s.ghosts_killed += 1
+    def spawn_boss(self):
+        for i in range(s.bosses_to_spawn):
+            boss_x = self.seraphima.center_x + random.randint(-500, 500)
+            boss_y = self.seraphima.center_y + random.randint(-500, 500)
+            boss = darkfairy.DarkFairy(boss_x, boss_y, s.BOSS_SCALING)
+
+            distance = arcade.get_distance_between_sprites(boss, self.seraphima)
+            # Make the ghost move into the play area if they are outside it
+            if distance > boss.min_spawn_distance and boss.left > 32 and boss.top < 2527 and \
+                    boss.right < 2527 and boss.bottom > 32:
+                self.boss_list.append(boss)
+            else:
+                while distance <= boss.min_spawn_distance or boss.left < 32 or boss.top > 2527 or \
+                        boss.right > 2527 or boss.bottom < 32:
+                    boss_x = self.seraphima.center_x + random.randint(-700, 700)
+                    boss_y = self.seraphima.center_y + random.randint(-700, 700)
+                    boss.center_x, boss.center_y = boss_x, boss_y
+                    distance = arcade.get_distance_between_sprites(boss, self.seraphima)
+                self.boss_list.append(boss)
 
     def scroll_to_player(self, speed=s.CAMERA_SPEED):
         position = Vec2(self.seraphima.center_x - self.width / 2,
@@ -837,4 +844,3 @@ if __name__ == "__main__":
     window = MyGame(s.SCREEN_WIDTH, s.SCREEN_HEIGHT, s.SCREEN_TITLE)
     window.set_location(0, 30)
     arcade.run()
-

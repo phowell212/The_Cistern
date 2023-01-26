@@ -36,6 +36,7 @@ class DarkFairy(arcade.Sprite):
         self.scale = scale
 
         self.load_frames()
+        self.texture = self.phase_1_idle_frames[0]
 
     def load_frames(self):
         for i in range(0, 7):
