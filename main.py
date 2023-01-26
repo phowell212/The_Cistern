@@ -426,7 +426,7 @@ class MyGame(arcade.Window):
         if self.boss_list:
             for boss in self.boss_list:
                 self.move_boss(boss)
-                if (random.randint(0, 80) == 0 and arcade.get_distance_between_sprites(self.seraphima, boss) < 400 and
+                if (random.randint(0, 80) == 0 and arcade.get_distance_between_sprites(self.seraphima, boss) < 900 and
                     boss.phase == 1) or (random.randint(0, 50) == 0 and
                                          arcade.get_distance_between_sprites(self.seraphima,
                                                                              boss) < 400 and boss.phase == 2):
@@ -670,16 +670,16 @@ class MyGame(arcade.Window):
     def spawn_boss_on_score(self):
         if s.ghosts_killed % 15 == 0 and s.ghosts_killed != 0:
             for i in range(s.bosses_to_spawn):
-                boss_x = self.seraphima.center_x + random.randint(-300, 300)
-                boss_y = self.seraphima.center_y + random.randint(-300, 300)
+                boss_x = self.seraphima.center_x + random.randint(-500, 500)
+                boss_y = self.seraphima.center_y + random.randint(-500, 500)
                 boss = darkfairy.DarkFairy(boss_x, boss_y, s.BOSS_SCALING)
                 distance = arcade.get_distance_between_sprites(boss, self.seraphima)
                 if distance > boss.min_spawn_distance:
                     self.boss_list.append(boss)
                 else:
                     while distance <= boss.min_spawn_distance:
-                        boss_x = self.seraphima.center_x + random.randint(-500, 500)
-                        boss_y = self.seraphima.center_y + random.randint(-500, 500)
+                        boss_x = self.seraphima.center_x + random.randint(-700, 700)
+                        boss_y = self.seraphima.center_y + random.randint(-700, 700)
                         boss.center_x, boss.center_y = boss_x, boss_y
                         distance = arcade.get_distance_between_sprites(boss, self.seraphima)
                     self.boss_list.append(boss)
