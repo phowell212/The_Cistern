@@ -23,7 +23,7 @@ class DarkFairy(arcade.Sprite):
         self.is_transforming = False
         self.is_dying = False
         self.phase = 1
-        self.min_spawn_distance = 150
+        self.min_spawn_distance = 300
         self.movement_speed_modifier = 1
         self.current_frame = 0
         self.casting_frame = 0

@@ -674,8 +674,8 @@ class MyGame(arcade.Window):
 
     def spawn_boss(self):
         for i in range(s.bosses_to_spawn):
-            boss_x = self.seraphima.center_x + random.randint(-500, 500)
-            boss_y = self.seraphima.center_y + random.randint(-500, 500)
+            boss_x = self.seraphima.center_x + random.randint(-700, 700)
+            boss_y = self.seraphima.center_y + random.randint(-700, 700)
             boss = darkfairy.DarkFairy(boss_x, boss_y, s.BOSS_SCALING)
 
             distance = arcade.get_distance_between_sprites(boss, self.seraphima)
