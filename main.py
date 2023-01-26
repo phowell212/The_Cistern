@@ -13,7 +13,6 @@ from pathlib import Path
 from pyglet.math import Vec2
 
 
-# noinspection PyTypeChecker
 class MyGame(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title, resizable=True)
@@ -381,28 +380,6 @@ class MyGame(arcade.Window):
 
     def update_monsters(self):
         self.spawn_ghosts_on_empty_list()
-        # Let the boss attack:
-        if self.boss_list:
-            for boss in self.boss_list:
-                self.move_boss(boss)
-                if (random.randint(0, 80) == 0 and arcade.get_distance_between_sprites(self.seraphima, boss) < 400 and
-                        boss.phase == 1) or (random.randint(0, 50) == 0 and
-                        arcade.get_distance_between_sprites(self.seraphima, boss) < 400 and boss.phase == 2):
-                    boss.is_casting = True
-                    spell_x = self.seraphima.center_x + random.randint(-300, 300)
-                    spell_y = self.seraphima.center_y + random.randint(-300, 300)
-                    spell = darkfairy_spell.DarkFairySpell(spell_x, spell_y, s.BOSS_SCALING, boss)
-                    distance = arcade.get_distance_between_sprites(spell, self.seraphima)
-                    if distance > spell.min_spawn_distance:
-                        self.dark_fairy_spell_list.append(spell)
-                    else:
-                        while distance <= spell.min_spawn_distance:
-                            spell_x = self.seraphima.center_x + random.randint(-500, 500)
-                            spell_y = self.seraphima.center_y + random.randint(-500, 500)
-                            spell.center_x, spell.center_y = spell_x, spell_y
-                            distance = arcade.get_distance_between_sprites(spell, self.seraphima)
-                        self.dark_fairy_spell_list.append(spell)
-
         for monster in self.monster_list:
             if not monster.is_being_hurt:
                 self.move_monster(monster)
@@ -444,6 +421,29 @@ class MyGame(arcade.Window):
             self.move_spell(spell)
 
     def update_boss(self):
+        # Let the boss attack:
+        if self.boss_list:
+            for boss in self.boss_list:
+                self.move_boss(boss)
+                if (random.randint(0, 80) == 0 and arcade.get_distance_between_sprites(self.seraphima, boss) < 400 and
+                    boss.phase == 1) or (random.randint(0, 50) == 0 and
+                                         arcade.get_distance_between_sprites(self.seraphima,
+                                                                             boss) < 400 and boss.phase == 2):
+                    boss.is_casting = True
+                    spell_x = self.seraphima.center_x + random.randint(-300, 300)
+                    spell_y = self.seraphima.center_y + random.randint(-300, 300)
+                    spell = darkfairy_spell.DarkFairySpell(spell_x, spell_y, s.BOSS_SCALING, boss)
+                    distance = arcade.get_distance_between_sprites(spell, self.seraphima)
+                    if distance > spell.min_spawn_distance:
+                        self.dark_fairy_spell_list.append(spell)
+                    else:
+                        while distance <= spell.min_spawn_distance:
+                            spell_x = self.seraphima.center_x + random.randint(-500, 500)
+                            spell_y = self.seraphima.center_y + random.randint(-500, 500)
+                            spell.center_x, spell.center_y = spell_x, spell_y
+                            distance = arcade.get_distance_between_sprites(spell, self.seraphima)
+                        self.dark_fairy_spell_list.append(spell)
+
         self.boss_list.update()
         self.spawn_boss_on_score()
 
