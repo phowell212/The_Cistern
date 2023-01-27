@@ -540,9 +540,6 @@ class MyGame(arcade.Window):
             if random.randint(0, 100) == 0:
                 ghost.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
                 ghost.change_y = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
-        else:
-            if ghost.is_hunting:
-                ghost.is_hunting = False
 
     def move_spell(self, spell):
         if spell.change_x == 0 and spell.change_y == 0:
