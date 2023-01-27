@@ -231,7 +231,7 @@ class MyGame(arcade.Window):
                              font_name="Garamond")
             for i in range((len(ghost_velocities))):
                 ghost_velocity_text = f"\n    Ghost {i} velocity: ({ghost_velocities[i][0]}, " \
-                                      f" {int(ghost_velocities[i][1])})."
+                                      f" {ghost_velocities[i][1]})."
                 ghost_position_text = f"Ghost {i} position: ({int(self.ghost_list[i].position[0])}, " \
                                       f" {int(self.ghost_list[i].position[1])})."
                 arcade.draw_text(ghost_velocity_text, start_x=40, start_y=904 - (i * 30 * 2), color=(255, 255, 242),
