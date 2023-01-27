@@ -88,9 +88,9 @@ class MyGame(arcade.Window):
         self.boss_and_wall_collider = None
         self.ghost_and_wall_collider = None
         self.ghost_and_ghost_collider = None
+        self.ghost_and_boss_collider = None
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
-        self.ghost_phys_engines = []
         arcade.set_background_color((108, 121, 147))
 
         # Make the pathfinding vars
@@ -286,6 +286,9 @@ class MyGame(arcade.Window):
             self.ghost_and_wall_collider.update()
             self.ghost_and_ghost_collider = arcade.PhysicsEngineSimple(ghost, self.ghost_list)
             self.ghost_and_ghost_collider.update()
+            if self.boss_list:
+                self.ghost_and_boss_collider = arcade.PhysicsEngineSimple(ghost, self.boss_list)
+                self.ghost_and_boss_collider.update()
 
     def update_movement(self, delta_time):
         self.ghost_list.update()
@@ -561,20 +564,6 @@ class MyGame(arcade.Window):
                 boss.change_y = random.randint(int(-s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier),
                                                int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
 
-    def respawn_ghost(self, ghost):
-        spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
-        spawn_y = random.randint(0, self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
-        distance = math.sqrt(
-            (spawn_x - self.seraphima.center_x) ** 2 + (spawn_y - self.seraphima.center_y) ** 2)
-        while distance < s.SPOTLIGHT_SIZE:
-            spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
-            spawn_y = random.randint(0,
-                                     self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
-            distance = math.sqrt(
-                (spawn_x - self.seraphima.center_x) ** 2 + (spawn_y - self.seraphima.center_y) ** 2)
-        ghost.center_x = spawn_x
-        ghost.center_y = spawn_y
-
     def spawn_ghosts(self):
         for i in range(int(self.ghosts_to_spawn)):
             random_x = random.uniform(self.seraphima.center_x - 50, self.seraphima.center_x + 50)
@@ -595,8 +584,8 @@ class MyGame(arcade.Window):
             if ghost.collides_with_sprite(self.seraphima):
                 collision = True
             if not collision:
-                if random.random() > 0.9:
-                    ghost.scale *= random.randint(90, 250) / 100
+                if random.random() > 0.95:
+                    ghost.scale *= random.randint(80, 140) / 100
                 self.ghost_list.append(ghost)
             else:
 
