@@ -33,7 +33,7 @@ class GhostMonster(arcade.Sprite):
         self.bob_frequency = 5
         self.bob_amplitude = 0.3
         self.current_path_position = 0
-        self.movement_speed_modifier = 0.4
+        self.movement_speed_modifier = 1
         self.direction_lock_timer = 0
         self.direction_lock_stop_time = 20
         self.scale = scale

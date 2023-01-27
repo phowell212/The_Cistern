@@ -99,7 +99,7 @@ class MyGame(arcade.Window):
         self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
         self.playing_field_bottom_boundary = 0
         self.grid_size = 128 * s.SPRITE_SCALING
-        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size * 2,
+        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size,
                                                     self.playing_field_left_boundary,
                                                     self.playing_field_right_boundary,
                                                     self.playing_field_bottom_boundary,
@@ -230,7 +230,7 @@ class MyGame(arcade.Window):
             arcade.draw_text(ghost_hunting_text, start_x=40, start_y=964, color=(255, 255, 242), font_size=19,
                              font_name="Garamond")
             for i in range((len(ghost_velocities))):
-                ghost_velocity_text = f"\n    Ghost {i} velocity: ({int(ghost_velocities[i][0])}, " \
+                ghost_velocity_text = f"\n    Ghost {i} velocity: ({ghost_velocities[i][0]}, " \
                                       f" {int(ghost_velocities[i][1])})."
                 ghost_position_text = f"Ghost {i} position: ({int(self.ghost_list[i].position[0])}, " \
                                       f" {int(self.ghost_list[i].position[1])})."
@@ -538,8 +538,8 @@ class MyGame(arcade.Window):
 
             # If we can't find a path, or are far enough away from the player just move randomly:
             if random.randint(0, 100) == 0:
-                ghost.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
-                ghost.change_y = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
+                ghost.change_x = random.uniform(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
+                ghost.change_y = random.uniform(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
 
     def move_spell(self, spell):
         if spell.change_x == 0 and spell.change_y == 0:
