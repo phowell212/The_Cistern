@@ -377,8 +377,10 @@ class MyGame(arcade.Window):
             # Let the boss cast spells
             for boss in self.boss_list:
                 if (random.randint(0, 90) == 0 and arcade.get_distance_between_sprites(self.seraphima, boss) < 700 and
-                        boss.phase == 1 and not self.dark_fairy_spell_list) or (random.randint(0, 80) == 0 and
-                        arcade.get_distance_between_sprites(self.seraphima, boss) < 400 and boss.phase == 2):
+                    boss.phase == 1 and not self.dark_fairy_spell_list) or (random.randint(0, 80) == 0 and
+                                                                            arcade.get_distance_between_sprites(
+                                                                                self.seraphima,
+                                                                                boss) < 400 and boss.phase == 2):
                     boss.is_casting = True
                     spell_x = self.seraphima.center_x + random.randint(-300, 300)
                     spell_y = self.seraphima.center_y + random.randint(-300, 300)
@@ -472,10 +474,23 @@ class MyGame(arcade.Window):
         DarkFairy.health -= 1
         DarkFairy.is_being_hurt = True
 
+    def follow_path(self, target, path, speed):
+        if len(path) > 0:
+            target.center_x = path[0][0] * self.level_map.tile_width * s.SPRITE_SCALING
+            target.center_y = path[0][1] * self.level_map.tile_height * s.SPRITE_SCALING
+            path.pop(0)
+
     def move_ghost(self, ghost):
 
-        # Try to calculate the path
-        if arcade.get_distance_between_sprites(ghost, self.seraphima) < s.MONSTER_VISION_RANGE:
+        # Make sure that the ghost doesn't try to follow the path into the side of the level
+        # Instead, if they are beyond a certain bounds, just move towards the player
+        if ghost.center_x < 60 or ghost.center_y < 70:
+            angle = math.atan2(self.seraphima.center_y - ghost.center_y,
+                               self.seraphima.center_x - ghost.center_x)
+            ghost.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
+            ghost.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
+            ghost.is_out_of_bounds = True
+        else:
             self.path = arcade.astar_calculate_path(ghost.position,
                                                     self.seraphima.position,
                                                     self.barrier_list,
@@ -484,21 +499,55 @@ class MyGame(arcade.Window):
                 arcade.get_distance_between_sprites(ghost, self.seraphima) < s.MONSTER_VISION_RANGE:
             if not ghost.is_hunting:
                 ghost.is_hunting = True
-            self.follow_path(ghost, self.path, s.MONSTER_MOVEMENT_SPEED)
+            # Figure out where we want to go
+            try:
+                next_x = self.path[ghost.current_path_position][0]
+                next_y = self.path[ghost.current_path_position][1]
+            except IndexError:
+                # We are at the end of the path
+                next_x = self.seraphima.center_x
+                next_y = self.seraphima.center_y
+            # What's the difference between the two
+            diff_x = next_x - ghost.center_x
+            diff_y = next_y - ghost.center_y
+            # What's our angle
+            angle = math.atan2(diff_y, diff_x)
+            # Calculate the travel vector
+            ghost.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
+            ghost.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
+            if (ghost.change_y ** 2 + ghost.change_x ** 2) ** 0.5 > s.MONSTER_MOVEMENT_SPEED:
+                ghost.change_x += s.MONSTER_MOVEMENT_SPEED * ghost.change_x / abs(ghost.change_x)
+                ghost.change_y += s.MONSTER_MOVEMENT_SPEED * ghost.change_y / abs(ghost.change_y)
+            # Recalculate distance after the move
+            distance = math.sqrt((ghost.center_x - next_x) ** 2 + (ghost.center_y - next_y) ** 2)
+            # If we're close enough, move to the next point
+            if distance < s.MONSTER_MOVEMENT_SPEED:
+                ghost.current_path_position += 1
+                # If we're at the end of the path, start over
+                if ghost.current_path_position >= len(self.path):
+                    ghost.current_path_position = 0
+        elif not ghost.is_out_of_bounds:
+            if ghost.is_hunting:
+                ghost.is_hunting = False
+            # If we can't find a path, or are far enough away from the player just move randomly:
+            if random.randint(0, 100) == 0:
+                ghost.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
+                ghost.change_y = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
         else:
             if ghost.is_hunting:
                 ghost.is_hunting = False
 
-            # If we can't find a path, or are far enough away from the player just move randomly:
-            if random.randint(0, 100) == 0:
-                ghost.change_x = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
-                ghost.change_y = random.randint(int(-s.MONSTER_MOVEMENT_SPEED), int(s.MONSTER_MOVEMENT_SPEED))
-
     def move_spell(self, spell):
-        self.path = arcade.astar_calculate_path(spell.position, self.seraphima.position, self.barrier_list,
-                                                diagonal_movement=False)
-        if self.path:
-            self.follow_path(spell, self.path, s.SPELL_MOVEMENT_SPEED)
+        if spell.change_x == 0 and spell.change_y == 0:
+            angle = math.atan2(self.seraphima.center_y - spell.center_y,
+                               self.seraphima.center_x - spell.center_x)
+            spell.change_x = math.cos(angle) * s.SPELL_MOVEMENT_SPEED
+            spell.change_y = math.sin(angle) * s.SPELL_MOVEMENT_SPEED
+        elif spell.current_frame == int(len(spell.phase_1_frames) / 2):
+            angle = math.atan2(self.seraphima.center_y - spell.center_y,
+                               self.seraphima.center_x - spell.center_x)
+            spell.change_x = math.cos(angle) * s.SPELL_MOVEMENT_SPEED
+            spell.change_y = math.sin(angle) * s.SPELL_MOVEMENT_SPEED
 
     def move_boss(self):
         for boss in self.boss_list:
@@ -507,45 +556,6 @@ class MyGame(arcade.Window):
                                                int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
                 boss.change_y = random.randint(int(-s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier),
                                                int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
-
-    def follow_path(self, target, path, speed):
-        # Figure out where we want to go
-        try:
-            next_x = path[target.current_path_position][0]
-            next_y = path[target.current_path_position][1]
-        except IndexError:
-
-            # We are at the end of the path
-            next_x = self.seraphima.center_x
-            next_y = self.seraphima.center_y
-
-        # What's the difference between the two
-        diff_x = next_x - target.center_x
-        diff_y = next_y - target.center_y
-
-        # What's our angle
-        angle = math.atan2(diff_y, diff_x)
-
-        # Calculate the travel vector
-        target.change_x = math.cos(angle) * speed * target.movement_speed_modifier
-        target.change_y = math.sin(angle) * speed * target.movement_speed_modifier
-        if (target.change_y ** 2 + target.change_x ** 2) ** 0.5 > speed * \
-                target.movement_speed_modifier:
-            target.change_x += speed * target.movement_speed_modifier * target.change_x / \
-                               abs(target.change_x)
-            target.change_y += speed * target.movement_speed_modifier * target.change_y / \
-                               abs(target.change_y)
-
-        # Recalculate distance after the move
-        distance = math.sqrt((target.center_x - next_x) ** 2 + (target.center_y - next_y) ** 2)
-
-        # If we're close enough, move to the next point
-        if distance < speed:
-            target.current_path_position += 1
-
-            # If we're at the end of the path, start over
-            if target.current_path_position >= len(path):
-                target.current_path_position = 0
 
     def respawn_ghost(self, ghost):
         spawn_x = random.randint(0, self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)

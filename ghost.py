@@ -17,6 +17,7 @@ class GhostMonster(arcade.Sprite):
         # Init flags
         self.is_being_hurt = False
         self.is_spawned = False
+        self.is_out_of_bounds = False
         self.is_hunting = False
         self.can_hunt = True
         self.direction_lock = False
@@ -32,7 +33,7 @@ class GhostMonster(arcade.Sprite):
         self.bob_frequency = 5
         self.bob_amplitude = 0.3
         self.current_path_position = 0
-        self.movement_speed_modifier = 1
+        self.movement_speed_modifier = 0.4
         self.direction_lock_timer = 0
         self.direction_lock_stop_time = 20
         self.scale = scale
@@ -62,8 +63,8 @@ class GhostMonster(arcade.Sprite):
         # Update the ghost's position
         if not self.is_being_hurt or self.health > 0:
             self.update_animation(1)
-            self.center_x += self.change_x
-            self.center_y += self.change_y
+            self.center_x += (self.change_x * self.movement_speed_modifier)
+            self.center_y += (self.change_y * self.movement_speed_modifier)
 
             # Make the ghost bob
             self.time += 1 / 60
