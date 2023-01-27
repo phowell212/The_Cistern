@@ -102,7 +102,7 @@ class GhostMonster(arcade.Sprite):
         # If the sprite has no health, play that animation then kill it
         elif self.health <= 0 and self.death_frame < len(self.death_frames):
             self.texture = self.death_frames[int(self.death_frame)]
-            self.death_frame += 0.5
+            self.death_frame += 1
         elif self.health <= 0:
             self.death_frame = 0
             s.ghosts_killed += 1
