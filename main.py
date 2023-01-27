@@ -470,15 +470,10 @@ class MyGame(arcade.Window):
         if self.health < 0:
             self.is_dead = True
 
-    def handle_boss_damage(self, DarkFairy):
+    @staticmethod
+    def handle_boss_damage(DarkFairy):
         DarkFairy.health -= 1
         DarkFairy.is_being_hurt = True
-
-    def follow_path(self, target, path, speed):
-        if len(path) > 0:
-            target.center_x = path[0][0] * self.level_map.tile_width * s.SPRITE_SCALING
-            target.center_y = path[0][1] * self.level_map.tile_height * s.SPRITE_SCALING
-            path.pop(0)
 
     def move_ghost(self, ghost):
 
@@ -499,36 +494,45 @@ class MyGame(arcade.Window):
                 arcade.get_distance_between_sprites(ghost, self.seraphima) < s.MONSTER_VISION_RANGE:
             if not ghost.is_hunting:
                 ghost.is_hunting = True
+
             # Figure out where we want to go
             try:
                 next_x = self.path[ghost.current_path_position][0]
                 next_y = self.path[ghost.current_path_position][1]
             except IndexError:
+
                 # We are at the end of the path
                 next_x = self.seraphima.center_x
                 next_y = self.seraphima.center_y
+
             # What's the difference between the two
             diff_x = next_x - ghost.center_x
             diff_y = next_y - ghost.center_y
+
             # What's our angle
             angle = math.atan2(diff_y, diff_x)
+
             # Calculate the travel vector
             ghost.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
             ghost.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
             if (ghost.change_y ** 2 + ghost.change_x ** 2) ** 0.5 > s.MONSTER_MOVEMENT_SPEED:
                 ghost.change_x += s.MONSTER_MOVEMENT_SPEED * ghost.change_x / abs(ghost.change_x)
                 ghost.change_y += s.MONSTER_MOVEMENT_SPEED * ghost.change_y / abs(ghost.change_y)
+
             # Recalculate distance after the move
             distance = math.sqrt((ghost.center_x - next_x) ** 2 + (ghost.center_y - next_y) ** 2)
+
             # If we're close enough, move to the next point
             if distance < s.MONSTER_MOVEMENT_SPEED:
                 ghost.current_path_position += 1
+
                 # If we're at the end of the path, start over
                 if ghost.current_path_position >= len(self.path):
                     ghost.current_path_position = 0
         elif not ghost.is_out_of_bounds:
             if ghost.is_hunting:
                 ghost.is_hunting = False
+
             # If we can't find a path, or are far enough away from the player just move randomly:
             if random.randint(0, 100) == 0:
                 ghost.change_x = random.randint(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
