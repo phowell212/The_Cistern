@@ -99,7 +99,7 @@ class MyGame(arcade.Window):
         self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
         self.playing_field_bottom_boundary = 0
         self.grid_size = 128 * s.SPRITE_SCALING
-        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size,
+        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size * 2,
                                                     self.playing_field_left_boundary,
                                                     self.playing_field_right_boundary,
                                                     self.playing_field_bottom_boundary,
