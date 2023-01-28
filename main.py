@@ -525,6 +525,7 @@ class MyGame(arcade.Window):
 
         # If we can't find a path, or are far enough away from the player just move randomly:
         else:
+            ghost.is_hunting = False
             if random.randint(0, 100) == 0:
                 ghost.change_x = random.uniform(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
                 ghost.change_y = random.uniform(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
