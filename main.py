@@ -87,7 +87,7 @@ class MyGame(arcade.Window):
         self.player_and_boss_collider = None
         self.boss_and_wall_collider = None
         self.ghost_and_wall_collider = None
-        self.ghost_and_ghost_collider = None
+        # self.ghost_and_ghost_collider = None
         self.ghost_and_boss_collider = None
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
@@ -99,7 +99,7 @@ class MyGame(arcade.Window):
         self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
         self.playing_field_bottom_boundary = 0
         self.grid_size = 128 * s.SPRITE_SCALING
-        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size,
+        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size * 1.5,
                                                     self.playing_field_left_boundary,
                                                     self.playing_field_right_boundary,
                                                     self.playing_field_bottom_boundary,
@@ -118,7 +118,7 @@ class MyGame(arcade.Window):
         self.draw_debug_info()
         self.draw_game_over()
 
-    def on_update(self, delta_time: float = 1 / 120):
+    def on_update(self, delta_time: float = 1 / 60):
         self.update_physics()
         self.update_movement(delta_time)
         self.update_projectiles()
@@ -284,8 +284,8 @@ class MyGame(arcade.Window):
         for ghost in self.ghost_list:
             self.ghost_and_wall_collider = arcade.PhysicsEngineSimple(ghost, self.wall_list)
             self.ghost_and_wall_collider.update()
-            self.ghost_and_ghost_collider = arcade.PhysicsEngineSimple(ghost, self.ghost_list)
-            self.ghost_and_ghost_collider.update()
+            # self.ghost_and_ghost_collider = arcade.PhysicsEngineSimple(ghost, self.ghost_list)
+            # self.ghost_and_ghost_collider.update()
             if self.boss_list:
                 self.ghost_and_boss_collider = arcade.PhysicsEngineSimple(ghost, self.boss_list)
                 self.ghost_and_boss_collider.update()
@@ -432,7 +432,7 @@ class MyGame(arcade.Window):
     def generate_walls(self, map_width, map_height):
         map_width = int(map_width * self.level_map.tile_width * s.SPRITE_SCALING)
         map_height = int(map_height * self.level_map.tile_height * s.SPRITE_SCALING)
-        for i in range(100):
+        for i in range(70):
             x = random.randint(100, map_width - 100)
             y = random.randint(100, map_height - 100)
             wall = arcade.Sprite("assets/level/wall.png", s.SPRITE_SCALING)
@@ -450,8 +450,6 @@ class MyGame(arcade.Window):
                     overlap = True
                     break
             if not overlap:
-                if random.random() > 0.5:
-                    wall.angle = 45
                 if random.random() > 0.9:
                     wall.scale *= random.randint(50, 200) / 100
                     if random.random() > 0.95:
@@ -480,14 +478,28 @@ class MyGame(arcade.Window):
 
     def move_ghost(self, ghost):
 
-        # Make sure that the ghost doesn't try to follow the path into the side of the level
-        # Instead, if they are beyond a certain bounds, just move towards the player
-        if ghost.center_x < 60 or ghost.center_y < 70:
+        # If the player is out of bounds then the ghost will follow the player
+        if self.seraphima.bottom < 80 or self.seraphima.left < 80:
             angle = math.atan2(self.seraphima.center_y - ghost.center_y,
                                self.seraphima.center_x - ghost.center_x)
             ghost.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
             ghost.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
+            ghost.change_x += s.MONSTER_MOVEMENT_SPEED * ghost.change_x / abs(ghost.change_x)
+            ghost.change_y += s.MONSTER_MOVEMENT_SPEED * ghost.change_y / abs(ghost.change_y)
             ghost.is_out_of_bounds = True
+
+        # Make sure that the ghost doesn't try to follow the path into the side of the level
+        # Instead, if they are beyond a certain bounds, just move towards the player
+        elif ghost.bottom < 60 or ghost.left < 70:
+            angle = math.atan2(self.seraphima.center_y - ghost.center_y,
+                               self.seraphima.center_x - ghost.center_x)
+            ghost.change_x = math.cos(angle) * s.MONSTER_MOVEMENT_SPEED
+            ghost.change_y = math.sin(angle) * s.MONSTER_MOVEMENT_SPEED
+            ghost.change_x += s.MONSTER_MOVEMENT_SPEED * ghost.change_x / abs(ghost.change_x)
+            ghost.change_y += s.MONSTER_MOVEMENT_SPEED * ghost.change_y / abs(ghost.change_y)
+            ghost.is_out_of_bounds = True
+
+        # Otherwise the ghost will follow the path
         else:
             self.path = arcade.astar_calculate_path(ghost.position,
                                                     self.seraphima.position,
