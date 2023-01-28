@@ -87,7 +87,7 @@ class MyGame(arcade.Window):
         self.player_and_boss_collider = None
         self.boss_and_wall_collider = None
         self.ghost_and_wall_collider = None
-        # self.ghost_and_ghost_collider = None
+        self.ghost_and_ghost_collider = None
         self.ghost_and_boss_collider = None
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
@@ -99,7 +99,7 @@ class MyGame(arcade.Window):
         self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
         self.playing_field_bottom_boundary = 0
         self.grid_size = 128 * s.SPRITE_SCALING
-        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size * 1.5,
+        self.barrier_list = arcade.AStarBarrierList(self.seraphima, self.wall_list, self.grid_size,
                                                     self.playing_field_left_boundary,
                                                     self.playing_field_right_boundary,
                                                     self.playing_field_bottom_boundary,
@@ -284,8 +284,8 @@ class MyGame(arcade.Window):
         for ghost in self.ghost_list:
             self.ghost_and_wall_collider = arcade.PhysicsEngineSimple(ghost, self.wall_list)
             self.ghost_and_wall_collider.update()
-            # self.ghost_and_ghost_collider = arcade.PhysicsEngineSimple(ghost, self.ghost_list)
-            # self.ghost_and_ghost_collider.update()
+            self.ghost_and_ghost_collider = arcade.PhysicsEngineSimple(ghost, self.ghost_list)
+            self.ghost_and_ghost_collider.update()
             if self.boss_list:
                 self.ghost_and_boss_collider = arcade.PhysicsEngineSimple(ghost, self.boss_list)
                 self.ghost_and_boss_collider.update()
@@ -552,6 +552,10 @@ class MyGame(arcade.Window):
             if random.randint(0, 100) == 0:
                 ghost.change_x = random.uniform(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
                 ghost.change_y = random.uniform(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
+
+        else:
+            if ghost.is_hunting:
+                ghost.is_hunting = False
 
     def move_spell(self, spell):
         if spell.change_x == 0 and spell.change_y == 0:
