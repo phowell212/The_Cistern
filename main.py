@@ -544,6 +544,7 @@ class MyGame(arcade.Window):
                 # If we're at the end of the path, start over
                 if ghost.current_path_position >= len(self.path):
                     ghost.current_path_position = 0
+
         elif not ghost.is_out_of_bounds:
             if ghost.is_hunting:
                 ghost.is_hunting = False
