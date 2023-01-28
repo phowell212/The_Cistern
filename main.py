@@ -490,11 +490,15 @@ class MyGame(arcade.Window):
 
             # Figure out where we want to go
             try:
-                next_x = self.path[ghost.current_path_position + 1][0]
-                next_y = self.path[ghost.current_path_position + 1][1]
-            except TypeError and IndexError:
+                if ghost.current_path_position < len(self.path) - 1:
+                    next_x = self.path[ghost.current_path_position + 1][0]
+                    next_y = self.path[ghost.current_path_position + 1][1]
+                else:
 
-                # We are at the end of the path
+                    # We are at the end of the path
+                    next_x = self.seraphima.center_x
+                    next_y = self.seraphima.center_y
+            except TypeError:
                 next_x = self.seraphima.center_x
                 next_y = self.seraphima.center_y
 
