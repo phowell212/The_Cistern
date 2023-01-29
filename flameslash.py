@@ -99,10 +99,10 @@ class FlameSlash(arcade.Sprite):
                 self.center_x -= self.speed
                 self.center_y -= self.speed
                 if self.player_copy.is_walking and self.player_copy.current_direction == "southwest":
-                    self.center_x -= self.speedspeed
+                    self.center_x -= self.speed
                     self.center_y -= self.speed
                 elif self.player_copy.is_running and self.player_copy.current_direction == "southwest":
-                    self.center_x -= self.speedspeed * 2
+                    self.center_x -= self.speed * 2
                     self.center_y -= self.speed * 2
             elif self.direction == "northeast":
                 self.center_x += self.speed
