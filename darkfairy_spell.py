@@ -34,7 +34,6 @@ class DarkFairySpell(arcade.Sprite):
     def update(self):
         self.center_x += self.change_x
         self.center_y += self.change_y
-        self.update_animation()
 
     def update_animation(self, delta_time: float = 1 / 60):
         self.current_frame += delta_time * self.update_interval

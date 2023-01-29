@@ -70,9 +70,6 @@ class GhostMonster(arcade.Sprite):
             self.time += 1 / 60
             self.center_y += math.sin(self.time * self.bob_frequency) * self.bob_amplitude
 
-        else:
-            self.update_animation(1 / 2)
-
         # Update the ghost's direction
         if not self.direction_lock:
             if self.change_y > 0:

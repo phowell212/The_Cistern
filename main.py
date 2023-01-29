@@ -111,16 +111,17 @@ class MyGame(arcade.Window):
         self.channel1.clear()
 
         self.draw_debug_paths()
-        self.draw_ghosts()
+        self.draw_monsters()
         self.draw_walls()
         self.draw_player()
+        self.draw_projectiles()
         self.draw_gui()
         self.draw_debug_info()
         self.draw_game_over()
 
     def on_update(self, delta_time: float = 1 / 60):
         self.update_physics()
-        self.update_movement(delta_time)
+        self.update_movement()
         self.update_projectiles()
         self.update_seraphima(delta_time)
         self.update_gui(delta_time)
@@ -178,10 +179,11 @@ class MyGame(arcade.Window):
                 if spell.debug_path is not None:
                     arcade.draw_line_strip(spell.debug_path, (30, 33, 40), 2)
 
-    def draw_ghosts(self):
+    def draw_monsters(self):
         self.ghost_list.draw()
+        self.ghost_list.update_animation()
         self.boss_list.draw()
-        self.dark_fairy_spell_list.draw()
+        self.boss_list.update_animation()
 
     def draw_walls(self):
         self.channel0.use()
@@ -199,7 +201,12 @@ class MyGame(arcade.Window):
         self.box_shadertoy.render()
 
         self.player_list.draw()
+
+    def draw_projectiles(self):
         self.swordslash_list.draw()
+        self.swordslash_list.update_animation()
+        self.dark_fairy_spell_list.draw()
+        self.dark_fairy_spell_list.update_animation()
 
     def draw_gui(self):
         self.camera_gui.use()
@@ -290,12 +297,11 @@ class MyGame(arcade.Window):
                 self.ghost_and_boss_collider = arcade.PhysicsEngineSimple(ghost, self.boss_list)
                 self.ghost_and_boss_collider.update()
 
-    def update_movement(self, delta_time):
+    def update_movement(self):
         self.ghost_list.update()
         self.scroll_to_player()
         self.process_key_presses()
         for projectile in self.swordslash_list:
-            projectile.update_animation(delta_time)
             projectile.update()
             if arcade.check_for_collision_with_list(projectile, self.wall_list):
                 projectile.is_hitting_wall = True
