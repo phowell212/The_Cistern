@@ -16,7 +16,6 @@ class FlameSlash(arcade.Sprite):
         self.scale = s.FLAMESLASH_SCALING + (s.bosses_killed / 10)
         if self.scale > 1.25:
             self.scale = 1.25
-        self.scale = 1.25
 
         self.speed = s.FLAMESLASH_PROJECTILE_SPEED + (s.bosses_killed / 10)
         if self.speed > 5:
