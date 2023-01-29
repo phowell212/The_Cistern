@@ -62,10 +62,12 @@ class FlameSlash(arcade.Sprite):
         self.load_frames()
 
     def load_frames(self):
+
+        # I named the northeast and northwest frames wrong, shh
         for i in range(1, 18):
-            self.northwest_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_northwest-{i}.png"))
+            self.northeast_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_northwest-{i}.png"))
             self.southwest_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_southwest-{i}.png"))
-            self.northeast_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_northeast-{i}.png"))
+            self.northwest_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_northeast-{i}.png"))
             self.southeast_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_southeast-{i}.png"))
             self.north_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_north-{i}.png"))
             self.south_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_south-{i}.png"))

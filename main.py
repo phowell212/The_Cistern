@@ -331,9 +331,10 @@ class MyGame(arcade.Window):
         if self.seraphima.is_slashing and self.seraphima.c_key_timer == 0 and not self.swordslash_list:
             slash_projectile = swordslash.SwordSlash(self.seraphima)
             self.swordslash_list.append(slash_projectile)
-            flameslash_projectile = flameslash.FlameSlash(self.seraphima)
-            self.flameslash_list.append(flameslash_projectile)
             arcade.play_sound(random.choice(self.swoosh_sounds), s.SWOOSH_VOLUME)
+            if s.bosses_to_spawn != 1:
+                flameslash_projectile = flameslash.FlameSlash(self.seraphima)
+                self.flameslash_list.append(flameslash_projectile)
 
         for projectile in self.swordslash_list:
             projectile_collisions = arcade.check_for_collision_with_list(projectile, self.ghost_list)
