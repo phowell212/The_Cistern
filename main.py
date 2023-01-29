@@ -332,7 +332,7 @@ class MyGame(arcade.Window):
             slash_projectile = swordslash.SwordSlash(self.seraphima)
             self.swordslash_list.append(slash_projectile)
             arcade.play_sound(random.choice(self.swoosh_sounds), s.SWOOSH_VOLUME)
-            if s.bosses_killed != 1:
+            if s.bosses_to_spawn > 1:
                 flameslash_projectile = flameslash.FlameSlash(self.seraphima)
                 self.flameslash_list.append(flameslash_projectile)
 
@@ -644,8 +644,10 @@ class MyGame(arcade.Window):
             self.no_ghost_timer = 0.0
 
     def spawn_boss(self):
-        for i in range(s.bosses_to_spawn):
-            if random.randrange(0, 15) == 0:
+        if len(self.boss_list) >= 25:
+            for i in range(s.bosses_to_spawn):
+                if len(self.boss_list) >= 25:
+                    break
                 boss_x = self.seraphima.center_x + random.randint(-500, 500)
                 boss_y = self.seraphima.center_y + random.randint(-500, 500)
                 boss = darkfairy.DarkFairy(boss_x, boss_y, s.BOSS_SCALING)
@@ -663,6 +665,7 @@ class MyGame(arcade.Window):
                         boss.center_x, boss.center_y = boss_x, boss_y
                         distance = arcade.get_distance_between_sprites(boss, self.seraphima)
                     self.boss_list.append(boss)
+        if random.randint(0, 3) == 0:
             s.bosses_to_spawn += 1
 
     def scroll_to_player(self, speed=s.CAMERA_SPEED):
