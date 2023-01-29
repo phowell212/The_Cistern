@@ -10,8 +10,18 @@ class FlameSlash(arcade.Sprite):
         self.center_x = player.center_x
         self.center_y = player.center_y
         self.direction = player.current_direction
-        self.scale = s.FLAME_SLASH_SCALING
+
+        # Init the vars
+        if s.FLAMESLASH_SCALING < 2:
+            self.scale = s.FLAMESLASH_SCALING
+        else:
+            self.scale = 2
         self.player_copy = player
+
+        if s.FLAMESLASH_PROJECTILE_SPEED < 10:
+            self.speed = s.FLAMESLASH_PROJECTILE_SPEED
+        else:
+            self.speed = 10
 
         self.is_hitting_wall = False
         self.update_interval = 1 / 20
@@ -77,65 +87,65 @@ class FlameSlash(arcade.Sprite):
     def update(self):
         if not self.is_hitting_wall:
             if self.direction == "northwest":
-                self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED
-                self.center_y += s.FLAMESLASH_PROJECTILE_SPEED
+                self.center_x -= self.speed
+                self.center_y += self.speed
                 if self.player_copy.is_walking and self.player_copy.current_direction == "northwest":
-                    self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED
-                    self.center_y += s.FLAMESLASH_PROJECTILE_SPEED
+                    self.center_x -= self.speed
+                    self.center_y += self.speed
                 elif self.player_copy.is_running and self.player_copy.current_direction == "northwest":
-                    self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED * 2
-                    self.center_y += s.FLAMESLASH_PROJECTILE_SPEED * 2
+                    self.center_x -= self.speed * 2
+                    self.center_y += self.speed * 2
             elif self.direction == "southwest":
-                self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED
-                self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED
+                self.center_x -= self.speed
+                self.center_y -= self.speed
                 if self.player_copy.is_walking and self.player_copy.current_direction == "southwest":
-                    self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED
-                    self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED
+                    self.center_x -= self.speedspeed
+                    self.center_y -= self.speed
                 elif self.player_copy.is_running and self.player_copy.current_direction == "southwest":
-                    self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED * 2
-                    self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED * 2
+                    self.center_x -= self.speedspeed * 2
+                    self.center_y -= self.speed * 2
             elif self.direction == "northeast":
-                self.center_x += s.FLAMESLASH_PROJECTILE_SPEED
-                self.center_y += s.FLAMESLASH_PROJECTILE_SPEED
+                self.center_x += self.speed
+                self.center_y += self.speed
                 if self.player_copy.is_walking and self.player_copy.current_direction == "northeast":
-                    self.center_x += s.FLAMESLASH_PROJECTILE_SPEED
-                    self.center_y += s.FLAMESLASH_PROJECTILE_SPEED
+                    self.center_x += self.speed
+                    self.center_y += self.speed
                 elif self.player_copy.is_running and self.player_copy.current_direction == "northeast":
-                    self.center_x += s.FLAMESLASH_PROJECTILE_SPEED * 2
-                    self.center_y += s.FLAMESLASH_PROJECTILE_SPEED * 2
+                    self.center_x += self.speed * 2
+                    self.center_y += self.speed * 2
             elif self.direction == "southeast":
-                self.center_x += s.FLAMESLASH_PROJECTILE_SPEED
-                self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED
+                self.center_x += self.speed
+                self.center_y -= self.speed
                 if self.player_copy.is_walking and self.player_copy.current_direction == "southeast":
-                    self.center_x += s.FLAMESLASH_PROJECTILE_SPEED
-                    self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED
+                    self.center_x += self.speed
+                    self.center_y -= self.speed
                 elif self.player_copy.is_running and self.player_copy.current_direction == "southeast":
-                    self.center_x += s.FLAMESLASH_PROJECTILE_SPEED * 2
-                    self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED * 2
+                    self.center_x += self.speed * 2
+                    self.center_y -= self.speed * 2
             elif self.direction == "north":
-                self.center_y += s.FLAMESLASH_PROJECTILE_SPEED
+                self.center_y += self.speed
                 if self.player_copy.is_walking and self.player_copy.current_direction == "north":
-                    self.center_y += s.FLAMESLASH_PROJECTILE_SPEED
+                    self.center_y += self.speed
                 elif self.player_copy.is_running and self.player_copy.current_direction == "north":
-                    self.center_y += s.FLAMESLASH_PROJECTILE_SPEED * 2
+                    self.center_y += self.speed * 2
             elif self.direction == "south":
-                self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED
+                self.center_y -= self.speed
                 if self.player_copy.is_walking and self.player_copy.current_direction == "south":
-                    self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED
+                    self.center_y -= self.speed
                 elif self.player_copy.is_running and self.player_copy.current_direction == "south":
-                    self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED * 2
+                    self.center_y -= self.speed * 2
             elif self.direction == "east":
-                self.center_x += s.FLAMESLASH_PROJECTILE_SPEED
+                self.center_x += self.speed
                 if self.player_copy.is_walking and self.player_copy.current_direction == "east":
-                    self.center_x += s.FLAMESLASH_PROJECTILE_SPEED
+                    self.center_x += self.speed
                 elif self.player_copy.is_running and self.player_copy.current_direction == "east":
-                    self.center_x += s.FLAMESLASH_PROJECTILE_SPEED * 2
+                    self.center_x += self.speed * 2
             elif self.direction == "west":
-                self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED
+                self.center_x -= self.speed
                 if self.player_copy.is_walking and self.player_copy.current_direction == "west":
-                    self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED
+                    self.center_x -= self.speed
                 elif self.player_copy.is_running and self.player_copy.current_direction == "west":
-                    self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED * 2
+                    self.center_x -= self.speed * 2
 
     def update_animation(self, delta_time: float = 1/60):
         self.current_frame += 1

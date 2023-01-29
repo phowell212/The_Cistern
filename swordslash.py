@@ -3,7 +3,7 @@ import settings as s
 
 
 class SwordSlash(arcade.Sprite):
-    def __init__(self, player, scale=s.SWORD_SLASH_SCALING,):
+    def __init__(self, player, scale=s.SWORDSLASH_SCALING, ):
         super().__init__()
 
         # Set the starting position and direction of the projectile based on the player's position and facing direction

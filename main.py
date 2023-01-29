@@ -321,8 +321,8 @@ class MyGame(arcade.Window):
         # when more bosses are spawned
         if self.boss_list:
             for _ in self.boss_list:
-                self.seraphima.change_x *= 0.9
-                self.seraphima.change_y *= 0.9
+                self.seraphima.change_x *= 0.8
+                self.seraphima.change_y *= 0.8
 
     def update_projectiles(self):
 
