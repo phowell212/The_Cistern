@@ -644,7 +644,7 @@ class MyGame(arcade.Window):
             self.no_ghost_timer = 0.0
 
     def spawn_boss(self):
-        if len(self.boss_list) >= 25:
+        if len(self.boss_list) <= 25:
             for i in range(s.bosses_to_spawn):
                 if len(self.boss_list) >= 25:
                     break
