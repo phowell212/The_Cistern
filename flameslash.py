@@ -2,15 +2,15 @@ import arcade
 import settings as s
 
 
-class FlameSlash(arcade.sprite):
-    def __init__(self, player, scale=s.FLAME_SLASH_SCALING):
+class FlameSlash(arcade.Sprite):
+    def __init__(self, player):
         super().__init__()
 
         # Set the starting position and direction of the projectile based on the player's position and facing direction
         self.center_x = player.center_x
         self.center_y = player.center_y
         self.direction = player.current_direction
-        self.scale = scale
+        self.scale = s.FLAME_SLASH_SCALING
         self.player_copy = player
 
         self.is_hitting_wall = False
@@ -135,7 +135,7 @@ class FlameSlash(arcade.sprite):
                 elif self.player_copy.is_running and self.player_copy.current_direction == "west":
                     self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED * 2
 
-    def update_animation(self, delta_time: float = 1/30):
+    def update_animation(self, delta_time: float = 1/60):
         self.current_frame += 1
 
         # Have the flameslash fade in and out
@@ -144,7 +144,7 @@ class FlameSlash(arcade.sprite):
         elif 4 < self.current_frame < 20:
             self.alpha = 255
         else:
-            self.alpha = 255 - 255 * ((self.current_frame - 20) / 5)
+            self.alpha = 255 / (5 - (self.current_frame - 20))
 
         if self.direction == "northwest" and self.current_frame < len(self.northwest_frames):
             self.texture = self.northwest_frames[int(self.current_frame)]

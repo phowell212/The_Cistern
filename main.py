@@ -3,6 +3,7 @@ import random
 import arcade
 import time
 import player
+import flameslash
 import swordslash
 import darkfairy
 import darkfairy_spell
@@ -29,6 +30,7 @@ class MyGame(arcade.Window):
         self.player_list = arcade.SpriteList()
         self.ghost_list = arcade.SpriteList()
         self.swordslash_list = arcade.SpriteList()
+        self.flameslash_list = arcade.SpriteList()
         self.heart_list = arcade.SpriteList()
         self.boss_list = arcade.SpriteList()
         self.dark_fairy_spell_list = arcade.SpriteList()
@@ -206,6 +208,8 @@ class MyGame(arcade.Window):
     def draw_friendly_projectiles(self):
         self.swordslash_list.draw()
         self.swordslash_list.update_animation()
+        self.flameslash_list.draw()
+        self.flameslash_list.update_animation()
 
     def draw_hostile_projectiles(self):
         self.dark_fairy_spell_list.draw()
@@ -307,7 +311,9 @@ class MyGame(arcade.Window):
         self.scroll_to_player()
         self.process_key_presses()
         for projectile in self.swordslash_list:
-            projectile.update()
+            if arcade.check_for_collision_with_list(projectile, self.wall_list):
+                projectile.is_hitting_wall = True
+        for projectile in self.flameslash_list:
             if arcade.check_for_collision_with_list(projectile, self.wall_list):
                 projectile.is_hitting_wall = True
 
@@ -319,12 +325,27 @@ class MyGame(arcade.Window):
                 self.seraphima.change_y *= 0.9
 
     def update_projectiles(self):
+
+        # Update the swordslash projectiles
+        self.swordslash_list.update()
         if self.seraphima.is_slashing and self.seraphima.c_key_timer == 0 and not self.swordslash_list:
             slash_projectile = swordslash.SwordSlash(self.seraphima)
             self.swordslash_list.append(slash_projectile)
+            flameslash_projectile = flameslash.FlameSlash(self.seraphima)
+            self.flameslash_list.append(flameslash_projectile)
             arcade.play_sound(random.choice(self.swoosh_sounds), s.SWOOSH_VOLUME)
 
         for projectile in self.swordslash_list:
+            projectile_collisions = arcade.check_for_collision_with_list(projectile, self.ghost_list)
+            for ghost in projectile_collisions:
+                ghost.is_being_hurt = True
+            boss_collisions = arcade.check_for_collision_with_list(projectile, self.boss_list)
+            for boss in boss_collisions:
+                self.handle_boss_damage(boss)
+
+        # Update flameslash projectiles
+        self.flameslash_list.update()
+        for projectile in self.flameslash_list:
             projectile_collisions = arcade.check_for_collision_with_list(projectile, self.ghost_list)
             for ghost in projectile_collisions:
                 ghost.is_being_hurt = True
