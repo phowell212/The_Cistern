@@ -91,15 +91,15 @@ class GhostMonster(arcade.Sprite):
 
         # If the ghost is spawning in, then play the spawn animation in full
         if not self.is_spawned and self.spawn_frame < len(self.spawn_frames):
-            self.texture = self.spawn_frames[self.spawn_frame]
-            self.spawn_frame += 1
+            self.texture = self.spawn_frames[int(self.spawn_frame)]
+            self.spawn_frame += self.update_interval * 4
             if self.spawn_frame == len(self.spawn_frames):
                 self.is_spawned = True
 
         # If the sprite has no health, play that animation then kill it
         elif self.health <= 0 and self.death_frame < len(self.death_frames):
             self.texture = self.death_frames[int(self.death_frame)]
-            self.death_frame += self.update_interval * 3
+            self.death_frame += self.update_interval * 4
         elif self.health <= 0:
             self.death_frame = 0
             s.ghosts_killed += 1
