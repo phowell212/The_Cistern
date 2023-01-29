@@ -2,8 +2,8 @@ import arcade
 import settings as s
 
 
-class SwordSlash(arcade.Sprite):
-    def __init__(self, player, scale=s.SWORD_SLASH_SCALING,):
+class FlameSlash(arcade.sprite):
+    def __init__(self, player, scale=s.FLAME_SLASH_SCALING):
         super().__init__()
 
         # Set the starting position and direction of the projectile based on the player's position and facing direction
@@ -14,38 +14,39 @@ class SwordSlash(arcade.Sprite):
         self.player_copy = player
 
         self.is_hitting_wall = False
-        self.update_interval = 1 / 10
+        self.update_interval = 1 / 20
         self.elapsed_time = 0
         self.offset = 20
+        self.alpha = 0
 
         # Set the first texture based on the sprite's direction
         if self.direction == "northwest":
-            self.texture = arcade.load_texture("assets/swordslash/ss_northwest-0.png")
+            self.texture = arcade.load_texture("assets/flameslash/flameslash_northwest-0.png")
             self.center_x -= self.offset
             self.center_y += self.offset
         elif self.direction == "southwest":
-            self.texture = arcade.load_texture("assets/swordslash/ss_southwest-0.png")
+            self.texture = arcade.load_texture("assets/flameslash/flameslash_southwest-0.png")
             self.center_x -= self.offset
             self.center_y -= self.offset
         elif self.direction == "northeast":
-            self.texture = arcade.load_texture("assets/swordslash/ss_northeast-0.png")
+            self.texture = arcade.load_texture("assets/flameslash/flameslash_northeast-0.png")
             self.center_x += self.offset
             self.center_y += self.offset
         elif self.direction == "southeast":
-            self.texture = arcade.load_texture("assets/swordslash/ss_southeast-0.png")
+            self.texture = arcade.load_texture("assets/flameslash/flameslash_southeast-0.png")
             self.center_x += self.offset
             self.center_y -= self.offset
         elif self.direction == "north":
-            self.texture = arcade.load_texture("assets/swordslash/ss_north-0.png")
+            self.texture = arcade.load_texture("assets/flameslash/flameslash_north-0.png")
             self.center_y += self.offset
         elif self.direction == "south":
-            self.texture = arcade.load_texture("assets/swordslash/ss_south-0.png")
+            self.texture = arcade.load_texture("assets/flameslash/flameslash_south-0.png")
             self.center_y -= self.offset
         elif self.direction == "east":
-            self.texture = arcade.load_texture("assets/swordslash/ss_east-0.png")
+            self.texture = arcade.load_texture("assets/flameslash/flameslash_east-0.png")
             self.center_x += self.offset
         elif self.direction == "west":
-            self.texture = arcade.load_texture("assets/swordslash/ss_west-0.png")
+            self.texture = arcade.load_texture("assets/flameslash/flameslash_west-0.png")
             self.center_x -= self.offset
 
         # Load the animation frames
@@ -61,82 +62,89 @@ class SwordSlash(arcade.Sprite):
         self.load_frames()
 
     def load_frames(self):
-        for i in range(1, 15):
-            self.northwest_frames.append(arcade.load_texture(f"assets/swordslash/ss_northwest-{i}.png"))
-            self.southwest_frames.append(arcade.load_texture(f"assets/swordslash/ss_southwest-{i}.png"))
-            self.northeast_frames.append(arcade.load_texture(f"assets/swordslash/ss_northeast-{i}.png"))
-            self.southeast_frames.append(arcade.load_texture(f"assets/swordslash/ss_southeast-{i}.png"))
-            self.north_frames.append(arcade.load_texture(f"assets/swordslash/ss_north-{i}.png"))
-            self.south_frames.append(arcade.load_texture(f"assets/swordslash/ss_south-{i}.png"))
-            self.east_frames.append(arcade.load_texture(f"assets/swordslash/ss_east-{i}.png"))
-            self.west_frames.append(arcade.load_texture(f"assets/swordslash/ss_west-{i}.png"))
+        for i in range(1, 24):
+            self.northwest_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_northwest-{i}.png"))
+            self.southwest_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_southwest-{i}.png"))
+            self.northeast_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_northeast-{i}.png"))
+            self.southeast_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_southeast-{i}.png"))
+            self.north_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_north-{i}.png"))
+            self.south_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_south-{i}.png"))
+            self.east_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_east-{i}.png"))
+            self.west_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_west-{i}.png"))
 
     def update(self):
         if not self.is_hitting_wall:
             if self.direction == "northwest":
-                self.center_x -= s.SWORDSLASH_PROJECTILE_SPEED
-                self.center_y += s.SWORDSLASH_PROJECTILE_SPEED
+                self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED
+                self.center_y += s.FLAMESLASH_PROJECTILE_SPEED
                 if self.player_copy.is_walking and self.player_copy.current_direction == "northwest":
-                    self.center_x -= s.SWORDSLASH_PROJECTILE_SPEED
-                    self.center_y += s.SWORDSLASH_PROJECTILE_SPEED
+                    self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED
+                    self.center_y += s.FLAMESLASH_PROJECTILE_SPEED
                 elif self.player_copy.is_running and self.player_copy.current_direction == "northwest":
-                    self.center_x -= s.SWORDSLASH_PROJECTILE_SPEED * 2
-                    self.center_y += s.SWORDSLASH_PROJECTILE_SPEED * 2
+                    self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED * 2
+                    self.center_y += s.FLAMESLASH_PROJECTILE_SPEED * 2
             elif self.direction == "southwest":
-                self.center_x -= s.SWORDSLASH_PROJECTILE_SPEED
-                self.center_y -= s.SWORDSLASH_PROJECTILE_SPEED
+                self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED
+                self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED
                 if self.player_copy.is_walking and self.player_copy.current_direction == "southwest":
-                    self.center_x -= s.SWORDSLASH_PROJECTILE_SPEED
-                    self.center_y -= s.SWORDSLASH_PROJECTILE_SPEED
+                    self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED
+                    self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED
                 elif self.player_copy.is_running and self.player_copy.current_direction == "southwest":
-                    self.center_x -= s.SWORDSLASH_PROJECTILE_SPEED * 2
-                    self.center_y -= s.SWORDSLASH_PROJECTILE_SPEED * 2
+                    self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED * 2
+                    self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED * 2
             elif self.direction == "northeast":
-                self.center_x += s.SWORDSLASH_PROJECTILE_SPEED
-                self.center_y += s.SWORDSLASH_PROJECTILE_SPEED
+                self.center_x += s.FLAMESLASH_PROJECTILE_SPEED
+                self.center_y += s.FLAMESLASH_PROJECTILE_SPEED
                 if self.player_copy.is_walking and self.player_copy.current_direction == "northeast":
-                    self.center_x += s.SWORDSLASH_PROJECTILE_SPEED
-                    self.center_y += s.SWORDSLASH_PROJECTILE_SPEED
+                    self.center_x += s.FLAMESLASH_PROJECTILE_SPEED
+                    self.center_y += s.FLAMESLASH_PROJECTILE_SPEED
                 elif self.player_copy.is_running and self.player_copy.current_direction == "northeast":
-                    self.center_x += s.SWORDSLASH_PROJECTILE_SPEED * 2
-                    self.center_y += s.SWORDSLASH_PROJECTILE_SPEED * 2
+                    self.center_x += s.FLAMESLASH_PROJECTILE_SPEED * 2
+                    self.center_y += s.FLAMESLASH_PROJECTILE_SPEED * 2
             elif self.direction == "southeast":
-                self.center_x += s.SWORDSLASH_PROJECTILE_SPEED
-                self.center_y -= s.SWORDSLASH_PROJECTILE_SPEED
+                self.center_x += s.FLAMESLASH_PROJECTILE_SPEED
+                self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED
                 if self.player_copy.is_walking and self.player_copy.current_direction == "southeast":
-                    self.center_x += s.SWORDSLASH_PROJECTILE_SPEED
-                    self.center_y -= s.SWORDSLASH_PROJECTILE_SPEED
+                    self.center_x += s.FLAMESLASH_PROJECTILE_SPEED
+                    self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED
                 elif self.player_copy.is_running and self.player_copy.current_direction == "southeast":
-                    self.center_x += s.SWORDSLASH_PROJECTILE_SPEED * 2
-                    self.center_y -= s.SWORDSLASH_PROJECTILE_SPEED * 2
+                    self.center_x += s.FLAMESLASH_PROJECTILE_SPEED * 2
+                    self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED * 2
             elif self.direction == "north":
-                self.center_y += s.SWORDSLASH_PROJECTILE_SPEED
+                self.center_y += s.FLAMESLASH_PROJECTILE_SPEED
                 if self.player_copy.is_walking and self.player_copy.current_direction == "north":
-                    self.center_y += s.SWORDSLASH_PROJECTILE_SPEED
+                    self.center_y += s.FLAMESLASH_PROJECTILE_SPEED
                 elif self.player_copy.is_running and self.player_copy.current_direction == "north":
-                    self.center_y += s.SWORDSLASH_PROJECTILE_SPEED * 2
+                    self.center_y += s.FLAMESLASH_PROJECTILE_SPEED * 2
             elif self.direction == "south":
-                self.center_y -= s.SWORDSLASH_PROJECTILE_SPEED
+                self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED
                 if self.player_copy.is_walking and self.player_copy.current_direction == "south":
-                    self.center_y -= s.SWORDSLASH_PROJECTILE_SPEED
+                    self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED
                 elif self.player_copy.is_running and self.player_copy.current_direction == "south":
-                    self.center_y -= s.SWORDSLASH_PROJECTILE_SPEED * 2
+                    self.center_y -= s.FLAMESLASH_PROJECTILE_SPEED * 2
             elif self.direction == "east":
-                self.center_x += s.SWORDSLASH_PROJECTILE_SPEED
+                self.center_x += s.FLAMESLASH_PROJECTILE_SPEED
                 if self.player_copy.is_walking and self.player_copy.current_direction == "east":
-                    self.center_x += s.SWORDSLASH_PROJECTILE_SPEED
+                    self.center_x += s.FLAMESLASH_PROJECTILE_SPEED
                 elif self.player_copy.is_running and self.player_copy.current_direction == "east":
-                    self.center_x += s.SWORDSLASH_PROJECTILE_SPEED * 2
+                    self.center_x += s.FLAMESLASH_PROJECTILE_SPEED * 2
             elif self.direction == "west":
-                self.center_x -= s.SWORDSLASH_PROJECTILE_SPEED
+                self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED
                 if self.player_copy.is_walking and self.player_copy.current_direction == "west":
-                    self.center_x -= s.SWORDSLASH_PROJECTILE_SPEED
+                    self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED
                 elif self.player_copy.is_running and self.player_copy.current_direction == "west":
-                    self.center_x -= s.SWORDSLASH_PROJECTILE_SPEED * 2
+                    self.center_x -= s.FLAMESLASH_PROJECTILE_SPEED * 2
 
     def update_animation(self, delta_time: float = 1/30):
-        # Update the animation frame
         self.current_frame += 1
+
+        # Have the flameslash fade in and out
+        if self.current_frame < 4:
+            self.alpha = 255 * (self.current_frame / 5)
+        elif 4 < self.current_frame < 20:
+            self.alpha = 255
+        else:
+            self.alpha = 255 - 255 * ((self.current_frame - 20) / 5)
 
         if self.direction == "northwest" and self.current_frame < len(self.northwest_frames):
             self.texture = self.northwest_frames[int(self.current_frame)]
