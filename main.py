@@ -292,10 +292,12 @@ class MyGame(arcade.Window):
                 self.player_and_boss_collider.update()
 
         for ghost in self.ghost_list:
-            self.ghost_and_wall_collider = arcade.PhysicsEngineSimple(ghost, self.wall_list)
-            self.ghost_and_wall_collider.update()
-            self.ghost_and_ghost_collider = arcade.PhysicsEngineSimple(ghost, self.ghost_list)
-            self.ghost_and_ghost_collider.update()
+            if arcade.check_for_collision_with_list(ghost, self.wall_list):
+                self.ghost_and_wall_collider = arcade.PhysicsEngineSimple(ghost, self.wall_list)
+                self.ghost_and_wall_collider.update()
+            if arcade.check_for_collision_with_list(ghost, self.ghost_list):
+                self.ghost_and_ghost_collider = arcade.PhysicsEngineSimple(ghost, self.ghost_list)
+                self.ghost_and_ghost_collider.update()
             if self.boss_list:
                 self.ghost_and_boss_collider = arcade.PhysicsEngineSimple(ghost, self.boss_list)
                 self.ghost_and_boss_collider.update()
