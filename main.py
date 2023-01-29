@@ -327,8 +327,8 @@ class MyGame(arcade.Window):
             for boss in boss_collisions:
                 self.handle_boss_damage(boss)
 
+        self.dark_fairy_spell_list.update()
         for spell in self.dark_fairy_spell_list:
-            spell.update()
             self.move_spell(spell)
             spell_collisions = arcade.check_for_collision_with_list(spell, self.ghost_list)
             for ghost in spell_collisions:
