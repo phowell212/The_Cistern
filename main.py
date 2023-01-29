@@ -320,8 +320,8 @@ class MyGame(arcade.Window):
         # Decrease the player's speed when a boss is out because for whatever reason the player's speed is increased
         # when more bosses are spawned
         if len(self.boss_list) > 1:
-            self.seraphima.change_x *= 0.8
-            self.seraphima.change_y *= 0.8
+            self.seraphima.change_x *= 0.75
+            self.seraphima.change_y *= 0.75
 
     def update_projectiles(self):
 
@@ -445,8 +445,15 @@ class MyGame(arcade.Window):
 
         self.boss_list.update()
         if s.ghosts_killed % 15 == 0 and s.ghosts_killed != 0:
-            self.spawn_boss()
-            s.ghosts_killed += 1
+            if self.ghosts_killed == 15:
+                self.spawn_boss()
+                s.ghosts_killed += 1
+            else:
+                if random.randint(0, 3) == 0:
+                    self.spawn_boss()
+                    s.ghosts_killed += 1
+                if random.randint(0, 2) == 0:
+                    s.bosses_to_spawn = 2
 
     def update_music(self):
         if time.time() > self.music_timer:
@@ -657,7 +664,7 @@ class MyGame(arcade.Window):
     def spawn_boss(self):
         if len(self.boss_list) <= 25:
             for i in range(s.bosses_to_spawn):
-                if len(self.boss_list) >= 25:
+                if len(self.boss_list) >= 5:
                     break
                 boss_x = self.seraphima.center_x + random.randint(-500, 500)
                 boss_y = self.seraphima.center_y + random.randint(-500, 500)
