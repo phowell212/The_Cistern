@@ -645,7 +645,7 @@ class MyGame(arcade.Window):
 
     def spawn_boss(self):
         for i in range(s.bosses_to_spawn):
-            if random.randInt(0, 15) == 0:
+            if random.randrange(0, 15) == 0:
                 boss_x = self.seraphima.center_x + random.randint(-500, 500)
                 boss_y = self.seraphima.center_y + random.randint(-500, 500)
                 boss = darkfairy.DarkFairy(boss_x, boss_y, s.BOSS_SCALING)
