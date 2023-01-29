@@ -43,10 +43,10 @@ class FlameSlash(arcade.Sprite):
             self.texture = arcade.load_texture("assets/flameslash/flameslash_south-0.png")
             self.center_y -= self.offset
         elif self.direction == "east":
-            self.texture = arcade.load_texture("assets/flameslash/flameslash_east-0.png")
+            self.texture = arcade.load_texture("assets/flameslash/flameslash-east-0.png")
             self.center_x += self.offset
         elif self.direction == "west":
-            self.texture = arcade.load_texture("assets/flameslash/flameslash_west-0.png")
+            self.texture = arcade.load_texture("assets/flameslash/flameslash-west-0.png")
             self.center_x -= self.offset
 
         # Load the animation frames
@@ -62,15 +62,15 @@ class FlameSlash(arcade.Sprite):
         self.load_frames()
 
     def load_frames(self):
-        for i in range(1, 24):
+        for i in range(1, 18):
             self.northwest_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_northwest-{i}.png"))
             self.southwest_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_southwest-{i}.png"))
             self.northeast_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_northeast-{i}.png"))
             self.southeast_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_southeast-{i}.png"))
             self.north_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_north-{i}.png"))
             self.south_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_south-{i}.png"))
-            self.east_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_east-{i}.png"))
-            self.west_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_west-{i}.png"))
+            self.east_frames.append(arcade.load_texture(f"assets/flameslash/flameslash-east-{i}.png"))
+            self.west_frames.append(arcade.load_texture(f"assets/flameslash/flameslash-west-{i}.png"))
 
     def update(self):
         if not self.is_hitting_wall:
