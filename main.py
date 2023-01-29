@@ -331,17 +331,29 @@ class MyGame(arcade.Window):
             slash_projectile = swordslash.SwordSlash(self.seraphima)
             self.swordslash_list.append(slash_projectile)
             arcade.play_sound(random.choice(self.swoosh_sounds), s.SWOOSH_VOLUME)
-            if s.bosses_to_spawn > 1:
+            if s.bosses_killed >= 1:
                 flameslash_projectile = flameslash.FlameSlash(self.seraphima)
                 self.flameslash_list.append(flameslash_projectile)
 
-        for projectile in self.swordslash_list:
-            projectile_collisions = arcade.check_for_collision_with_list(projectile, self.ghost_list)
-            for ghost in projectile_collisions:
-                ghost.is_being_hurt = True
-            boss_collisions = arcade.check_for_collision_with_list(projectile, self.boss_list)
-            for boss in boss_collisions:
-                self.handle_boss_damage(boss)
+        # Handle swordslash dealing damage
+        if self.swordslash_list:
+            for projectile in self.swordslash_list:
+                projectile_collisions = arcade.check_for_collision_with_list(projectile, self.ghost_list)
+                for ghost in projectile_collisions:
+                    ghost.is_being_hurt = True
+                boss_collisions = arcade.check_for_collision_with_list(projectile, self.boss_list)
+                for boss in boss_collisions:
+                    self.handle_boss_damage(boss)
+
+        # Handle flameslash dealing damage
+        if self.flameslash_list:
+            for projectile in self.flameslash_list:
+                projectile_collisions = arcade.check_for_collision_with_list(projectile, self.ghost_list)
+                for ghost in projectile_collisions:
+                    ghost.is_being_hurt = True
+                boss_collisions = arcade.check_for_collision_with_list(projectile, self.boss_list)
+                for boss in boss_collisions:
+                    self.handle_boss_damage(boss)
 
         # Update flameslash projectiles
         self.flameslash_list.update()

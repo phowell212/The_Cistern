@@ -12,16 +12,16 @@ class FlameSlash(arcade.Sprite):
         self.direction = player.current_direction
 
         # Init the vars
-        if s.FLAMESLASH_SCALING < 2:
-            self.scale = s.FLAMESLASH_SCALING
+        if s.FLAMESLASH_SCALING < 1.25:
+            self.scale = s.FLAMESLASH_SCALING + (s.bosses_killed / 10)
         else:
-            self.scale = 2
+            self.scale = 1.25
         self.player_copy = player
 
-        if s.FLAMESLASH_PROJECTILE_SPEED < 10:
-            self.speed = s.FLAMESLASH_PROJECTILE_SPEED
+        if s.FLAMESLASH_PROJECTILE_SPEED < 5:
+            self.speed = s.FLAMESLASH_PROJECTILE_SPEED + (s.bosses_killed / 10)
         else:
-            self.speed = 10
+            self.speed = 5
 
         self.is_hitting_wall = False
         self.update_interval = 1 / 20
