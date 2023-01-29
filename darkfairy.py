@@ -41,34 +41,34 @@ class DarkFairy(arcade.Sprite):
     def load_frames(self):
         for i in range(0, 7):
             self.phase_1_cast_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_new/darkfairy_phase1_castspell_{i}.png"))
+                f"assets/enemies/darkfairy/darkfairy_phase1_castspell_{i}.png"))
         for i in range(0, 2):
             self.phase_1_hurt_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_new/darkfairy_phase1_hurt_{i}.png"))
+                f"assets/enemies/darkfairy/darkfairy_phase1_hurt_{i}.png"))
         for i in range(0, 7):
             self.phase_1_idle_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_new/darkfairy_phase1_idle{i}.png"))
+                f"assets/enemies/darkfairy/darkfairy_phase1_idle{i}.png"))
         for i in range(0, 10):
             self.transform_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_new/darkfairy_transformation_into_phase2_0{i}.png"))
+                f"assets/enemies/darkfairy/darkfairy_transformation_into_phase2_0{i}.png"))
         for i in range(0, 6):
             self.transform_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_new/darkfairy_transformation_into_phase2_1{i}.png"))
+                f"assets/enemies/darkfairy/darkfairy_transformation_into_phase2_1{i}.png"))
         for i in range(0, 4):
             self.phase_2_cast_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_new/darkfairy_phase2_castspell_{i}.png"))
+                f"assets/enemies/darkfairy/darkfairy_phase2_castspell_{i}.png"))
         for i in range(0, 3):
             self.phase_2_hurt_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_new/darkfairy_phase2_hurt_{i}.png"))
+                f"assets/enemies/darkfairy/darkfairy_phase2_hurt_{i}.png"))
         for i in range(0, 2):
             self.phase_2_idle_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_new/darkfairy_phase2_idle_{i}.png"))
+                f"assets/enemies/darkfairy/darkfairy_phase2_idle_{i}.png"))
         for i in range(0, 10):
             self.death_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_new/darkfairy_phase2_death_0{i}.png"))
+                f"assets/enemies/darkfairy/darkfairy_phase2_death_0{i}.png"))
         for i in range(0, 4):
             self.death_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_new/darkfairy_phase2_death_1{i}.png"))
+                f"assets/enemies/darkfairy/darkfairy_phase2_death_1{i}.png"))
 
         self.phase_1_idle_frames.extend(self.phase_1_idle_frames[::-1])
         self.phase_2_idle_frames.extend(self.phase_2_idle_frames[::-1])
