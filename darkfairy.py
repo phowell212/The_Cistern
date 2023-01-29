@@ -134,6 +134,7 @@ class DarkFairy(arcade.Sprite):
                         self.texture = self.death_frames[int(self.current_frame)]
                     except IndexError:
                         self.kill()
+                        s.bosses_killed += 1
                         s.bosses_to_spawn += 1
 
             elif self.is_casting and self.casting_frame < len(self.phase_2_cast_frames):

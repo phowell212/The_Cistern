@@ -332,7 +332,7 @@ class MyGame(arcade.Window):
             slash_projectile = swordslash.SwordSlash(self.seraphima)
             self.swordslash_list.append(slash_projectile)
             arcade.play_sound(random.choice(self.swoosh_sounds), s.SWOOSH_VOLUME)
-            if s.bosses_to_spawn != 1:
+            if s.bosses_killed != 1:
                 flameslash_projectile = flameslash.FlameSlash(self.seraphima)
                 self.flameslash_list.append(flameslash_projectile)
 
