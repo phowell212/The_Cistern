@@ -112,9 +112,10 @@ class MyGame(arcade.Window):
 
         self.draw_debug_paths()
         self.draw_monsters()
+        self.draw_friendly_projectiles()
+        self.draw_hostile_projectiles()
         self.draw_walls()
-        self.draw_player()
-        self.draw_projectiles()
+        self.draw_seraphima()
         self.draw_gui()
         self.draw_debug_info()
         self.draw_game_over()
@@ -192,7 +193,7 @@ class MyGame(arcade.Window):
         self.use()
         self.clear()
 
-    def draw_player(self):
+    def draw_seraphima(self):
         position = (self.seraphima.position[0] - self.camera.position[0],
                     self.seraphima.position[1] - self.camera.position[1])
 
@@ -202,9 +203,11 @@ class MyGame(arcade.Window):
 
         self.player_list.draw()
 
-    def draw_projectiles(self):
+    def draw_friendly_projectiles(self):
         self.swordslash_list.draw()
         self.swordslash_list.update_animation()
+
+    def draw_hostile_projectiles(self):
         self.dark_fairy_spell_list.draw()
         self.dark_fairy_spell_list.update_animation()
 
