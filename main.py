@@ -502,7 +502,7 @@ class MyGame(arcade.Window):
 
         self.boss_list.update()
         if s.ghosts_killed % 15 == 0 and s.ghosts_killed != 0:
-            if self.ghosts_killed == 15:
+            if s.ghosts_killed == 15:
                 self.spawn_boss()
                 s.ghosts_killed += 1
             else:
