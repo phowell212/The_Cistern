@@ -713,8 +713,10 @@ class MyGame(arcade.Window):
                         over_ghosts -= 1
                     else:
                         over_ghosts -= 1
-            if self.ghosts_to_spawn > 25:
-                self.ghosts_to_spawn = 25
+            if self.ghosts_to_spawn > ((25 * s.bosses_killed) / 2) + 25:
+                self.ghosts_to_spawn = ((25 * s.bosses_killed) / 2) + 25
+            if self.ghosts_to_spawn > 99:
+                self.ghosts_to_spawn = 99
 
     def spawn_ghosts_on_empty_list(self):
 
