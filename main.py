@@ -377,8 +377,8 @@ class MyGame(arcade.Window):
         # Decrease the player's speed when a boss is out because for whatever reason the player's speed is increased
         # when more bosses are spawned
         if len(self.boss_list) >= 1:
-            self.seraphima.change_x *= 0.7
-            self.seraphima.change_y *= 0.7
+            self.seraphima.change_x *= 0.75
+            self.seraphima.change_y *= 0.75
             if len(self.boss_list) >= 2:
                 self.seraphima.change_x *= 0.75
                 self.seraphima.change_y *= 0.75
