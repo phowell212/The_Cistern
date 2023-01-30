@@ -49,6 +49,7 @@ class MyGame(arcade.Window):
         self.is_dead = False
         self.is_faded_out = False
         self.has_spawned_player_death_ghost = True
+        self.title_screen = True
         self.swoosh_sounds = []
         for i in range(0, 3):
             self.swoosh_sounds.append(arcade.load_sound(f"sounds/sword_swoosh-{i}.mp3"))
@@ -121,6 +122,7 @@ class MyGame(arcade.Window):
         self.draw_gui()
         self.draw_debug_info()
         self.draw_game_over()
+        self.draw_title_screen()
 
     def on_update(self, delta_time: float = 1 / 60):
         self.update_physics()
@@ -259,7 +261,7 @@ class MyGame(arcade.Window):
 
     def draw_game_over(self):
         if not self.heart_list:
-            arcade.draw_text("GAME OVER", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2,
+            arcade.draw_text("GAME OVER", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2 + 50,
                              color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
                              anchor_y="baseline", bold=True)
             for ghost in self.ghost_list:
@@ -281,6 +283,15 @@ class MyGame(arcade.Window):
                 self.seraphima.remove_from_sprite_lists()
                 self.ghost_list.append(ghost_sprite)
                 self.has_spawned_player_death_ghost = True
+
+    def draw_title_screen(self):
+        if self.title_screen:
+            arcade.draw_text("Welcome to: The Cistern", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2 + 50,
+                             color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
+                             anchor_y="baseline", bold=True)
+            arcade.draw_text("Press any key to start.", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2 - 100,
+                             color=(255, 255, 242), font_size=36, font_name="Garamond", anchor_x="center",
+                             anchor_y="baseline")
 
     def update_physics(self):
         if self.heart_list:
@@ -412,7 +423,7 @@ class MyGame(arcade.Window):
     def update_ghosts(self):
         self.spawn_ghosts_on_empty_list()
         for ghost in self.ghost_list:
-            if not ghost.is_being_hurt:
+            if not ghost.is_being_hurt and self.title_screen is False:
                 self.move_ghost(ghost)
             if ghost.left < 0 or ghost.top > 2559 or ghost.right > 2559 or ghost.bottom < 0:
                 ghost.health = 0
@@ -694,6 +705,10 @@ class MyGame(arcade.Window):
     def process_key_presses(self):
         self.seraphima.change_x = 0
         self.seraphima.change_y = 0
+
+        # Handle the title screen
+        if self.key_press_buffer:
+            self.title_screen = False
 
         # Handle slashing, hold the c key for SLASH_CHARGE_TIME to activate
         # This discourages spamming the slash key
