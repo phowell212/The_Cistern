@@ -731,9 +731,11 @@ class MyGame(arcade.Window):
             self.no_ghost_timer = 0.0
 
     def spawn_boss(self):
-        if len(self.boss_list) <= 25:
-            for i in range(s.bosses_to_spawn):
-                if len(self.boss_list) >= 5:
+        for i in range(s.bosses_to_spawn):
+
+            # Always spawn the first boss
+            if s.bosses_killed == 0:
+                if len(self.boss_list) > 5:
                     break
                 boss_x = self.seraphima.center_x + random.randint(-500, 500)
                 boss_y = self.seraphima.center_y + random.randint(-500, 500)
@@ -752,6 +754,30 @@ class MyGame(arcade.Window):
                         boss.center_x, boss.center_y = boss_x, boss_y
                         distance = arcade.get_distance_between_sprites(boss, self.seraphima)
                     self.boss_list.append(boss)
+
+            # Otherwise, let there be a chance to spawn a boss
+            else:
+                if len(self.boss_list) > 5:
+                    break
+                if random.randint(0, 5) == 0:
+                    boss_x = self.seraphima.center_x + random.randint(-500, 500)
+                    boss_y = self.seraphima.center_y + random.randint(-500, 500)
+                    boss = darkfairy.DarkFairy(boss_x, boss_y, s.BOSS_SCALING)
+
+                    distance = arcade.get_distance_between_sprites(boss, self.seraphima)
+                    # Make the ghost move into the play area if they are outside it
+                    if distance > boss.min_spawn_distance and boss.left > 32 and boss.top < 2527 and \
+                            boss.right < 2527 and boss.bottom > 32:
+                        self.boss_list.append(boss)
+                    else:
+                        while distance <= boss.min_spawn_distance or boss.left < 32 or boss.top > 2527 or \
+                                boss.right > 2527 or boss.bottom < 32:
+                            boss_x = self.seraphima.center_x + random.randint(-500, 500)
+                            boss_y = self.seraphima.center_y + random.randint(-500, 500)
+                            boss.center_x, boss.center_y = boss_x, boss_y
+                            distance = arcade.get_distance_between_sprites(boss, self.seraphima)
+                        self.boss_list.append(boss)
+
         if random.randint(0, 3) == 0:
             s.bosses_to_spawn += 1
 
