@@ -50,6 +50,7 @@ class MyGame(arcade.Window):
         self.is_faded_out = False
         self.has_spawned_player_death_ghost = True
         self.title_screen = True
+        self.restart = False
         self.swoosh_sounds = []
         for i in range(0, 3):
             self.swoosh_sounds.append(arcade.load_sound(f"sounds/sword_swoosh-{i}.mp3"))
@@ -137,6 +138,9 @@ class MyGame(arcade.Window):
     def on_key_press(self, key, modifiers):
         if self.heart_list:
             self.key_press_buffer.add(key)
+        if self.restart:
+            if key == arcade.key.X:
+                self.key_press_buffer.add(key)
 
     def on_key_release(self, key, modifiers):
         self.key_press_buffer.discard(key)
@@ -220,6 +224,8 @@ class MyGame(arcade.Window):
     def draw_gui(self):
         self.camera_gui.use()
         self.heart_list.draw()
+        if s.ghosts_killed == 0:
+            self.score = 0
         score_text = f"Score: {int(self.score / 6.5)}.0"
         for ghost in self.ghost_list:
             if ghost.death_frame > 0:
@@ -267,6 +273,45 @@ class MyGame(arcade.Window):
             for ghost in self.ghost_list:
                 ghost.can_hunt = False
 
+            # Draw the restart button and restart the game c is pressed
+            if self.restart:
+                arcade.draw_text("Press x to restart.", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2 - 100,
+                                 color=(255, 255, 242), font_size=36, font_name="Garamond", anchor_x="center",
+                                 anchor_y="baseline")
+
+                # Restart the game if x is pressed
+                if arcade.key.X in self.key_press_buffer:
+                    self.restart = False
+                    self.player_list.clear()
+                    for i in range(len(self.ghost_list) - 1):
+                        self.ghost_list[i].health = 0
+                    self.ghosts_to_spawn_multiplier = 1.4
+                    self.ghosts_to_spawn = 4.0
+                    self.spawn_ghosts()
+                    self.heart_list.clear()
+                    self.swordslash_list.clear()
+                    self.flameslash_list.clear()
+                    self.dark_fairy_spell_list.clear()
+                    self.boss_list.clear()
+                    self.seraphima = player.Player(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
+                    self.score = 0
+                    s.ghosts_killed = 0
+                    self.is_faded_out = False
+                    self.has_spawned_player_death_ghost = False
+                    s.bosses_killed = 0
+                    s.bosses_to_spawn = 1
+                    self.no_ghost_timer = 0.0
+                    self.player_list.append(self.seraphima)
+                    self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.seraphima, self.wall_list)
+                    self.health = s.PLAYER_STARTING_HEALTH
+                    for i in range(int(self.health / 10)):
+                        heart = arcade.Sprite("assets/heart/heart-0.png", s.HEART_SCALING)
+                        heart.center_x = (self.width - 200) + i * 40
+                        heart.center_y = 45
+                        self.heart_list.append(heart)
+                    self.heart_list.reverse()
+                    self.is_dead = False
+
             # If the player isn't already transparent make the player sprite slowly fade out
             if self.seraphima.alpha != 0:
                 self.seraphima.alpha -= 0.03 * self.seraphima.alpha
@@ -274,6 +319,7 @@ class MyGame(arcade.Window):
             elif not self.is_faded_out:
                 self.is_faded_out = True
                 self.has_spawned_player_death_ghost = False
+                self.restart = True
 
             # If the player is fully transparent, spawn a ghost on their death location
             elif not self.has_spawned_player_death_ghost:
