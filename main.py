@@ -10,6 +10,7 @@ import darkfairy_spell
 import settings as s
 import ghost as g
 from arcade.experimental import Shadertoy
+from arcade.experimental.crt_filter import CRTFilter
 from pathlib import Path
 from pyglet.math import Vec2
 
@@ -96,7 +97,6 @@ class MyGame(arcade.Window):
         self.ghost_and_boss_collider = None
         self.camera = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
         self.camera_gui = arcade.Camera(s.SCREEN_WIDTH, s.SCREEN_HEIGHT)
-        arcade.set_background_color((108, 121, 147))
 
         # Make the pathfinding vars
         self.playing_field_left_boundary = 0
@@ -110,9 +110,20 @@ class MyGame(arcade.Window):
                                                     self.playing_field_bottom_boundary,
                                                     self.playing_field_top_boundary)
 
+        # Init the CRT filter for the sprites
+        self.crt_filter = CRTFilter(width, height, resolution_down_scale=1.0,
+                                    hard_scan=-3.0,
+                                    hard_pix=-3.0,
+                                    display_warp=Vec2(1.0 / 32.0, 1.0 / 24.0))
+
     def on_draw(self):
         arcade.start_render()
         self.camera.use()
+
+        # Select the CRT layer to draw on, then draw it
+        self.crt_filter.use()
+        self.crt_filter.clear()
+        self.draw_channel_crt()
 
         # Select channel 1 (below-shadow layer) to draw on, then draw it
         self.channel1.use()
@@ -124,9 +135,10 @@ class MyGame(arcade.Window):
         self.channel0.clear()
         self.draw_channel0()
 
-        # Select our window (top game layer) to draw on, then draw the player and projectiles
+        # Select our window (top game layer) to draw on, then draw it
         self.use()
         self.clear()
+        self.crt_filter.draw()
         self.draw_window()
 
         # Select the GUI camera (top layer) to draw on, then draw the GUI
@@ -161,14 +173,10 @@ class MyGame(arcade.Window):
         elif arcade.key.C not in self.key_press_buffer:
             self.seraphima.c_key_timer = 0
 
-    def draw_channel0(self):
-        self.wall_list.draw()
+    def draw_channel_crt(self):
+        arcade.draw_lrtb_rectangle_filled(0, 99999, 99999, 0, (108, 121, 147))
 
-    def draw_channel1(self):
-        self.ghost_list.draw()
-        self.boss_list.draw()
-        self.dark_fairy_spell_list.draw()
-
+        # Draw the debug pathfinding lines if the condition is met
         if self.debug_mode and arcade.key.D in self.key_press_buffer:
             for ghost in self.ghost_list:
                 try:
@@ -202,6 +210,16 @@ class MyGame(arcade.Window):
                     pass
                 if spell.debug_path is not None:
                     arcade.draw_line_strip(spell.debug_path, (30, 33, 40), 2)
+
+    def draw_channel0(self):
+        self.wall_list.draw()
+
+    def draw_channel1(self):
+
+        # Draw the enemy sprites on top of the background
+        self.ghost_list.draw()
+        self.boss_list.draw()
+        self.dark_fairy_spell_list.draw()
 
     def draw_window(self):
         position = (self.seraphima.position[0] - self.camera.position[0],
