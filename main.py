@@ -51,6 +51,7 @@ class MyGame(arcade.Window):
         self.has_spawned_player_death_ghost = True
         self.title_screen = True
         self.restart = False
+        self.debug_mode = True
         self.swoosh_sounds = []
         for i in range(0, 3):
             self.swoosh_sounds.append(arcade.load_sound(f"sounds/sword_swoosh-{i}.mp3"))
@@ -71,7 +72,7 @@ class MyGame(arcade.Window):
         self.wall_tile_map = arcade.Scene.from_tilemap(self.wall_tile_map)
         scene_wall_sprite_list = self.wall_tile_map.get_sprite_list("Tile Layer 1")
         self.wall_list.extend(scene_wall_sprite_list)
-        self.generate_walls(self, self.level_map.width, self.level_map.height)
+        self.generate_walls(self.level_map.width, self.level_map.height)
 
         # Create playing field sprites
         self.seraphima = player.Player(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
@@ -110,20 +111,27 @@ class MyGame(arcade.Window):
                                                     self.playing_field_top_boundary)
 
     def on_draw(self):
+        arcade.start_render()
         self.camera.use()
+
+        # Select channel 1 (below-shadow layer) to draw on, then draw it
         self.channel1.use()
         self.channel1.clear()
+        self.draw_channel1()
 
-        self.draw_debug_paths()
-        self.draw_monsters()
-        self.draw_friendly_projectiles()
-        self.draw_hostile_projectiles()
-        self.draw_walls()
-        self.draw_seraphima()
+        # Select channel 0 (shadow layer) to draw on, then draw it
+        self.channel0.use()
+        self.channel0.clear()
+        self.draw_channel0()
+
+        # Select our window (top game layer) to draw on, then draw the player and projectiles
+        self.use()
+        self.clear()
+        self.draw_window()
+
+        # Select the GUI camera (top layer) to draw on, then draw the GUI
+        self.camera_gui.use()
         self.draw_gui()
-        self.draw_debug_info()
-        self.draw_game_over()
-        self.draw_title_screen()
 
     def on_update(self, delta_time: float = 1 / 60):
         self.update_physics()
@@ -131,7 +139,7 @@ class MyGame(arcade.Window):
         self.update_projectiles()
         self.update_seraphima(delta_time)
         self.update_gui(delta_time)
-        self.update_ghosts()
+        self.update_ghosts(delta_time)
         self.update_bosses()
         self.update_music()
 
@@ -153,8 +161,15 @@ class MyGame(arcade.Window):
         elif arcade.key.C not in self.key_press_buffer:
             self.seraphima.c_key_timer = 0
 
-    def draw_debug_paths(self):
-        if arcade.key.D in self.key_press_buffer:
+    def draw_channel0(self):
+        self.wall_list.draw()
+
+    def draw_channel1(self):
+        self.ghost_list.draw()
+        self.boss_list.draw()
+        self.dark_fairy_spell_list.draw()
+
+        if self.debug_mode and arcade.key.D in self.key_press_buffer:
             for ghost in self.ghost_list:
                 try:
                     ghost.debug_path = arcade.astar_calculate_path(ghost.position,
@@ -188,20 +203,7 @@ class MyGame(arcade.Window):
                 if spell.debug_path is not None:
                     arcade.draw_line_strip(spell.debug_path, (30, 33, 40), 2)
 
-    def draw_monsters(self):
-        self.ghost_list.draw()
-        self.ghost_list.update_animation()
-        self.boss_list.draw()
-        self.boss_list.update_animation()
-
-    def draw_walls(self):
-        self.channel0.use()
-        self.channel0.clear()
-        self.wall_list.draw()
-        self.use()
-        self.clear()
-
-    def draw_seraphima(self):
+    def draw_window(self):
         position = (self.seraphima.position[0] - self.camera.position[0],
                     self.seraphima.position[1] - self.camera.position[1])
 
@@ -209,20 +211,14 @@ class MyGame(arcade.Window):
         self.box_shadertoy.program['lightSize'] = s.SPOTLIGHT_SIZE
         self.box_shadertoy.render()
 
+        # Draw the player
         self.player_list.draw()
 
-    def draw_friendly_projectiles(self):
+        # Draw the projectiles
         self.swordslash_list.draw()
-        self.swordslash_list.update_animation()
         self.flameslash_list.draw()
-        self.flameslash_list.update_animation()
-
-    def draw_hostile_projectiles(self):
-        self.dark_fairy_spell_list.draw()
-        self.dark_fairy_spell_list.update_animation()
 
     def draw_gui(self):
-        self.camera_gui.use()
         self.heart_list.draw()
         if s.ghosts_killed == 0:
             self.score = 0
@@ -237,8 +233,48 @@ class MyGame(arcade.Window):
         arcade.draw_text(score_text, start_x=40, start_y=32, color=(255, 255, 242), font_size=19,
                          font_name="Garamond")
 
-    def draw_debug_info(self):
-        if arcade.key.D in self.key_press_buffer:
+        # Draw the title screen if the game hasn't started yet
+        if self.title_screen:
+            arcade.draw_text("Welcome to: The Cistern", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2 + 50,
+                             color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
+                             anchor_y="baseline", bold=True)
+            arcade.draw_text("Press any key to start.", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2 - 100,
+                             color=(255, 255, 242), font_size=36, font_name="Garamond", anchor_x="center",
+                             anchor_y="baseline")
+
+        # Draw the game over screen if the player has died
+        if not self.heart_list:
+            arcade.draw_text("GAME OVER", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2 + 50,
+                             color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
+                             anchor_y="baseline", bold=True)
+
+            # Draw the game over effects:
+            # If the player isn't already transparent make the player sprite slowly fade out
+            if self.seraphima.alpha != 0:
+                self.seraphima.alpha -= 0.03 * self.seraphima.alpha
+                self.seraphima.alpha = max(0, self.seraphima.alpha)
+            elif not self.is_faded_out:
+                self.is_faded_out = True
+                self.has_spawned_player_death_ghost = False
+                self.restart = True
+
+            # If the player is fully transparent, spawn a ghost on their death location
+            elif not self.has_spawned_player_death_ghost:
+                ghost_sprite = g.GhostMonster(self.seraphima.center_x, self.seraphima.center_y,
+                                              s.PLAYER_SCALING)
+                ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+                self.seraphima.remove_from_sprite_lists()
+                self.ghost_list.append(ghost_sprite)
+                self.has_spawned_player_death_ghost = True
+
+        # Draw the restart text if the player's ghost has spawned
+        if self.restart:
+            arcade.draw_text("Press x to restart.", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2 - 100,
+                             color=(255, 255, 242), font_size=36, font_name="Garamond", anchor_x="center",
+                             anchor_y="baseline")
+
+        # Draw the debug text if the debug mode is enabled and the debug key is pressed
+        if self.debug_mode and arcade.key.D in self.key_press_buffer:
             num_ghosts_hunting = 0
             ghost_velocities = []
             for ghost in self.ghost_list:
@@ -265,85 +301,14 @@ class MyGame(arcade.Window):
             arcade.draw_text(text, start_x=40, start_y=934, color=(255, 255, 242), font_size=19,
                              font_name="Garamond")
 
-    def draw_game_over(self):
-        if not self.heart_list:
-            arcade.draw_text("GAME OVER", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2 + 50,
-                             color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
-                             anchor_y="baseline", bold=True)
-            for ghost in self.ghost_list:
-                ghost.can_hunt = False
-
-            # Draw the restart button and restart the game c is pressed
-            if self.restart:
-                arcade.draw_text("Press x to restart.", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2 - 100,
-                                 color=(255, 255, 242), font_size=36, font_name="Garamond", anchor_x="center",
-                                 anchor_y="baseline")
-
-                # Restart the game if x is pressed
-                if arcade.key.X in self.key_press_buffer:
-                    self.restart = False
-                    self.player_list.clear()
-                    for i in range(len(self.ghost_list) - 1):
-                        self.ghost_list[i].health = 0
-                    self.ghosts_to_spawn_multiplier = 1.4
-                    self.ghosts_to_spawn = 4.0
-                    self.spawn_ghosts()
-                    self.heart_list.clear()
-                    self.swordslash_list.clear()
-                    self.flameslash_list.clear()
-                    self.dark_fairy_spell_list.clear()
-                    self.boss_list.clear()
-                    self.seraphima = player.Player(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
-                    self.score = 0
-                    s.ghosts_killed = 0
-                    self.is_faded_out = False
-                    self.has_spawned_player_death_ghost = False
-                    s.bosses_killed = 0
-                    s.bosses_to_spawn = 1
-                    self.no_ghost_timer = 0.0
-                    self.player_list.append(self.seraphima)
-                    self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.seraphima, self.wall_list)
-                    self.health = s.PLAYER_STARTING_HEALTH
-                    for i in range(int(self.health / 10)):
-                        heart = arcade.Sprite("assets/heart/heart-0.png", s.HEART_SCALING)
-                        heart.center_x = (self.width - 200) + i * 40
-                        heart.center_y = 45
-                        self.heart_list.append(heart)
-                    self.heart_list.reverse()
-                    self.is_dead = False
-
-            # If the player isn't already transparent make the player sprite slowly fade out
-            if self.seraphima.alpha != 0:
-                self.seraphima.alpha -= 0.03 * self.seraphima.alpha
-                self.seraphima.alpha = max(0, self.seraphima.alpha)
-            elif not self.is_faded_out:
-                self.is_faded_out = True
-                self.has_spawned_player_death_ghost = False
-                self.restart = True
-
-            # If the player is fully transparent, spawn a ghost on their death location
-            elif not self.has_spawned_player_death_ghost:
-                ghost_sprite = g.GhostMonster(self.seraphima.center_x, self.seraphima.center_y,
-                                              s.PLAYER_SCALING)
-                ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
-                self.seraphima.remove_from_sprite_lists()
-                self.ghost_list.append(ghost_sprite)
-                self.has_spawned_player_death_ghost = True
-
-    def draw_title_screen(self):
-        if self.title_screen:
-            arcade.draw_text("Welcome to: The Cistern", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2 + 50,
-                             color=(255, 255, 242), font_size=72, font_name="Garamond", anchor_x="center",
-                             anchor_y="baseline", bold=True)
-            arcade.draw_text("Press any key to start.", start_x=s.SCREEN_WIDTH / 2, start_y=s.SCREEN_HEIGHT / 2 - 100,
-                             color=(255, 255, 242), font_size=36, font_name="Garamond", anchor_x="center",
-                             anchor_y="baseline")
-
     def update_physics(self):
         if self.heart_list:
             self.player_and_ghost_collider = arcade.PhysicsEngineSimple(self.seraphima, self.ghost_list)
             self.player_and_ghost_collider.update()
             self.player_and_wall_collider.update()
+        else:
+            for ghost in self.ghost_list:
+                ghost.can_hunt = False
 
         if self.boss_list:
             for boss in self.boss_list:
@@ -364,7 +329,6 @@ class MyGame(arcade.Window):
                 self.ghost_and_boss_collider.update()
 
     def update_movement(self):
-        self.ghost_list.update()
         self.scroll_to_player()
         self.process_key_presses()
         for projectile in self.swordslash_list:
@@ -396,6 +360,7 @@ class MyGame(arcade.Window):
 
         # Update the swordslash projectiles
         self.swordslash_list.update()
+        self.swordslash_list.update_animation()
         if self.seraphima.is_slashing and self.seraphima.c_key_timer == 0 and not self.swordslash_list:
             slash_projectile = swordslash.SwordSlash(self.seraphima)
             self.swordslash_list.append(slash_projectile)
@@ -424,8 +389,9 @@ class MyGame(arcade.Window):
                 for boss in boss_collisions:
                     self.handle_boss_damage(boss)
 
-        # Update flameslash projectiles
+        # Update the flameslash projectiles
         self.flameslash_list.update()
+        self.flameslash_list.update_animation()
         for projectile in self.flameslash_list:
             projectile_collisions = arcade.check_for_collision_with_list(projectile, self.ghost_list)
             for ghost in projectile_collisions:
@@ -434,7 +400,9 @@ class MyGame(arcade.Window):
             for boss in boss_collisions:
                 self.handle_boss_damage(boss)
 
+        # Update the dark fairy's spells and make them deal damage
         self.dark_fairy_spell_list.update()
+        self.dark_fairy_spell_list.update_animation()
         for spell in self.dark_fairy_spell_list:
             self.move_spell(spell)
             spell_collisions = arcade.check_for_collision_with_list(spell, self.ghost_list)
@@ -442,12 +410,6 @@ class MyGame(arcade.Window):
                 ghost.is_being_hurt = True
             if arcade.check_for_collision(spell, self.seraphima):
                 self.handle_player_damage()
-
-        player_collisions = arcade.check_for_collision_with_list(self.seraphima, self.ghost_list)
-        for ghost in player_collisions:
-            if self.seraphima.is_slashing:
-                ghost.is_being_hurt = True
-            self.handle_player_damage()
 
     def update_seraphima(self, delta_time):
         self.seraphima.update_animation(delta_time)
@@ -478,7 +440,9 @@ class MyGame(arcade.Window):
             if boss.health == 0 and boss.phase == 2:
                 self.score += 11
 
-    def update_ghosts(self):
+    def update_ghosts(self, delta_time):
+        self.ghost_list.update()
+        self.ghost_list.update_animation(delta_time)
         self.spawn_ghosts_on_empty_list()
         for ghost in self.ghost_list:
             if not ghost.is_being_hurt and self.title_screen is False:
@@ -486,7 +450,13 @@ class MyGame(arcade.Window):
             if ghost.left < 0 or ghost.top > 2559 or ghost.right > 2559 or ghost.bottom < 0:
                 ghost.health = 0
 
+            # Make the ghosts deal damage to the player
+            if arcade.check_for_collision(ghost, self.seraphima):
+                self.handle_player_damage()
+
     def update_bosses(self):
+        self.boss_list.update()
+        self.boss_list.update_animation()
         if self.boss_list:
             self.move_boss()
 
@@ -512,7 +482,6 @@ class MyGame(arcade.Window):
                             distance = arcade.get_distance_between_sprites(spell, self.seraphima)
                         self.dark_fairy_spell_list.append(spell)
 
-        self.boss_list.update()
         if s.ghosts_killed % 15 == 0 and s.ghosts_killed != 0:
             if s.ghosts_killed == 15:
                 self.spawn_boss()
@@ -549,7 +518,6 @@ class MyGame(arcade.Window):
         for i in range(0, 7):
             self.heart_frames.append(arcade.load_texture(f"assets/heart/heart-{i}.png"))
 
-    @staticmethod
     def generate_walls(self, map_width, map_height):
         map_width = int(map_width * self.level_map.tile_width * s.SPRITE_SCALING)
         map_height = int(map_height * self.level_map.tile_height * s.SPRITE_SCALING)
@@ -592,10 +560,9 @@ class MyGame(arcade.Window):
         if self.health < 0:
             self.is_dead = True
 
-    @staticmethod
-    def handle_boss_damage(DarkFairy):
-        DarkFairy.health -= 1
-        DarkFairy.is_being_hurt = True
+    def handle_boss_damage(self, boss):
+        boss.health -= 1
+        boss.is_being_hurt = True
 
     def move_ghost(self, ghost):
         if not self.is_dead and \
@@ -668,7 +635,7 @@ class MyGame(arcade.Window):
 
     def move_boss(self):
         for boss in self.boss_list:
-            if random.randint(0, 100) == 0:
+            if random.randint(0, 60) == 0:
                 boss.change_x = random.randint(int(-s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier),
                                                int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
                 boss.change_y = random.randint(int(-s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier),
@@ -788,6 +755,38 @@ class MyGame(arcade.Window):
                         self.seraphima.center_y - self.height / 2)
         self.camera.move_to(position, speed)
 
+    def restart_game(self):
+        self.restart = False
+        self.player_list.clear()
+        for i in range(len(self.ghost_list) - 1):
+            self.ghost_list[i].health = 0
+        self.ghosts_to_spawn_multiplier = 1.4
+        self.ghosts_to_spawn = 4.0
+        self.spawn_ghosts()
+        self.heart_list.clear()
+        self.swordslash_list.clear()
+        self.flameslash_list.clear()
+        self.dark_fairy_spell_list.clear()
+        self.boss_list.clear()
+        self.seraphima = player.Player(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
+        self.score = 0
+        s.ghosts_killed = 0
+        self.is_faded_out = False
+        self.has_spawned_player_death_ghost = False
+        s.bosses_killed = 0
+        s.bosses_to_spawn = 1
+        self.no_ghost_timer = 0.0
+        self.player_list.append(self.seraphima)
+        self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.seraphima, self.wall_list)
+        self.health = s.PLAYER_STARTING_HEALTH
+        for i in range(int(self.health / 10)):
+            heart = arcade.Sprite("assets/heart/heart-0.png", s.HEART_SCALING)
+            heart.center_x = (self.width - 200) + i * 40
+            heart.center_y = 45
+            self.heart_list.append(heart)
+        self.heart_list.reverse()
+        self.is_dead = False
+
     def process_key_presses(self):
         self.seraphima.change_x = 0
         self.seraphima.change_y = 0
@@ -795,6 +794,10 @@ class MyGame(arcade.Window):
         # Handle the title screen
         if self.key_press_buffer:
             self.title_screen = False
+
+        # Restart the game if x is pressed and the restart text is drawn
+        if arcade.key.X in self.key_press_buffer and self.restart:
+            self.restart_game()
 
         # Handle slashing, hold the c key for SLASH_CHARGE_TIME to activate
         # This discourages spamming the slash key
