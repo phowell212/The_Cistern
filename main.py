@@ -120,7 +120,7 @@ class MyGame(arcade.Window):
         arcade.start_render()
         self.camera.use()
 
-        # Select the CRT layer to draw on, then draw it
+        # Select the CRT filter (bottom layer) to draw on, then draw it
         self.crt_filter.use()
         self.crt_filter.clear()
         self.draw_channel_crt()
