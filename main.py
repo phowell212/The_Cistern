@@ -601,7 +601,7 @@ class MyGame(arcade.Window):
         boss.health -= 1
         boss.is_being_hurt = True
 
-    def move_ghost(self, ghost):
+    def move_ghost(self, ghost: g.GhostMonster):
         if not self.is_dead and \
                 arcade.get_distance_between_sprites(ghost, self.seraphima) < s.MONSTER_VISION_RANGE:
             if not ghost.is_hunting:
@@ -658,7 +658,7 @@ class MyGame(arcade.Window):
                 ghost.change_x = random.uniform(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
                 ghost.change_y = random.uniform(-s.MONSTER_MOVEMENT_SPEED, s.MONSTER_MOVEMENT_SPEED)
 
-    def move_spell(self, spell):
+    def move_spell(self, spell: darkfairy_spell.DarkFairySpell):
         if spell.change_x == 0 and spell.change_y == 0:
             angle = math.atan2(self.seraphima.center_y - spell.center_y,
                                self.seraphima.center_x - spell.center_x)
