@@ -159,14 +159,14 @@ class MyGame(arcade.Window):
         self.update_music()
         self.update_secret_door()
 
-    def on_key_press(self, key, modifiers):
+    def on_key_press(self, key: arcade.key, modifiers):
         if self.heart_list:
             self.key_press_buffer.add(key)
         if self.restart:
             if key == arcade.key.X:
                 self.key_press_buffer.add(key)
 
-    def on_key_release(self, key, modifiers):
+    def on_key_release(self, key: arcade.key, modifiers):
         self.key_press_buffer.discard(key)
         if not self.key_press_buffer:
             if self.seraphima.is_walking:
