@@ -35,6 +35,7 @@ class MyGame(arcade.Window):
         self.heart_list = arcade.SpriteList()
         self.boss_list = arcade.SpriteList()
         self.dark_fairy_spell_list = arcade.SpriteList()
+        self.secret_door_list = arcade.SpriteList()
         self.heart_frames = []
         self.heart_frame = 0
 
@@ -74,6 +75,7 @@ class MyGame(arcade.Window):
         scene_wall_sprite_list = self.wall_tile_map.get_sprite_list("Tile Layer 1")
         self.wall_list.extend(scene_wall_sprite_list)
         self.generate_walls(self.level_map.width, self.level_map.height)
+        self.generate_secret_door()
 
         # Create playing field sprites
         self.seraphima = player.Player(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
@@ -89,6 +91,7 @@ class MyGame(arcade.Window):
 
         # Make the physics engine
         self.player_and_wall_collider = arcade.PhysicsEngineSimple(self.seraphima, self.wall_list)
+        self.player_and_secret_door_collider = arcade.PhysicsEngineSimple(self.seraphima, self.secret_door_list)
         self.player_and_ghost_collider = None
         self.player_and_boss_collider = None
         self.boss_and_wall_collider = None
@@ -110,7 +113,7 @@ class MyGame(arcade.Window):
                                                     self.playing_field_bottom_boundary,
                                                     self.playing_field_top_boundary)
 
-        # Init the CRT filter for the sprites
+        # Make the CRT filter
         self.crt_filter = CRTFilter(width, height, resolution_down_scale=1.0,
                                     hard_scan=-3.0,
                                     hard_pix=-3.0,
@@ -120,7 +123,7 @@ class MyGame(arcade.Window):
         arcade.start_render()
         self.camera.use()
 
-        # Select the CRT filter (bottom layer) to draw on, then draw it
+        # Select the CRT filter (bottom layer) to draw on, then draw it, this gives the floor a cool effect
         self.crt_filter.use()
         self.crt_filter.clear()
         self.draw_channel_crt()
@@ -154,6 +157,7 @@ class MyGame(arcade.Window):
         self.update_ghosts(delta_time)
         self.update_bosses()
         self.update_music()
+        self.update_secret_door()
 
     def on_key_press(self, key, modifiers):
         if self.heart_list:
@@ -174,7 +178,7 @@ class MyGame(arcade.Window):
             self.seraphima.c_key_timer = 0
 
     def draw_channel_crt(self):
-        arcade.draw_lrtb_rectangle_filled(0, 99999, 99999, 0, (108, 121, 147))
+        arcade.draw_lrtb_rectangle_filled(-99999, 99999, 99999, -99999, (108, 121, 147))
 
         # Draw the debug pathfinding lines if the condition is met
         if self.debug_mode and arcade.key.D in self.key_press_buffer:
@@ -213,6 +217,7 @@ class MyGame(arcade.Window):
 
     def draw_channel0(self):
         self.wall_list.draw()
+        self.secret_door_list.draw()
 
     def draw_channel1(self):
 
@@ -324,6 +329,8 @@ class MyGame(arcade.Window):
             self.player_and_ghost_collider = arcade.PhysicsEngineSimple(self.seraphima, self.ghost_list)
             self.player_and_ghost_collider.update()
             self.player_and_wall_collider.update()
+            if s.bosses_killed < 3:
+                self.player_and_secret_door_collider.update()
         else:
             for ghost in self.ghost_list:
                 ghost.can_hunt = False
@@ -516,6 +523,12 @@ class MyGame(arcade.Window):
             arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
             self.music_timer = time.time() + (5 * 60) + 57
 
+    def update_secret_door(self):
+        if s.bosses_killed >= 3:
+            if self.secret_door_list:
+                for door in self.secret_door_list:
+                    door.kill()
+
     def load_shader(self):
         shader_file_path = Path("shaders/level_1_shader.glsl")
         window_size = self.get_size()
@@ -570,6 +583,12 @@ class MyGame(arcade.Window):
                 wall.center_x = x
                 wall.center_y = y
 
+    def generate_secret_door(self):
+        secret_door = arcade.Sprite("assets/level/wall.png", 0.55)
+        secret_door.center_x = 2493
+        secret_door.center_y = 66
+        self.secret_door_list.append(secret_door)
+
     def handle_player_damage(self):
         self.health -= 1
         if self.health == 0 and self.heart_list:
@@ -578,7 +597,7 @@ class MyGame(arcade.Window):
         if self.health < 0:
             self.is_dead = True
 
-    def handle_boss_damage(self, boss):
+    def handle_boss_damage(self, boss: darkfairy.DarkFairy):
         boss.health -= 1
         boss.is_being_hurt = True
 
