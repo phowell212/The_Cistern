@@ -7,6 +7,7 @@ import flameslash
 import swordslash
 import darkfairy
 import darkfairy_spell
+import altar
 import settings as s
 import ghost as g
 from arcade.experimental import Shadertoy
@@ -36,6 +37,7 @@ class MyGame(arcade.Window):
         self.boss_list = arcade.SpriteList()
         self.dark_fairy_spell_list = arcade.SpriteList()
         self.secret_door_list = arcade.SpriteList()
+        self.altar_list = arcade.SpriteList()
         self.heart_frames = []
         self.heart_frame = 0
 
@@ -76,6 +78,10 @@ class MyGame(arcade.Window):
         self.wall_list.extend(scene_wall_sprite_list)
         self.generate_walls(self.level_map.width, self.level_map.height)
         self.generate_secret_door()
+
+        # Make the altar
+        self.altar = altar.Altar(2837, -348)
+        self.altar_list.append(self.altar)
 
         # Create playing field sprites
         self.seraphima = player.Player(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
@@ -156,8 +162,9 @@ class MyGame(arcade.Window):
         self.update_gui(delta_time)
         self.update_ghosts(delta_time)
         self.update_bosses()
-        self.update_music()
         self.update_secret_door()
+        self.update_altar(delta_time)
+        self.update_music()
 
     def on_key_press(self, key: arcade.key, modifiers):
         if self.heart_list:
@@ -220,8 +227,7 @@ class MyGame(arcade.Window):
         self.secret_door_list.draw()
 
     def draw_channel1(self):
-
-        # Draw the enemy sprites on top of the background
+        self.altar_list.draw()
         self.ghost_list.draw()
         self.boss_list.draw()
         self.dark_fairy_spell_list.draw()
@@ -518,16 +524,19 @@ class MyGame(arcade.Window):
                 if random.randint(0, 2) == 0:
                     s.bosses_to_spawn = 2
 
-    def update_music(self):
-        if time.time() > self.music_timer:
-            arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
-            self.music_timer = time.time() + (5 * 60) + 57
-
     def update_secret_door(self):
         if s.bosses_killed >= 3:
             if self.secret_door_list:
                 for door in self.secret_door_list:
                     door.kill()
+
+    def update_altar(self, delta_time):
+        self.altar_list.update_animation(delta_time)
+
+    def update_music(self):
+        if time.time() > self.music_timer:
+            arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
+            self.music_timer = time.time() + (5 * 60) + 57
 
     def load_shader(self):
         shader_file_path = Path("shaders/level_1_shader.glsl")
