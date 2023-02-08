@@ -57,6 +57,8 @@ class MyGame(arcade.Window):
         self.restart = False
         self.debug_mode = True
         self.swoosh_sounds = []
+        self.is_door_open = False
+        self.door_open_sound = arcade.load_sound("sounds/door_open.mp3")
         for i in range(0, 3):
             self.swoosh_sounds.append(arcade.load_sound(f"sounds/sword_swoosh-{i}.mp3"))
         arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
@@ -526,9 +528,10 @@ class MyGame(arcade.Window):
 
     def update_secret_door(self):
         if s.bosses_killed >= 3:
-            if self.secret_door_list:
-                for door in self.secret_door_list:
-                    door.kill()
+            self.secret_door_list.clear()
+            if not self.is_door_open:
+                self.is_door_open = True
+                arcade.play_sound(self.door_open_sound, 0.5)
 
     def update_altar(self, delta_time):
         self.altar_list.update_animation(delta_time)
