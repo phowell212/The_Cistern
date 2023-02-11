@@ -410,7 +410,8 @@ class MyGame(arcade.Window):
                 projectile.is_hitting_wall = True
 
         # Decrease the player's speed when a boss is out because for whatever reason the player's speed is increased
-        # when more bosses are spawned
+        # when more bosses are spawned. I know you could use a loop to do this but why do that when if statements are
+        # faster and easier to read?
         if len(self.boss_list) >= 1:
             self.seraphima.change_x *= 0.75
             self.seraphima.change_y *= 0.75
@@ -503,7 +504,7 @@ class MyGame(arcade.Window):
 
         # If a ghost dies increase the counter
         for ghost in self.ghost_list:
-            if ghost.health == 0:
+            if ghost.health <= 0:
                 self.score += 1 * ghost.scale
 
         # If the boss dies increase the counter
