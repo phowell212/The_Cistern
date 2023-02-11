@@ -861,6 +861,9 @@ class MyGame(arcade.Window):
         self.camera.move_to(position, speed)
 
     def restart_game(self):
+
+        # Reset all the variables
+        self.level = 1
         self.restart = False
         self.player_list.clear()
         for i in range(len(self.ghost_list) - 1):
