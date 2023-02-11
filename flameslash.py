@@ -70,7 +70,6 @@ class FlameSlash(arcade.Sprite):
         self.load_frames()
 
     def load_frames(self):
-
         for i in range(2, 19):
             self.northwest_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_northwest ({i}).png"))
             self.southwest_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_southwest ({i}).png"))

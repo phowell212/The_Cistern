@@ -401,8 +401,12 @@ class MyGame(arcade.Window):
         for projectile in self.swordslash_list:
             if arcade.check_for_collision_with_list(projectile, self.wall_list):
                 projectile.is_hitting_wall = True
+            elif arcade.check_for_collision_with_list(projectile, self.secret_door_list):
+                projectile.is_hitting_wall = True
         for projectile in self.flameslash_list:
             if arcade.check_for_collision_with_list(projectile, self.wall_list):
+                projectile.is_hitting_wall = True
+            elif arcade.check_for_collision_with_list(projectile, self.secret_door_list):
                 projectile.is_hitting_wall = True
 
         # Decrease the player's speed when a boss is out because for whatever reason the player's speed is increased
@@ -782,8 +786,8 @@ class MyGame(arcade.Window):
                         over_ghosts -= 1
             if self.ghosts_to_spawn > ((25 * s.bosses_killed) / 2) + 25:
                 self.ghosts_to_spawn = ((25 * s.bosses_killed) / 2) + 25
-            if self.ghosts_to_spawn > 99:
-                self.ghosts_to_spawn = 99
+            if self.ghosts_to_spawn > 40:
+                self.ghosts_to_spawn = 40
 
     def spawn_ghosts_on_empty_list(self):
 
@@ -810,8 +814,8 @@ class MyGame(arcade.Window):
                 boss_y = self.seraphima.center_y + random.randint(-500, 500)
                 boss = darkfairy.DarkFairy(boss_x, boss_y, s.BOSS_SCALING)
 
+                # Make the boss move into the play area if they are outside it
                 distance = arcade.get_distance_between_sprites(boss, self.seraphima)
-                # Make the ghost move into the play area if they are outside it
                 if distance > boss.min_spawn_distance and boss.left > 32 and boss.top < 2527 and \
                         boss.right < 2527 and boss.bottom > 32:
                     self.boss_list.append(boss)
