@@ -220,7 +220,7 @@ class MyGame(arcade.Window):
             if progress >= 1.0:
                 self.is_transitioning = False
                 self.transition_time = 0
-                self.level += 1
+                self.level = 2
                 self.load_shader(self.level)
 
         # Draw the debug pathfinding lines if the condition is met
@@ -505,7 +505,7 @@ class MyGame(arcade.Window):
         # If a ghost dies increase the counter
         for ghost in self.ghost_list:
             if ghost.health <= 0:
-                self.score += 1 * ghost.scale
+                self.score += 1 * ghost.scale * self.level
 
         # If the boss dies increase the counter
         for boss in self.boss_list:
