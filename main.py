@@ -20,12 +20,6 @@ class MyGame(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title, resizable=True)
 
-        # Init the shaders
-        self.box_shadertoy = None
-        self.channel0 = None
-        self.channel1 = None
-        self.load_shader()
-
         # Init the sprites
         self.seraphima = None
         self.wall_list = arcade.SpriteList()
@@ -42,14 +36,18 @@ class MyGame(arcade.Window):
         self.heart_frame = 0
 
         # Init counters, constants, arrays, flags, and sounds
+        self.level = 1
+        self.altar_points = 0
         self.key_press_buffer = set()
         self.ghosts_to_spawn = 4.0
         self.ghosts_to_spawn_multiplier = 1.4
         self.no_ghost_timer = 0.0
+        self.transition_time = 0.0
         self.score = 0
         self.music_timer = time.time()
         self.general_timer = time.time()
         self.health = s.PLAYER_STARTING_HEALTH
+        self.is_transitioning = False
         self.is_dead = False
         self.is_faded_out = False
         self.has_spawned_player_death_ghost = True
@@ -63,6 +61,16 @@ class MyGame(arcade.Window):
             self.swoosh_sounds.append(arcade.load_sound(f"sounds/sword_swoosh-{i}.mp3"))
         arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
         self.music_timer = time.time() + (5 * 60) + 57
+
+        # Make the colors
+        self.level_1_floor_color = (108, 121, 147)
+        self.level_2_floor_color = (51, 25, 0)
+
+        # Init the shaders
+        self.box_shadertoy = None
+        self.channel0 = None
+        self.channel1 = None
+        self.load_shader(self.level)
 
         # Init the pathfinding vars
         self.path = None
@@ -187,7 +195,33 @@ class MyGame(arcade.Window):
             self.seraphima.c_key_timer = 0
 
     def draw_channel_crt(self):
-        arcade.draw_lrtb_rectangle_filled(-99999, 99999, 99999, -99999, (108, 121, 147))
+
+        # Draw the floor
+        if not self.is_transitioning:
+            if self.level == 1:
+                arcade.draw_lrtb_rectangle_filled(-99999, 99999, 99999, -99999, self.level_1_floor_color)
+            elif self.level == 2:
+                arcade.draw_lrtb_rectangle_filled(-99999, 99999, 99999, -99999, self.level_2_floor_color)
+        else:
+            self.transition_time += 1
+
+            # Calculate progress (0.0 to 1.0) of transition
+            progress = min(self.transition_time / 300, 1.0)
+
+            # Interpolate between current and target colors
+            r = int(self.lerp(self.level_1_floor_color[0], self.level_2_floor_color[0], progress))
+            g = int(self.lerp(self.level_1_floor_color[1], self.level_2_floor_color[1], progress))
+            b = int(self.lerp(self.level_1_floor_color[2], self.level_2_floor_color[2], progress))
+
+            # Draw the floor with the interpolated color
+            arcade.draw_lrtb_rectangle_filled(-99999, 99999, 99999, -99999, (r, g, b))
+
+            # Check if transition is complete
+            if progress >= 1.0:
+                self.is_transitioning = False
+                self.transition_time = 0
+                self.level += 1
+                self.load_shader(self.level)
 
         # Draw the debug pathfinding lines if the condition is met
         if self.debug_mode and arcade.key.D in self.key_press_buffer:
@@ -535,14 +569,27 @@ class MyGame(arcade.Window):
 
     def update_altar(self, delta_time):
         self.altar_list.update_animation(delta_time)
+        if arcade.check_for_collision(self.seraphima, self.altar):
+            self.altar_points += 1
+            self.score -= 1
+
+            if self.seraphima and self.score > 1:
+                if arcade.check_for_collision_with_list(self.seraphima, self.altar_list):
+                    self.altar_points += 1
+                    self.score -= 1
+
+                # Load in the shader for level 2 if the player has enough altar points
+                if self.altar_points >= 100 and self.level == 1:
+                    self.altar_points = 0
+                    self.is_transitioning = True
 
     def update_music(self):
         if time.time() > self.music_timer:
             arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
             self.music_timer = time.time() + (5 * 60) + 57
 
-    def load_shader(self):
-        shader_file_path = Path("shaders/level_1_shader.glsl")
+    def load_shader(self, level: int):
+        shader_file_path = Path(f"shaders/level_{level}_shader.glsl")
         window_size = self.get_size()
         self.box_shadertoy = Shadertoy.create_from_file(window_size, shader_file_path)
 
@@ -600,6 +647,9 @@ class MyGame(arcade.Window):
         secret_door.center_x = 2493
         secret_door.center_y = 66
         self.secret_door_list.append(secret_door)
+
+    def lerp(self, a, b, t):
+        return a + (b - a) * t
 
     def handle_player_damage(self):
         self.health -= 1
@@ -690,7 +740,7 @@ class MyGame(arcade.Window):
                 boss.change_y = random.randint(int(-s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier),
                                                int(s.BOSS_MOVEMENT_SPEED * boss.movement_speed_modifier))
 
-    def spawn_ghosts(self):
+    def spawn_ghosts(self, level: int):
         for i in range(int(self.ghosts_to_spawn)):
             random_x = random.uniform(self.seraphima.center_x - 50, self.seraphima.center_x + 50)
             random_y = random.uniform(self.seraphima.center_y - 50, self.seraphima.center_y + 50)
@@ -700,6 +750,7 @@ class MyGame(arcade.Window):
                 random_y = random.uniform(0, self.height)
             ghost = g.GhostMonster(random_x, random_y, s.MONSTER_SCALING)
             ghost.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+            ghost.health *= 1 + level * 0.5
 
             # Check if the new ghost collides with any existing ghosts, wall sprites or player
             collision = False
@@ -741,7 +792,7 @@ class MyGame(arcade.Window):
             if self.no_ghost_timer != 0:
                 self.no_ghost_timer = time.time()
             elif time.time() - self.no_ghost_timer > 5:
-                self.spawn_ghosts()
+                self.spawn_ghosts(self.level)
 
                 # Reset the timer and increase the number of ghosts to spawn
                 self.ghosts_to_spawn += 0.5
@@ -811,7 +862,7 @@ class MyGame(arcade.Window):
             self.ghost_list[i].health = 0
         self.ghosts_to_spawn_multiplier = 1.4
         self.ghosts_to_spawn = 4.0
-        self.spawn_ghosts()
+        self.spawn_ghosts(self.level)
         self.heart_list.clear()
         self.swordslash_list.clear()
         self.flameslash_list.clear()
