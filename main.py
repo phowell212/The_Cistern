@@ -208,6 +208,9 @@ class MyGame(arcade.Window):
             # Calculate progress (0.0 to 1.0) of transition
             progress = min(self.transition_time / 300, 1.0)
 
+            # Set the mix value for the shader
+            self.box_shadertoy.program["iMix"] = progress
+
             # Interpolate between current and target colors
             r = int(self.lerp(self.level_1_floor_color[0], self.level_2_floor_color[0], progress))
             g = int(self.lerp(self.level_1_floor_color[1], self.level_2_floor_color[1], progress))
@@ -220,8 +223,6 @@ class MyGame(arcade.Window):
             if progress >= 1.0:
                 self.is_transitioning = False
                 self.transition_time = 0
-                self.level = 2
-                self.load_shader(self.level)
 
         # Draw the debug pathfinding lines if the condition is met
         if self.debug_mode and arcade.key.D in self.key_press_buffer:
@@ -578,7 +579,7 @@ class MyGame(arcade.Window):
             self.altar_points += 1
             self.score -= 1
 
-            if self.seraphima and self.score > 1:
+            if self.seraphima and self.level == 1 and self.score > 0:
                 if arcade.check_for_collision_with_list(self.seraphima, self.altar_list):
                     self.altar_points += 1
                     self.score -= 1
@@ -586,6 +587,8 @@ class MyGame(arcade.Window):
                 # Load in the shader for level 2 if the player has enough altar points
                 if self.altar_points >= 100 and self.level == 1:
                     self.altar_points = 0
+                    self.level = 2
+                    self.load_shader(self.level)
                     self.is_transitioning = True
 
     def update_music(self):
@@ -597,6 +600,8 @@ class MyGame(arcade.Window):
         shader_file_path = Path(f"shaders/level_{level}_shader.glsl")
         window_size = self.get_size()
         self.box_shadertoy = Shadertoy.create_from_file(window_size, shader_file_path)
+        if self.level == 2:
+            self.box_shadertoy.program['iMix'] = 0
 
         # Create the channels 0 and 1 frame buffers.
         # Make the buffer the size of the window, with 4 channels (RGBA)
