@@ -16,6 +16,7 @@ from pathlib import Path
 from pyglet.math import Vec2
 
 
+# noinspection PyTypeChecker
 class MyGame(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title, resizable=True)
@@ -212,12 +213,12 @@ class MyGame(arcade.Window):
             self.box_shadertoy.program["iMix"] = progress
 
             # Interpolate between current and target colors
-            r = int(self.lerp(self.level_1_floor_color[0], self.level_2_floor_color[0], progress))
-            g = int(self.lerp(self.level_1_floor_color[1], self.level_2_floor_color[1], progress))
-            b = int(self.lerp(self.level_1_floor_color[2], self.level_2_floor_color[2], progress))
+            red = int(self.lerp(self.level_1_floor_color[0], self.level_2_floor_color[0], progress))
+            green = int(self.lerp(self.level_1_floor_color[1], self.level_2_floor_color[1], progress))
+            blue = int(self.lerp(self.level_1_floor_color[2], self.level_2_floor_color[2], progress))
 
             # Draw the floor with the interpolated color
-            arcade.draw_lrtb_rectangle_filled(-99999, 99999, 99999, -99999, (r, g, b))
+            arcade.draw_lrtb_rectangle_filled(-99999, 99999, 99999, -99999, (red, green, blue))
 
             # Check if transition is complete
             if progress >= 1.0:
@@ -658,7 +659,8 @@ class MyGame(arcade.Window):
         secret_door.center_y = 66
         self.secret_door_list.append(secret_door)
 
-    def lerp(self, a, b, t):
+    @staticmethod
+    def lerp(a, b, t):
         return a + (b - a) * t
 
     def handle_player_damage(self):
@@ -669,7 +671,8 @@ class MyGame(arcade.Window):
         if self.health < 0:
             self.is_dead = True
 
-    def handle_boss_damage(self, boss: darkfairy.DarkFairy):
+    @staticmethod
+    def handle_boss_damage(boss: darkfairy.DarkFairy):
         boss.health -= 1
         boss.is_being_hurt = True
 
