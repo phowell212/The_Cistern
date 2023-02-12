@@ -506,7 +506,7 @@ class MyGame(arcade.Window):
         # If a ghost dies increase the counter
         for ghost in self.ghost_list:
             if ghost.health <= 0:
-                self.score += 1 * ghost.scale * self.level
+                self.score += 1 * ghost.scale * (self.level * self.level)
 
         # If the boss dies increase the counter
         for boss in self.boss_list:
