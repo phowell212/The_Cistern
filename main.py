@@ -899,6 +899,7 @@ class MyGame(arcade.Window):
             self.heart_list.append(heart)
         self.heart_list.reverse()
         self.is_dead = False
+        self.load_shader(self.level)
 
     def process_key_presses(self):
         self.seraphima.change_x = 0
