@@ -12,6 +12,9 @@ class FlameSlash(arcade.Sprite):
         self.direction = player.current_direction
         self.player_copy = player
 
+        # Define the type of projectile
+        self.type = "flameslash"
+
         # Init the vars
         self.scale = s.FLAMESLASH_SCALING + (s.bosses_killed / 10)
         if self.scale > 1.25:

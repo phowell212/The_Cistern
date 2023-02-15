@@ -1,6 +1,6 @@
 # global variables
 ghosts_killed = 0
-bosses_killed = 0
+bosses_killed = 1
 bosses_to_spawn = 1
 
 # Screen Settings
@@ -45,7 +45,8 @@ GHOST_ALPHA = 210
 HEART_HEALTH = 20
 PLAYER_STARTING_HEALTH = 40
 BOSS_HEALTH = 60
+GHOST_HEALTH = 4
 
 # Volume settings
-MUSIC_VOLUME = 0.0
-SWOOSH_VOLUME = 0.2
+MUSIC_VOLUME = 0.4
+SWOOSH_VOLUME = 0.5

@@ -16,7 +16,6 @@ from pathlib import Path
 from pyglet.math import Vec2
 
 
-# noinspection PyTypeChecker
 class MyGame(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title, resizable=True)
@@ -134,7 +133,7 @@ class MyGame(arcade.Window):
         self.crt_filter = CRTFilter(width, height, resolution_down_scale=1.0,
                                     hard_scan=-3.0,
                                     hard_pix=-3.0,
-                                    display_warp=Vec2(1.0 / 32.0, 1.0 / 24.0))
+                                    display_warp=Vec2(1 / 32, 1 / 64))
 
     def on_draw(self):
         arcade.start_render()
@@ -435,44 +434,42 @@ class MyGame(arcade.Window):
         # Update the swordslash projectiles
         self.swordslash_list.update()
         self.swordslash_list.update_animation()
-        if self.seraphima.is_slashing and self.seraphima.c_key_timer == 0 and not self.swordslash_list:
+
+        # Update the flameslash projectiles
+        self.flameslash_list.update()
+        self.flameslash_list.update_animation()
+
+        # Make a new projectile if the attack key is pressed and the player is not already attacking
+        if self.seraphima.is_slashing and self.seraphima.c_key_timer == 0 and not self.swordslash_list and \
+                s.bosses_killed < 1:
             slash_projectile = swordslash.SwordSlash(self.seraphima)
             self.swordslash_list.append(slash_projectile)
             arcade.play_sound(random.choice(self.swoosh_sounds), s.SWOOSH_VOLUME)
-            if s.bosses_killed >= 1:
-                flameslash_projectile = flameslash.FlameSlash(self.seraphima)
-                self.flameslash_list.append(flameslash_projectile)
+        elif self.seraphima.is_slashing and self.seraphima.c_key_timer == 0 and not self.flameslash_list and \
+                s.bosses_killed >= 1:
+            flameslash_projectile = flameslash.FlameSlash(self.seraphima)
+            self.flameslash_list.append(flameslash_projectile)
+            arcade.play_sound(random.choice(self.swoosh_sounds), s.SWOOSH_VOLUME)
 
         # Handle swordslash dealing damage
         if self.swordslash_list:
             for projectile in self.swordslash_list:
                 projectile_collisions = arcade.check_for_collision_with_list(projectile, self.ghost_list)
                 for ghost in projectile_collisions:
-                    ghost.is_being_hurt = True
+                    self.handle_ghost_damage(ghost, projectile)
                 boss_collisions = arcade.check_for_collision_with_list(projectile, self.boss_list)
                 for boss in boss_collisions:
-                    self.handle_boss_damage(boss)
+                    self.handle_boss_damage(boss, projectile)
 
         # Handle flameslash dealing damage
         if self.flameslash_list:
             for projectile in self.flameslash_list:
                 projectile_collisions = arcade.check_for_collision_with_list(projectile, self.ghost_list)
                 for ghost in projectile_collisions:
-                    ghost.is_being_hurt = True
+                    self.handle_ghost_damage(ghost, projectile)
                 boss_collisions = arcade.check_for_collision_with_list(projectile, self.boss_list)
                 for boss in boss_collisions:
-                    self.handle_boss_damage(boss)
-
-        # Update the flameslash projectiles
-        self.flameslash_list.update()
-        self.flameslash_list.update_animation()
-        for projectile in self.flameslash_list:
-            projectile_collisions = arcade.check_for_collision_with_list(projectile, self.ghost_list)
-            for ghost in projectile_collisions:
-                ghost.is_being_hurt = True
-            boss_collisions = arcade.check_for_collision_with_list(projectile, self.boss_list)
-            for boss in boss_collisions:
-                self.handle_boss_damage(boss)
+                    self.handle_boss_damage(boss, projectile)
 
         # Update the dark fairy's spells and make them deal damage
         self.dark_fairy_spell_list.update()
@@ -556,6 +553,7 @@ class MyGame(arcade.Window):
                             distance = arcade.get_distance_between_sprites(spell, self.seraphima)
                         self.dark_fairy_spell_list.append(spell)
 
+        # Spawn the boss once you kill enough ghosts
         if s.ghosts_killed % 15 == 0 and s.ghosts_killed != 0:
             if s.ghosts_killed == 15:
                 self.spawn_boss()
@@ -672,9 +670,20 @@ class MyGame(arcade.Window):
             self.is_dead = True
 
     @staticmethod
-    def handle_boss_damage(boss: darkfairy.DarkFairy):
-        boss.health -= 1
+    def handle_boss_damage(boss: darkfairy.DarkFairy, projectile):
+        if projectile.type == "swordslash":
+            boss.health -= 1
+        elif projectile.type == "flameslash":
+            boss.health -= 2
         boss.is_being_hurt = True
+
+    @staticmethod
+    def handle_ghost_damage(ghost: g.GhostMonster, projectile):
+        if projectile.type == "swordslash":
+            ghost.health -= 1
+        elif projectile.type == "flameslash":
+            ghost.health -= 2
+        ghost.is_being_hurt = True
 
     def move_ghost(self, ghost: g.GhostMonster):
         if not self.is_dead and \

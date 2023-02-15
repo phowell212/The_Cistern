@@ -13,6 +13,10 @@ class SwordSlash(arcade.Sprite):
         self.scale = scale
         self.player_copy = player
 
+        # Define the type of projectile
+        self.type = "swordslash"
+
+        # Init the vars
         self.is_hitting_wall = False
         self.update_interval = 1 / 10
         self.elapsed_time = 0

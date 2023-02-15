@@ -28,7 +28,7 @@ class GhostMonster(arcade.Sprite):
         self.death_frame = 0
         self.spawn_frame = 0
         self.update_interval = 1 / 10
-        self.health = 3
+        self.health = s.GHOST_HEALTH
         self.time = 0
         self.bob_frequency = 5
         self.bob_amplitude = 0.3
