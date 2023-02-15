@@ -1,6 +1,6 @@
 # global variables
 ghosts_killed = 0
-bosses_killed = 1
+bosses_killed = 0
 bosses_to_spawn = 1
 
 # Screen Settings

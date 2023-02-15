@@ -110,7 +110,6 @@ class GhostMonster(arcade.Sprite):
             self.hurt_frame += 1 / 3
             self.texture = self.hurt_frames[int(self.hurt_frame)]
         elif self.is_being_hurt:
-            self.health -= 1
             self.is_being_hurt = False
             self.hurt_frame = 0
 
