@@ -24,32 +24,32 @@ class SwordSlash(arcade.Sprite):
 
         # Set the first texture based on the sprite's direction
         if self.direction == "northwest":
-            self.texture = arcade.load_texture("assets/swordslash/ss_northwest-0.png")
+            self.texture = arcade.load_texture("assets/projectiles/swordslash/ss_northwest-0.png")
             self.center_x -= self.offset
             self.center_y += self.offset
         elif self.direction == "southwest":
-            self.texture = arcade.load_texture("assets/swordslash/ss_southwest-0.png")
+            self.texture = arcade.load_texture("assets/projectiles/swordslash/ss_southwest-0.png")
             self.center_x -= self.offset
             self.center_y -= self.offset
         elif self.direction == "northeast":
-            self.texture = arcade.load_texture("assets/swordslash/ss_northeast-0.png")
+            self.texture = arcade.load_texture("assets/projectiles/swordslash/ss_northeast-0.png")
             self.center_x += self.offset
             self.center_y += self.offset
         elif self.direction == "southeast":
-            self.texture = arcade.load_texture("assets/swordslash/ss_southeast-0.png")
+            self.texture = arcade.load_texture("assets/projectiles/swordslash/ss_southeast-0.png")
             self.center_x += self.offset
             self.center_y -= self.offset
         elif self.direction == "north":
-            self.texture = arcade.load_texture("assets/swordslash/ss_north-0.png")
+            self.texture = arcade.load_texture("assets/projectiles/swordslash/ss_north-0.png")
             self.center_y += self.offset
         elif self.direction == "south":
-            self.texture = arcade.load_texture("assets/swordslash/ss_south-0.png")
+            self.texture = arcade.load_texture("assets/projectiles/swordslash/ss_south-0.png")
             self.center_y -= self.offset
         elif self.direction == "east":
-            self.texture = arcade.load_texture("assets/swordslash/ss_east-0.png")
+            self.texture = arcade.load_texture("assets/projectiles/swordslash/ss_east-0.png")
             self.center_x += self.offset
         elif self.direction == "west":
-            self.texture = arcade.load_texture("assets/swordslash/ss_west-0.png")
+            self.texture = arcade.load_texture("assets/projectiles/swordslash/ss_west-0.png")
             self.center_x -= self.offset
 
         # Load the animation frames
@@ -66,14 +66,14 @@ class SwordSlash(arcade.Sprite):
 
     def load_frames(self):
         for i in range(1, 15):
-            self.northwest_frames.append(arcade.load_texture(f"assets/swordslash/ss_northwest-{i}.png"))
-            self.southwest_frames.append(arcade.load_texture(f"assets/swordslash/ss_southwest-{i}.png"))
-            self.northeast_frames.append(arcade.load_texture(f"assets/swordslash/ss_northeast-{i}.png"))
-            self.southeast_frames.append(arcade.load_texture(f"assets/swordslash/ss_southeast-{i}.png"))
-            self.north_frames.append(arcade.load_texture(f"assets/swordslash/ss_north-{i}.png"))
-            self.south_frames.append(arcade.load_texture(f"assets/swordslash/ss_south-{i}.png"))
-            self.east_frames.append(arcade.load_texture(f"assets/swordslash/ss_east-{i}.png"))
-            self.west_frames.append(arcade.load_texture(f"assets/swordslash/ss_west-{i}.png"))
+            self.northwest_frames.append(arcade.load_texture(f"assets/projectiles/swordslash/ss_northwest-{i}.png"))
+            self.southwest_frames.append(arcade.load_texture(f"assets/projectiles/swordslash/ss_southwest-{i}.png"))
+            self.northeast_frames.append(arcade.load_texture(f"assets/projectiles/swordslash/ss_northeast-{i}.png"))
+            self.southeast_frames.append(arcade.load_texture(f"assets/projectiles/swordslash/ss_southeast-{i}.png"))
+            self.north_frames.append(arcade.load_texture(f"assets/projectiles/swordslash/ss_north-{i}.png"))
+            self.south_frames.append(arcade.load_texture(f"assets/projectiles/swordslash/ss_south-{i}.png"))
+            self.east_frames.append(arcade.load_texture(f"assets/projectiles/swordslash/ss_east-{i}.png"))
+            self.west_frames.append(arcade.load_texture(f"assets/projectiles/swordslash/ss_west-{i}.png"))
 
     def update(self):
         if not self.is_hitting_wall:

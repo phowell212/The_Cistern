@@ -32,32 +32,32 @@ class FlameSlash(arcade.Sprite):
 
         # Set the first texture based on the sprite's direction
         if self.direction == "northwest":
-            self.texture = arcade.load_texture("assets/flameslash/flameslash_northwest (1).png")
+            self.texture = arcade.load_texture("assets/projectiles/flameslash/flameslash_northwest (1).png")
             self.center_x -= self.offset
             self.center_y += self.offset
         elif self.direction == "southwest":
-            self.texture = arcade.load_texture("assets/flameslash/flameslash_southwest (1).png")
+            self.texture = arcade.load_texture("assets/projectiles/flameslash/flameslash_southwest (1).png")
             self.center_x -= self.offset
             self.center_y -= self.offset
         elif self.direction == "northeast":
-            self.texture = arcade.load_texture("assets/flameslash/flameslash_northeast (1).png")
+            self.texture = arcade.load_texture("assets/projectiles/flameslash/flameslash_northeast (1).png")
             self.center_x += self.offset
             self.center_y += self.offset
         elif self.direction == "southeast":
-            self.texture = arcade.load_texture("assets/flameslash/flameslash_southeast (1).png")
+            self.texture = arcade.load_texture("assets/projectiles/flameslash/flameslash_southeast (1).png")
             self.center_x += self.offset
             self.center_y -= self.offset
         elif self.direction == "north":
-            self.texture = arcade.load_texture("assets/flameslash/flameslash_north (1).png")
+            self.texture = arcade.load_texture("assets/projectiles/flameslash/flameslash_north (1).png")
             self.center_y += self.offset
         elif self.direction == "south":
-            self.texture = arcade.load_texture("assets/flameslash/flameslash_south (1).png")
+            self.texture = arcade.load_texture("assets/projectiles/flameslash/flameslash_south (1).png")
             self.center_y -= self.offset
         elif self.direction == "east":
-            self.texture = arcade.load_texture("assets/flameslash/flameslash_east (1).png")
+            self.texture = arcade.load_texture("assets/projectiles/flameslash/flameslash_east (1).png")
             self.center_x += self.offset
         elif self.direction == "west":
-            self.texture = arcade.load_texture("assets/flameslash/flameslash_west (1).png")
+            self.texture = arcade.load_texture("assets/projectiles/flameslash/flameslash_west (1).png")
             self.center_x -= self.offset
 
         # Load the animation frames
@@ -74,14 +74,18 @@ class FlameSlash(arcade.Sprite):
 
     def load_frames(self):
         for i in range(2, 19):
-            self.northwest_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_northwest ({i}).png"))
-            self.southwest_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_southwest ({i}).png"))
-            self.northeast_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_northeast ({i}).png"))
-            self.southeast_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_southeast ({i}).png"))
-            self.north_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_north ({i}).png"))
-            self.south_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_south ({i}).png"))
-            self.east_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_east ({i}).png"))
-            self.west_frames.append(arcade.load_texture(f"assets/flameslash/flameslash_west ({i}).png"))
+            self.northwest_frames.append(arcade.load_texture(
+                f"assets/projectiles/flameslash/flameslash_northwest ({i}).png"))
+            self.southwest_frames.append(arcade.load_texture(
+                f"assets/projectiles/flameslash/flameslash_southwest ({i}).png"))
+            self.northeast_frames.append(arcade.load_texture(
+                f"assets/projectiles/flameslash/flameslash_northeast ({i}).png"))
+            self.southeast_frames.append(arcade.load_texture(
+                f"assets/projectiles/flameslash/flameslash_southeast ({i}).png"))
+            self.north_frames.append(arcade.load_texture(f"assets/projectiles/flameslash/flameslash_north ({i}).png"))
+            self.south_frames.append(arcade.load_texture(f"assets/projectiles/flameslash/flameslash_south ({i}).png"))
+            self.east_frames.append(arcade.load_texture(f"assets/projectiles/flameslash/flameslash_east ({i}).png"))
+            self.west_frames.append(arcade.load_texture(f"assets/projectiles/flameslash/flameslash_west ({i}).png"))
 
     def update(self):
         if not self.is_hitting_wall:

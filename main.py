@@ -197,11 +197,14 @@ class MyGame(arcade.Window):
     def draw_channel_crt(self):
 
         # Draw the floor
+        # If the floor is not transitioning, draw the floor of the current level
         if not self.is_transitioning:
             if self.level == 1:
                 arcade.draw_lrtb_rectangle_filled(-99999, 99999, 99999, -99999, self.level_1_floor_color)
             elif self.level == 2:
                 arcade.draw_lrtb_rectangle_filled(-99999, 99999, 99999, -99999, self.level_2_floor_color)
+
+        # If the floor is transitioning, use the shader to determine the color of the floor
         else:
             self.transition_time += 1
 
