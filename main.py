@@ -478,7 +478,7 @@ class MyGame(arcade.Window):
             self.move_spell(spell)
             spell_collisions = arcade.check_for_collision_with_list(spell, self.ghost_list)
             for ghost in spell_collisions:
-                ghost.is_being_hurt = True
+                self.handle_ghost_damage(ghost, spell)
             if arcade.check_for_collision(spell, self.seraphima):
                 self.handle_player_damage()
 
@@ -662,8 +662,8 @@ class MyGame(arcade.Window):
         return a + (b - a) * t
 
     def handle_player_damage(self):
-        self.health -= 1
-        if self.health == 0 and self.heart_list:
+        self.health -= 3
+        if self.health <= 0 and self.heart_list:
             self.heart_list.pop()
             self.health = s.HEART_HEALTH
         if self.health < 0:
@@ -679,7 +679,7 @@ class MyGame(arcade.Window):
 
     @staticmethod
     def handle_ghost_damage(ghost: g.GhostMonster, projectile):
-        if projectile.type == "swordslash":
+        if projectile.type == "swordslash" or projectile.type == "spell":
             ghost.health -= 1
         elif projectile.type == "flameslash":
             ghost.health -= 2

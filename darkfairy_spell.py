@@ -21,6 +21,9 @@ class DarkFairySpell(arcade.Sprite):
         self.load_frames()
         self.damage = self.phase
 
+        # Set the type
+        self.type = "spell"
+
         # Pathfinding parameters
         self.path = None
 
