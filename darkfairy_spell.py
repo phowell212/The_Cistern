@@ -32,7 +32,7 @@ class DarkFairySpell(arcade.Sprite):
     def load_frames(self):
         for i in range(0, 12):
             self.phase_1_frames.append(arcade.load_texture(
-                f"assets/enemies/darkfairy_spells/darkfairy_phase1_spell_0-{i}.png"))
+                f"assets/projectiles/darkfairy_spells/darkfairy_phase1_spell_0-{i}.png"))
 
     def update(self):
         self.center_x += self.change_x
