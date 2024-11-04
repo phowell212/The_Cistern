@@ -601,7 +601,7 @@ class   MyGame(arcade.Window):
 
     def update_music(self):
         if time.time() > self.music_timer:
-            arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
+            arcade.play_sound(arcade.load_sound("sounds/most.wav"), s.MUSIC_VOLUME)
             self.music_timer = time.time() + (5 * 60) + 57
 
     def load_shader(self, level: int):
