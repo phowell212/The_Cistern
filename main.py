@@ -16,7 +16,7 @@ from pathlib import Path
 from pyglet.math import Vec2
 
 
-class MyGame(arcade.Window):
+class   MyGame(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title, resizable=True)
 
@@ -56,10 +56,10 @@ class MyGame(arcade.Window):
         self.debug_mode = True
         self.swoosh_sounds = []
         self.is_door_open = False
-        self.door_open_sound = arcade.load_sound("sounds/door_open.mp3")
+        self.door_open_sound = arcade.load_sound("sounds/door_open.wav")
         for i in range(0, 3):
-            self.swoosh_sounds.append(arcade.load_sound(f"sounds/sword_swoosh-{i}.mp3"))
-        arcade.play_sound(arcade.load_sound("sounds/most.mp3"), s.MUSIC_VOLUME)
+            self.swoosh_sounds.append(arcade.load_sound(f"sounds/sword_swoosh-{i}.wav"))
+        arcade.play_sound(arcade.load_sound("sounds/most.wav"), s.MUSIC_VOLUME)
         self.music_timer = time.time() + (5 * 60) + 57
 
         # Make the colors
@@ -292,10 +292,12 @@ class MyGame(arcade.Window):
         if s.ghosts_killed == 0:
             self.score = 0
         score_text = f"Score: {int(self.score / 6.5)}.0"
-        for ghost in self.ghost_list:
-            if ghost.death_frame > 0:
-                score_text = f"Score: {self.score / 6.5}"
-                break
+
+        # Make the score scroll
+        # for ghost in self.ghost_list:
+        #    if ghost.death_frame > 0:
+             #    score_text = f"Score: {self.score / 6.5}"
+             #    break
         ghost_text = f"Ghosts: {len(self.ghost_list)}.0"
         arcade.draw_text(ghost_text, start_x=40, start_y=70, color=(255, 255, 242), font_size=19,
                          font_name="Garamond")
@@ -332,6 +334,7 @@ class MyGame(arcade.Window):
                 ghost_sprite = g.GhostMonster(self.seraphima.center_x, self.seraphima.center_y,
                                               s.PLAYER_SCALING)
                 ghost_sprite.texture = arcade.load_texture("assets/enemies/ghost/g_south-0.png")
+                ghost_sprite.is_death_ghost = True
                 self.seraphima.remove_from_sprite_lists()
                 self.ghost_list.append(ghost_sprite)
                 self.has_spawned_player_death_ghost = True
@@ -506,8 +509,11 @@ class MyGame(arcade.Window):
 
         # If a ghost dies increase the counter
         for ghost in self.ghost_list:
-            if ghost.health <= 0:
-                self.score += 1 * ghost.scale * (self.level * self.level)
+            if ghost.health <= 0 and self.restart == False:
+                if s.ghosts_killed != 0:
+                    self.score += ghost.scale * (self.level * self.level)
+                else:
+                    self.score += 6.5
 
         # If the boss dies increase the counter
         for boss in self.boss_list:
@@ -884,10 +890,7 @@ class MyGame(arcade.Window):
 
         # Reset all the variables
         self.level = 1
-        self.restart = False
         self.player_list.clear()
-        for i in range(len(self.ghost_list) - 1):
-            self.ghost_list[i].health = 0
         self.ghosts_to_spawn_multiplier = 1.4
         self.ghosts_to_spawn = 4.0
         self.spawn_ghosts(self.level)
@@ -915,6 +918,16 @@ class MyGame(arcade.Window):
         self.heart_list.reverse()
         self.is_dead = False
         self.load_shader(self.level)
+
+        # Reset the ghost list minus the death ghost
+        death_ghosts = arcade.SpriteList()
+        for ghost in self.ghost_list:
+            if getattr(ghost, 'is_player_death_ghost', False):
+                death_ghosts.append(ghost)
+
+        self.ghost_list = death_ghosts
+
+        self.restart = False
 
     def process_key_presses(self):
         self.seraphima.change_x = 0

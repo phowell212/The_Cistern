@@ -19,6 +19,7 @@ class GhostMonster(arcade.Sprite):
         self.is_spawned = False
         self.is_out_of_bounds = False
         self.is_hunting = False
+        self.is_death_ghost = False
         self.can_hunt = True
         self.direction_lock = False
 
@@ -96,7 +97,7 @@ class GhostMonster(arcade.Sprite):
             if self.spawn_frame == len(self.spawn_frames):
                 self.is_spawned = True
 
-        # If the sprite has no health, play that animation then kill it
+        # If the sprite has no health, play death animation then kill it
         elif self.health <= 0 and self.death_frame < len(self.death_frames):
             self.texture = self.death_frames[int(self.death_frame)]
             self.death_frame += self.update_interval * 4
