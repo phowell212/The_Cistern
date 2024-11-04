@@ -33,14 +33,14 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
 
 ## Installation
 
-## Recomendation: Jetbrains Pycharm
+### Recomendation: Jetbrains Pycharm
 
 - For the easiest setup, it's recommended to use [JetBrains PyCharm](https://www.jetbrains.com/pycharm/download/?section=linux), an integrated development environment (IDE) that simplifies project management and library installation.
 - Make a new project, Clone this project through Pycharm's UI, configure an interperater, then follow the instructions to auto-install the required libraries.
 - Finally, run main.py to begin playing!
 
 
-## Only proceed with the folowing instructions if you decide against using Pycharm!
+### Only proceed with the folowing instructions if you decide against using Pycharm!
 
 
 ### Windows
