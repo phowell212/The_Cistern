@@ -48,7 +48,7 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
 
    - **Clone with Git**:
 
-     ~ git clone https://github.com/Phineas/the-cistern.git
+     ```git clone https://github.com/Phineas/the-cistern.git```
 
    - **Or Download ZIP**:
      - Go to the [GitHub repository](https://github.com/phowell212/The-Cistern).
@@ -59,15 +59,15 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
 
    Open Command Prompt and navigate to the project directory:
 
-   ~ cd the-cistern
+   ```cd the-cistern```
 
    Install the required libraries using `pip`:
 
-   ~ pip install -r requirements.txt
+   ```pip install -r requirements.txt```
 
    - If `requirements.txt` is not available, install the libraries individually:
 
-     ~ pip install arcade pyglet numpy
+     ```pip install arcade pyglet numpy```
 
 ### macOS
 
@@ -75,23 +75,23 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
 
    - Install [Homebrew](https://brew.sh/) if not already installed:
 
-     ~ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+     ```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"```
 
    - Install Python:
 
-     ~ brew install python
+     ```brew install python```
 
 2. **Install Git (Optional)**
 
    - Install Git via Homebrew:
 
-     ~ brew install git
+     ```brew install git```
 
 3. **Clone or Download the Repository**
 
    - **Clone with Git**:
 
-     ~ git clone https://github.com/Phineas/the-cistern.git
+     ```git clone https://github.com/Phineas/the-cistern.git```
 
    - **Or Download ZIP**:
      - Visit the [GitHub repository](https://github.com/phowell212/The-Cistern).
@@ -102,15 +102,15 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
 
    Open Terminal and navigate to the project directory:
 
-   ~ cd the-cistern
+    ```cd the-cistern```
 
    Install the libraries:
 
-   ~ pip3 install -r requirements.txt
+   ```pip3 install -r requirements.txt```
 
    - Or individually:
 
-     ~ pip3 install arcade pyglet numpy
+     ```pip3 install arcade pyglet numpy```
 
 ### Linux
 
@@ -118,56 +118,51 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
 
    - **Debian/Ubuntu**:
 
-     ~ sudo apt update
+     ``` sudo apt update```
 
-     ~ sudo apt install python3 python3-pip
+     ```sudo apt install python3 python3-pip```
 
    - **Fedora**:
 
-     ~ sudo dnf install python3 python3-pip
+     ```sudo dnf install python3 python3-pip```
 
    - **Arch Linux**:
 
-     ~ sudo pacman -S python
+     ```sudo pacman -S python```
 
-2. **Clone or Download the Repository**
+2. **Clone the Repository**
 
    - **Clone with Git**:
 
-     ~ git clone https://github.com/Phineas/the-cistern.git
-
-   - **Or Download ZIP**:
-     - Go to the [GitHub repository](https://github.com/phowell212/The-Cistern).
-     - Click **Code** and select **Download ZIP**.
-     - Extract the ZIP file.
+     ```git clone https://github.com/Phineas/the-cistern.git```
 
 3. **Install Required Libraries**
 
    Open Terminal and navigate to the project directory:
 
-   ~ cd the-cistern
+   ```cd the-cistern```
 
    **For Debian/Ubuntu and Fedora**, install the libraries using `pip3`:
 
-   ~ pip3 install -r requirements.txt
+   ```pip3 install -r requirements.txt```
 
    - Or individually:
 
-     ~ pip3 install arcade pyglet numpy
+     ```pip3 install arcade pyglet numpy```
 
    **For Arch Linux**, install the libraries using `pacman`:
 
-   ~ sudo pacman -S python-arcade python-pyglet python-numpy
+   ```sudo pacman -S python-arcade python-pyglet python-numpy```
 
    - If any of these packages are not available in the official repositories, you can install them via the Arch User Repository (AUR) using an AUR helper like `yay`:
 
      Then, install the packages:
 
-     ~ yay -S python-arcade python-pyglet python-numpy
+     ```yay -S python-arcade python-pyglet python-numpy```
 
    - Alternatively, you can use `pip` (not recommended on Arch Linux):
 
-     ~ pip install --user arcade pyglet numpy
+     ```pip install --user arcade pyglet numpy```
 
      - Note: Using `pip` with the `--user` flag installs packages for your user only, avoiding system-wide changes.
 
@@ -177,17 +172,17 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
 
    Ensure you are in the project's root directory:
 
-   ~ cd the-cistern
+   ```cd the-cistern```
 
 2. **Run the Game**
 
    - **Windows**:
 
-     ~ python main.py
+     ```python main.py```
 
    - **macOS/Linux**:
 
-     ~ python3 main.py
+     ``` python3 main.py```
 
    If you encounter a `ModuleNotFoundError`, ensure all libraries are installed and use the correct Python version.
 
@@ -205,7 +200,7 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
 
 - **Python Version Issues**: Ensure you're using Python 3.7 or higher. Check your Python version with:
 
-  ~ python --version
+  ```python --version```
 
 - **Permission Errors on macOS**: If macOS blocks the application, go to **System Preferences > Security & Privacy** and allow the app to run.
 
