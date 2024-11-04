@@ -2,8 +2,6 @@
 
 A simple point chaicng game built with Python and the Arcade library. Navigate through 2 mysterious levels, battle ghosts, and uncover the secrets hidden within **The Cistern**.
 
-![Game Screenshot](assets/screenshots/game_screenshot.png)
-
 ## Table of Contents
 
 - [Features](#features)
@@ -16,7 +14,6 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
 - [Controls](#controls)
 - [Troubleshooting](#troubleshooting)
 - [Credits](#credits)
-- [License](#license)
 
 ## Features
 
@@ -54,7 +51,7 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
      ~ git clone https://github.com/Phineas/the-cistern.git
 
    - **Or Download ZIP**:
-     - Go to the [GitHub repository](https://github.com/Phineas/the-cistern).
+     - Go to the [GitHub repository](https://github.com/phowell212/The-Cistern).
      - Click on **Code** and select **Download ZIP**.
      - Extract the downloaded ZIP file.
 
@@ -97,7 +94,7 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
      ~ git clone https://github.com/Phineas/the-cistern.git
 
    - **Or Download ZIP**:
-     - Visit the [GitHub repository](https://github.com/Phineas/the-cistern).
+     - Visit the [GitHub repository](https://github.com/phowell212/The-Cistern).
      - Click **Code** and choose **Download ZIP**.
      - Unzip the downloaded file.
 
@@ -140,7 +137,7 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
      ~ git clone https://github.com/Phineas/the-cistern.git
 
    - **Or Download ZIP**:
-     - Go to the [GitHub repository](https://github.com/Phineas/the-cistern).
+     - Go to the [GitHub repository](https://github.com/phowell212/The-Cistern).
      - Click **Code** and select **Download ZIP**.
      - Extract the ZIP file.
 
@@ -223,10 +220,6 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
   - [NumPy](https://numpy.org/)
 - **Assets**: All game assets are credited to their respective creators.
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ---
 
-**Enjoy playing The Cistern! If you encounter any issues or have suggestions, feel free to open an issue on the [GitHub repository](https://github.com/Phineas/the-cistern/issues).**
+**Enjoy playing The Cistern! If you encounter any issues or have suggestions, feel free to open an issue!"
