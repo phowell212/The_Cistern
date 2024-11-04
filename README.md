@@ -33,8 +33,6 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
   - `arcade`
   - `pyglet`
   - `numpy`
-- **Optional Libraries** (if applicable):
-  - Any other libraries specified in `requirements.txt`
 
 ## Installation
 
