@@ -1,6 +1,6 @@
 # The Cistern
 
-A thrilling action-adventure game built with Python and the Arcade library. Navigate through mysterious levels, battle ghosts, and uncover the secrets hidden within **The Cistern**.
+A simple point chaicng game built with Python and the Arcade library. Navigate through 2 mysterious levels, battle ghosts, and uncover the secrets hidden within **The Cistern**.
 
 ![Game Screenshot](assets/screenshots/game_screenshot.png)
 
