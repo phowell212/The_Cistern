@@ -20,8 +20,6 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
 - **Engaging Gameplay**: Battle against ghosts and bosses in an immersive environment.
 - **Stunning Graphics**: Beautiful visuals powered by the Arcade library.
 - **Cross-Platform Support**: Play on Windows, macOS, or Linux.
-- **Dynamic Soundtrack**: Enjoy an original soundtrack that adapts to the gameplay.
-- **Challenging Levels**: Progress through increasingly difficult levels with unique challenges.
 
 ## Requirements
 
@@ -36,7 +34,9 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
 ### Recomendation: Jetbrains PyCharm
 
 - For the easiest setup, it's recommended to use [JetBrains PyCharm](https://www.jetbrains.com/pycharm/download/?section=linux), an integrated development environment (IDE) that simplifies project management and library installation.
-- Make a new project, Clone this project through Pycharm's UI, configure an interperater, then follow the instructions to auto-install the required libraries.
+  
+- Make a new project, clone this project through Pycharm's UI, configure an interperater, then follow the instructions to auto-install the required libraries.
+  
 - Finally, run main.py to begin playing!
 
 
