@@ -218,6 +218,7 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
   - [Arcade](https://api.arcade.academy/)
   - [Pyglet](https://pyglet.readthedocs.io/en/latest/)
   - [NumPy](https://numpy.org/)
+  
 - **Assets**: All game assets are credited to their respective creators.
 
 ---
