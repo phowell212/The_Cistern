@@ -228,4 +228,4 @@ A simple point chaicng game built with Python and the Arcade library. Navigate t
 
 ---
 
-**Enjoy playing The Cistern! If you encounter any issues or have suggestions, feel free to open an issue!"
+Enjoy playing The Cistern! If you encounter any issues or have suggestions, feel free to open an issue!
