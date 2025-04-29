@@ -1,19 +1,20 @@
 import math
 import random
-import arcade
 import time
-import player
-import flameslash
-import swordslash
-import darkfairy
-import darkfairy_spell
-import altar
-import settings as s
-import ghost as g
+from pathlib import Path
+
+import arcade
 from arcade.experimental import Shadertoy
 from arcade.experimental.crt_filter import CRTFilter
-from pathlib import Path
 from pyglet.math import Vec2
+
+import darkfairy
+import darkfairy_spell
+import flameslash
+import player
+import swordslash
+import ghost as g
+import settings as s
 
 
 class MyGame(arcade.Window):
@@ -65,6 +66,7 @@ class MyGame(arcade.Window):
         # Make the colors
         self.level_1_floor_color = (108, 121, 147)
         self.level_2_floor_color = (51, 25, 0)
+        arcade.set_background_color((211, 211, 211, 255))
 
         # Init the shaders
         self.box_shadertoy = None
