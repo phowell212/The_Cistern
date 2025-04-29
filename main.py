@@ -466,7 +466,7 @@ class MyGame(arcade.Window):
         for ghost in self.ghost_list:
             if ghost.health <= 0 and self.restart == False:
                 if s.ghosts_killed != 0:
-                    self.score += ghost.scale * (self.level * self.level)
+                    self.score += ghost.scale[0] * (self.level * self.level)
                 else:
                     self.score += 6.5
 
