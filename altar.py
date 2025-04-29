@@ -30,3 +30,5 @@ class Altar(arcade.Sprite):
     def load_frames(self):
         for i in range(0, 12):
             self.frames.append(arcade.load_texture(f"assets/altar/pentagram2-{i}.png"))
+
+

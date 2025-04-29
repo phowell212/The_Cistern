@@ -57,7 +57,7 @@ class MyGame(arcade.Window):
         self.swoosh_sounds = []
         self.is_door_open = False
         self.door_open_sound = arcade.load_sound("sounds/door_open.wav")
-        for i in range(0, 3):
+        for i in range(3):
             self.swoosh_sounds.append(arcade.load_sound(f"sounds/sword_swoosh-{i}.wav"))
         arcade.play_sound(arcade.load_sound("sounds/most.wav"), s.MUSIC_VOLUME)
         self.music_timer = time.time() + (5 * 60) + 57
@@ -89,10 +89,6 @@ class MyGame(arcade.Window):
         self.generate_walls(self.level_map.width, self.level_map.height)
         self.generate_secret_door()
 
-        # Make the altar
-        self.altar = altar.Altar(2837, -348)
-        self.altar_list.append(self.altar)
-
         # Create playing field sprites
         self.player = player.Player(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
         self.player_list.append(self.player)
@@ -117,17 +113,23 @@ class MyGame(arcade.Window):
         self.camera = arcade.Camera2D()
         self.camera_gui = arcade.Camera2D()
 
-        # Make the pathfinding vars
+        # Make the pathfinding grid
         self.playing_field_left_boundary = 0
-        self.playing_field_right_boundary = self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING
-        self.playing_field_top_boundary = self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING
+        self.playing_field_right_boundary = (
+            self.level_map.width * self.level_map.tile_width * s.SPRITE_SCALING)
+        self.playing_field_top_boundary = (
+            self.level_map.height * self.level_map.tile_height * s.SPRITE_SCALING)
         self.playing_field_bottom_boundary = 0
         self.grid_size = 128 * s.SPRITE_SCALING
-        self.barrier_list = arcade.AStarBarrierList(self.player, self.wall_list, self.grid_size,
-                                                    self.playing_field_left_boundary,
-                                                    self.playing_field_right_boundary,
-                                                    self.playing_field_bottom_boundary,
-                                                    self.playing_field_top_boundary)
+        self.barrier_list = arcade.AStarBarrierList(
+            self.player,
+            self.wall_list,
+            self.grid_size,
+            self.playing_field_left_boundary,
+            self.playing_field_right_boundary,
+            self.playing_field_bottom_boundary,
+            self.playing_field_top_boundary,
+        )
 
         # Make the CRT filter
         self.crt_filter = CRTFilter(width, height, resolution_down_scale=1.0,
@@ -538,16 +540,16 @@ class MyGame(arcade.Window):
 
     def update_altar(self, delta_time):
         self.altar_list.update_animation(delta_time)
-        if arcade.check_for_collision(self.player, self.altar):
+        # Check collision with any altar sprite from the altar list
+        if arcade.check_for_collision_with_list(self.player, self.altar_list):
             self.altar_points += 1
             self.score -= 1
 
+            # Load in the shader for level 2 if the player has enough altar points
             if self.player and self.level == 1 and self.score > 0:
-                if arcade.check_for_collision_with_list(self.player, self.altar_list):
-                    self.altar_points += 1
-                    self.score -= 1
+                self.altar_points += 1
+                self.score -= 1
 
-                # Load in the shader for level 2 if the player has enough altar points
                 if self.altar_points >= 100 and self.level == 1:
                     self.altar_points = 0
                     self.level = 2
