@@ -162,7 +162,7 @@ class DarkFairy(arcade.Sprite):
                     self.current_frame = 0
                     self.texture = self.phase_2_idle_frames[0]
 
-    def update(self):
+    def update(self, delta_time: float = 1 / 60):
         if self.health >= 0:
             self.center_x += self.change_x
             self.center_y += self.change_y

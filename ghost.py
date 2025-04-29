@@ -59,7 +59,7 @@ class GhostMonster(arcade.Sprite):
         self.spawn_frames = self.death_frames[::-1]
         self.spawn_frames = self.spawn_frames[1:]
 
-    def update(self):
+    def update(self, delta_time: float = 1 / 60):
 
         # Update the ghost's position
         if not self.is_being_hurt or self.health > 0:

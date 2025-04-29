@@ -87,7 +87,7 @@ class FlameSlash(arcade.Sprite):
             self.east_frames.append(arcade.load_texture(f"assets/projectiles/flameslash/flameslash_east ({i}).png"))
             self.west_frames.append(arcade.load_texture(f"assets/projectiles/flameslash/flameslash_west ({i}).png"))
 
-    def update(self):
+    def update(self, delta_time: float = 1 / 60):
         if not self.is_hitting_wall:
             if self.direction == "northwest":
                 self.center_x -= self.speed
