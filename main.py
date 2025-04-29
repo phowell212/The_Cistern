@@ -13,6 +13,7 @@ import darkfairy_spell
 import flameslash
 import player
 import swordslash
+import boxsprite
 import ghost as g
 import settings as s
 
@@ -21,9 +22,14 @@ class MyGame(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title, resizable=True)
 
-        # Init the sprites
+        # Init player stats
         self.player = None
+        self.heart_frames = []
+        self.heart_frame = 0
+
+        # Init the sprite lists
         self.wall_list = arcade.SpriteList()
+        self.box_sprite_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.ghost_list = arcade.SpriteList()
         self.swordslash_list = arcade.SpriteList()
@@ -33,8 +39,7 @@ class MyGame(arcade.Window):
         self.dark_fairy_spell_list = arcade.SpriteList()
         self.secret_door_list = arcade.SpriteList()
         self.altar_list = arcade.SpriteList()
-        self.heart_frames = []
-        self.heart_frame = 0
+
 
         # Init counters, constants, arrays, flags, and sounds
         self.level = 1
@@ -66,7 +71,6 @@ class MyGame(arcade.Window):
         # Make the colors
         self.level_1_floor_color = (108, 121, 147)
         self.level_2_floor_color = (51, 25, 0)
-        arcade.set_background_color((211, 211, 211, 255))
 
         # Init the shaders
         self.box_shadertoy = None
@@ -91,10 +95,14 @@ class MyGame(arcade.Window):
         self.generate_walls(self.level_map.width, self.level_map.height)
         self.generate_secret_door()
 
-        # Create playing field sprites
+        # Make sprites in the field
         self.player = player.Player(self.map_center_x, self.map_center_y, s.PLAYER_SCALING)
         self.player_list.append(self.player)
+        self.box_sprite=boxsprite.BoxSprite(self.map_center_x, self.map_center_y)
+        self.box_sprite_list.append(self.box_sprite)
         self.spawn_ghosts_on_empty_list()
+
+        # Handle hearts
         self.load_heart_frames()
         for i in range(int(self.health / 10)):
             heart = arcade.Sprite("assets/heart/heart-0.png", s.HEART_SCALING)
@@ -141,11 +149,6 @@ class MyGame(arcade.Window):
 
     def on_draw(self):
         self.camera.use()
-
-        # Select the CRT filter (bottom layer) to draw on, then draw it, this gives the floor a cool effect
-        self.crt_filter.use()
-        self.crt_filter.clear()
-        self.draw_channel_crt()
 
         # Select channel 1 (below-shadow layer) to draw on, then draw it
         self.channel1.use()
@@ -236,6 +239,7 @@ class MyGame(arcade.Window):
         self.secret_door_list.draw()
 
     def draw_channel1(self):
+        self.box_sprite_list.draw()
         self.altar_list.draw()
         self.ghost_list.draw()
         self.boss_list.draw()
